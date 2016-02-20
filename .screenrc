@@ -1,0 +1,62 @@
+
+# ----------------------
+# prefix key
+# ----------------------
+escape ^zz
+
+# ----------------------
+# detach
+# ----------------------
+autodetach on
+
+# ----------------------
+# scrollback buffer
+# ----------------------
+defscrollback 65535
+
+# ----------------------
+# output error
+# ----------------------
+vbell off
+
+# ----------------------
+# init message
+# ----------------------
+startup_message off
+
+# ----------------------
+# scroll on
+# ----------------------
+altscreen on
+cjkwidth off
+
+# ----------------------
+# status bar
+# ----------------------
+hardstatus on
+hardstatus alwayslastline ' %{=b .c}screen%{-} %L=%-Lw%45L>%{=u b.} %n%f* %t %{-}%+Lw %-17<%=%{=b .c}Time %{-}%{=u}%Y/%m/%d %02c:%s%{-} '
+caption always '%?%F%{=b bw}%:%{=b wk}%?%2n%f* %t%='
+sorendition '+rb'
+
+# ----------------------
+# emacs keybinds
+# ----------------------
+bind x command -c splitwindow
+bind -c splitwindow 0 remove
+bind -c splitwindow 1 only
+bind -c splitwindow 2 split
+bind -c splitwindow 3 split -v
+bind o focus
+markkeys h=^B:l=^F:$=^E
+
+# ----------------------
+# enabled mouse scroll
+# ----------------------
+termcapinfo xterm* ti@:te@
+
+bind r eval 'echo "Resize window"' 'command -c resize'
+bind -c resize ^]  command
+bind -c resize j eval 'resize -v +1' 'command -c resize'
+bind -c resize k eval 'resize -v -1' 'command -c resize'
+bind -c resize h eval 'resize -h +1' 'command -c resize'
+bind -c resize l eval 'resize -h -1' 'command -c resize'

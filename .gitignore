@@ -1,0 +1,13 @@
+/*
+!/.gitignore
+!/.bashrc
+!/.emacs.d
+!/.fonts
+!/.lein
+!/.profile
+!/.profile.d
+!/.screenrc
+!/.scripts
+!/.zshrc
+!/README.md
+!/setup.sh
