@@ -174,12 +174,16 @@
 ;;-------------------------
 (require 'company)
 (global-company-mode)
-(setq company-idle-delay nil)
+(setq company-idle-delay 0)
 (setq company-minimum-prefix-length 2)
 (setq company-selection-wrap-around t)
 (setq company-dabbrev-downcase nil)
-(setq company-backends '(company-files company-dabbrev))
-(global-set-key (kbd "C-c y") 'company-complete)
+(setq company-backends
+      '((company-capf
+         company-files
+         company-dabbrev-code
+         company-keywords
+         company-dabbrev)))
 
 (doto-> company-active-map
         (define-key (kbd "C-h") nil)
@@ -194,14 +198,14 @@
         (define-key (kbd "C-n") 'company-select-next)
         (define-key (kbd "C-p") 'company-select-previous))
 
-(apply-> #'set-face-attribute
-         ('company-tooltip nil :foreground "black" :background "lightgrey")
-         ('company-tooltip-common nil :foreground "black" :background "lightgrey")
-         ('company-tooltip-common-selection nil :foreground "white" :background "steelblue")
-         ('company-tooltip-selection nil :foreground "black" :background "steelblue")
-         ('company-preview-common nil :background nil :foreground "lightgrey" :underline t)
-         ('company-scrollbar-fg nil :background "orange")
-         ('company-scrollbar-bg nil :background "gray40"))
+(todo-> set-face-attribute
+        ('company-tooltip nil :foreground "black" :background "lightgrey")
+        ('company-tooltip-common nil :foreground "black" :background "lightgrey")
+        ('company-tooltip-common-selection nil :foreground "white" :background "steelblue")
+        ('company-tooltip-selection nil :foreground "black" :background "steelblue")
+        ('company-preview-common nil :background nil :foreground "lightgrey" :underline t)
+        ('company-scrollbar-fg nil :background "orange")
+        ('company-scrollbar-bg nil :background "gray40"))
 
 
 ;;-------------------------
@@ -246,11 +250,11 @@
    (erb-tag :submode ruby-mode :front "<%[ \n]?" :back "[ \n]?%>")
    (gsp-tag :submode text-mode :front "<%[ \n]?" :back "[ \n]?%>")))
 
-(apply-> #'mmm-add-mode-ext-class
-         ('html-mode nil 'js-tag)
-         ('html-mode nil 'css-tag)
-         ('html-mode "\\.erb\\'" 'erb-tag)
-         ('html-mode "\\.gsp\\'" 'gsp-tag))
+(todo-> mmm-add-mode-ext-class
+        ('html-mode nil 'js-tag)
+        ('html-mode nil 'css-tag)
+        ('html-mode "\\.erb\\'" 'erb-tag)
+        ('html-mode "\\.gsp\\'" 'gsp-tag))
 
 
 ;;---------------------------------------
@@ -284,12 +288,15 @@
   'last-command-char
   'last-command-event)
 
-(apply-> #'(lambda (source num) (assoc! source 'candidate-number-limit num))
-         (helm-source-recentf 15)
-         (helm-source-buffers-list 15)
-         (helm-source-file-cache 10)
-         (helm-source-locate 5)
-         (helm-source-files-in-current-dir 5))
+(defun helm-candidates (source num)
+  (assoc! source 'candidate-number-limit num))
+
+(todo-> helm-candidates
+        (helm-source-recentf 15)
+        (helm-source-buffers-list 15)
+        (helm-source-file-cache 10)
+        (helm-source-locate 5)
+        (helm-source-files-in-current-dir 5))
 
 
 ;;-------------------------
@@ -297,5 +304,4 @@
 ;;-------------------------
 
 (load-configs "config")
-
 

@@ -4,6 +4,8 @@
 (require 'cl)
 (require 'cl-lib)
 
+(setq lisp-indent-function #'common-lisp-indent-function)
+
 (defmacro -> (x &rest forms)
   (if (null forms) x
     (let ((head (car forms)))
@@ -36,12 +38,12 @@
        ,@(mapcar (lambda (f) `(->> ,gx ,f)) forms)
        ,gx)))
 
-(defmacro apply-> (fn &rest forms)
+(defmacro todo-> (fn &rest forms)
   `(progn
      ,@(mapcar (lambda (f)
                  (if (listp f)
-                     `(apply ,fn (list ,@f))
-                     `(apply ,fn (list ,f))))
+                     `(apply #',fn (list ,@f))
+                     `(apply #',fn (list ,f))))
                forms)))
 
 (defun assoc! (source key val)
