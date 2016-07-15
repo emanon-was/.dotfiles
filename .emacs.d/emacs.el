@@ -40,10 +40,7 @@
 
 (defmacro todo-> (fn &rest forms)
   `(progn
-     ,@(mapcar (lambda (f)
-                 (if (listp f)
-                     `(apply #',fn (list ,@f))
-                     `(apply #',fn (list ,f))))
+     ,@(mapcar (lambda (f) (if (listp f) `(,fn ,@f) `(,fn ,f)))
                forms)))
 
 (defun assoc! (source key val)
