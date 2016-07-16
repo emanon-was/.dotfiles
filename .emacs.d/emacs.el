@@ -6,18 +6,18 @@
 
 (setq lisp-indent-function #'common-lisp-indent-function)
 
-(defun simple-lambda-symbols (form)
-  (labels ((rec (form)
-             (if (consp form)
-                 (nconc (rec (car form)) (rec (cdr form)))
-                 (if (symbolp form)
-                     (let ((name (symbol-name form)))
-                       (if (string-match "^%[1-9&]?$" name)
-                           (list name)))))))
+(defun clj-lambda-symbols (form)
+  (cl-labels ((rec (form)
+                (if (consp form)
+                    (nconc (rec (car form)) (rec (cdr form)))
+                    (if (symbolp form)
+                        (let ((name (symbol-name form)))
+                          (if (string-match "^%[1-9&]?$" name)
+                              (list name)))))))
     (mapcar #'intern (sort (delete-duplicates (rec form)) #'string<))))
 
-(defun simple-lambda-arguments (form)
-  (let ((args (simple-lambda-symbols form)))
+(defun clj-lambda-arguments (form)
+  (let ((args (clj-lambda-symbols form)))
     (cond ((equal args '(%))    '(%))
           ((equal args '(%&))   '(&rest %&))
           ((equal args '(% %&)) '(% &rest %&))
@@ -30,8 +30,13 @@
                    `(,@num-args &rest %&)
                    num-args))))))
 
-(defmacro simple-lambda (form)
-  `(lambda ,(simple-lambda-arguments form) ,form))
+(defmacro clj-lambda (form)
+  `(lambda ,(clj-lambda-arguments form) ,form))
+
+(defmacro clj-funcall (form &rest args)
+  (if (listp form)
+      `(funcall ,`(clj-lambda ,form) ,@args)
+      `(,form ,@args)))
 
 (defmacro -> (x &optional form &rest more)
   (cond ((null form) x)
@@ -49,23 +54,18 @@
                `(,form ,x)))
           (:else `(->> (->> ,x ,form) ,@more))))
 
-(defmacro simple-funcall (form &rest args)
-  (if (listp form)
-      `(funcall ,`(simple-lambda ,form) ,@args)
-      `(,form ,@args)))
-
 (defmacro doto (x &rest forms)
   (let ((gx (gensym)))
     `(let ((,gx ,x))
-       ,@(mapcar (lambda (form) `(simple-funcall ,form ,gx)) forms)
+       ,@(mapcar (lambda (form) `(clj-funcall ,form ,gx)) forms)
        ,gx)))
 
 (defmacro todo (form &rest args)
   `(progn
      ,@(mapcar (lambda (arg)
                  (if (listp arg)
-                     `(simple-funcall ,form ,@arg)
-                     `(simple-funcall ,form ,arg)))
+                     `(clj-funcall ,form ,@arg)
+                     `(clj-funcall ,form ,arg)))
                  args)))
 
 (defun assoc! (source key val)
