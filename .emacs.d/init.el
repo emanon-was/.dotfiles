@@ -254,9 +254,9 @@
 ;; Setting tmpbuf
 ;;---------------------------------------
 (require 'tempbuf)
-(todo (add-hook '% 'turn-on-tempbuf-mode)
-      find-file-hooks
-      dired-mode-hook)
+(todo (add-hook % 'turn-on-tempbuf-mode)
+      'find-file-hooks
+      'dired-mode-hook)
 
 
 ;;--------------------

@@ -56,17 +56,19 @@
 
 (defmacro doto (x &rest forms)
   (let ((gx (gensym)))
-    `(let ((,gx ,x))
-       ,@(mapcar (lambda (form) `(clj-funcall ,form ,gx)) forms)
-       ,gx)))
+    (labels ((doto-form (form) `(clj-funcall ,form ,gx)))
+      `(let ((,gx ,x))
+         ,@(mapcar #'doto-form forms)
+         ,gx))))
 
 (defmacro todo (form &rest args)
-  `(progn
-     ,@(mapcar (lambda (arg)
-                 (if (listp arg)
-                     `(clj-funcall ,form ,@arg)
-                     `(clj-funcall ,form ,arg)))
-                 args)))
+  (labels ((todo-form (arg)
+             (if (listp arg)
+                 (if (special-form-p (car arg))
+                     `(clj-funcall ,form ,arg)
+                     `(clj-funcall ,form ,@arg))
+                 `(clj-funcall ,form ,arg))))
+    `(progn ,@(mapcar #'todo-form args))))
 
 (defun assoc! (source key val)
   (let ((point (assoc key source)))
