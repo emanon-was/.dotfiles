@@ -26,11 +26,11 @@
 ;; Setting UTF-8
 ;;---------------------------------
 ;;(set-language-environment "Japanese")
-(doto-> 'utf-8
-        set-terminal-coding-system
-        prefer-coding-system
-        set-keyboard-coding-system
-        set-default-coding-systems)
+(doto 'utf-8
+      set-terminal-coding-system
+      prefer-coding-system
+      set-keyboard-coding-system
+      set-default-coding-systems)
 
 
 ;;---------------------------------------
@@ -82,9 +82,10 @@
 (setq bookmark-default-file (tmp-directory "bookmark"))
 (setq bookmark-save-flag 1)
 (setq bookmark-sort-flag nil)
-(global-set-key (kbd "\C-c r l") 'bookmark-bmenu-list)
-(global-set-key (kbd "\C-c r b") 'bookmark-jump)
-(global-set-key (kbd "\C-c r m") 'bookmark-set)
+(todo (global-set-key (kbd %1) %2)
+      ("\C-c r l" 'bookmark-bmenu-list)
+      ("\C-c r b" 'bookmark-jump)
+      ("\C-c r m" 'bookmark-set))
 
 
 ;;-------------------------
@@ -97,23 +98,27 @@
   (file-cache-clear-cache))
 
 (file-cache-reset)
-(global-set-key (kbd "\C-c c d") 'file-cache-add-directory)
-(global-set-key (kbd "\C-c c t") 'file-cache-add-directory-recursively)
+(todo (global-set-key (kbd %1) %2)
+      ("\C-c c d" 'file-cache-add-directory)
+      ("\C-c c t" 'file-cache-add-directory-recursively))
 
 
 ;;---------------------
 ;; Setting global-set-keys
 ;;---------------------
-(global-set-key (kbd "C-x ?") 'help-command)
-(global-set-key (kbd "C-h") 'delete-backward-char)
-(global-set-key (kbd "C-u") 'repeat)
-(global-set-key (kbd "C-x C-d") 'dired)
-(global-set-key (kbd "C-x g") 'rgrep)
-(global-set-key (kbd "C-x ,") 'backward-word)
-(global-set-key (kbd "C-x .") 'forward-word)
-(define-key global-map [f1] 'start-kbd-macro)
-(define-key global-map [f2] 'end-kbd-macro)
-(define-key global-map [f3] 'call-last-kbd-macro)
+(todo (global-set-key (kbd %1) %2)
+      ("C-x ?" 'help-command)
+      ("C-h" 'delete-backward-char)
+      ("C-u" 'repeat)
+      ("C-x C-d" 'dired)
+      ("C-x g" 'rgrep)
+      ("C-x ," 'backward-word)
+      ("C-x ." 'forward-word))
+
+(todo (define-key global-map %1 %2)
+      ([f1] 'start-kbd-macro)
+      ([f2] 'end-kbd-macro)
+      ([f3] 'call-last-kbd-macro))
 
 
 ;;---------------------
@@ -127,11 +132,8 @@
 ;;---------------------------
 (show-paren-mode 1)
 (setq skeleton-pair 1)
-(doto->> 'skeleton-pair-insert-maybe
-         (global-set-key (kbd "("))
-         (global-set-key (kbd "{"))
-         (global-set-key (kbd "["))
-         (global-set-key (kbd "<")))
+(todo (global-set-key (kbd %) 'skeleton-pair-insert-maybe)
+      "(" "{" "[" "<")
 
 
 ;;-------------------------
@@ -185,27 +187,27 @@
          company-keywords
          company-dabbrev)))
 
-(doto-> company-active-map
-        (define-key (kbd "C-h") nil)
-        (define-key (kbd "M-n") nil)
-        (define-key (kbd "M-p") nil)
-        (define-key (kbd "C-n") 'company-select-next)
-        (define-key (kbd "C-p") 'company-select-previous)
-        (define-key (kbd "C-s") 'company-filter-candidates)
-        (define-key (kbd "C-i") 'company-complete-selection))
+(todo (define-key company-active-map (kbd %1) %2)
+      ("C-h" nil)
+      ("M-n" nil)
+      ("M-p" nil)
+      ("C-n" 'company-select-next)
+      ("C-p" 'company-select-previous)
+      ("C-s" 'company-filter-candidates)
+      ("C-i" 'company-complete-selection))
 
-(doto-> company-search-map
-        (define-key (kbd "C-n") 'company-select-next)
-        (define-key (kbd "C-p") 'company-select-previous))
+(todo (define-key company-search-map (kbd %1) %2)
+      ("C-n" 'company-select-next)
+      ("C-p" 'company-select-previous))
 
-(todo-> set-face-attribute
-        ('company-tooltip nil :foreground "black" :background "lightgrey")
-        ('company-tooltip-common nil :foreground "black" :background "lightgrey")
-        ('company-tooltip-common-selection nil :foreground "white" :background "steelblue")
-        ('company-tooltip-selection nil :foreground "black" :background "steelblue")
-        ('company-preview-common nil :background nil :foreground "lightgrey" :underline t)
-        ('company-scrollbar-fg nil :background "orange")
-        ('company-scrollbar-bg nil :background "gray40"))
+(todo set-face-attribute
+      ('company-tooltip nil :foreground "black" :background "lightgrey")
+      ('company-tooltip-common nil :foreground "black" :background "lightgrey")
+      ('company-tooltip-common-selection nil :foreground "white" :background "steelblue")
+      ('company-tooltip-selection nil :foreground "black" :background "steelblue")
+      ('company-preview-common nil :background nil :foreground "lightgrey" :underline t)
+      ('company-scrollbar-fg nil :background "orange")
+      ('company-scrollbar-bg nil :background "gray40"))
 
 
 ;;-------------------------
@@ -214,18 +216,9 @@
 (require 'key-combo)
 (global-key-combo-mode t)
 
-(key-combo-define-global
- (kbd "C-a")
- '(back-to-indentation
-   beginning-of-line
-   beginning-of-buffer
-   key-combo-return))
-
-(key-combo-define-global
- (kbd "C-e")
- '(end-of-line
-   end-of-buffer
-   key-combo-return))
+(todo (key-combo-define-global (kbd %1) %2)
+      ("C-a" '(back-to-indentation beginning-of-line beginning-of-buffer key-combo-return))
+      ("C-e" '(end-of-line end-of-buffer key-combo-return)))
 
 
 ;;---------------------------
@@ -250,20 +243,20 @@
    (erb-tag :submode ruby-mode :front "<%[ \n]?" :back "[ \n]?%>")
    (gsp-tag :submode text-mode :front "<%[ \n]?" :back "[ \n]?%>")))
 
-(todo-> mmm-add-mode-ext-class
-        ('html-mode nil 'js-tag)
-        ('html-mode nil 'css-tag)
-        ('html-mode "\\.erb\\'" 'erb-tag)
-        ('html-mode "\\.gsp\\'" 'gsp-tag))
+(todo mmm-add-mode-ext-class
+      ('html-mode nil 'js-tag)
+      ('html-mode nil 'css-tag)
+      ('html-mode "\\.erb\\'" 'erb-tag)
+      ('html-mode "\\.gsp\\'" 'gsp-tag))
 
 
 ;;---------------------------------------
 ;; Setting tmpbuf
 ;;---------------------------------------
 (require 'tempbuf)
-(doto->> 'turn-on-tempbuf-mode
-         (add-hook 'find-file-hooks)
-         (add-hook 'dired-mode-hook))
+(todo (add-hook % 'turn-on-tempbuf-mode)
+      'find-file-hooks
+      'dired-mode-hook)
 
 
 ;;--------------------
@@ -272,13 +265,17 @@
 (require 'helm-config)
 (helm-mode t)
 (setq helm-M-x-requires-pattern 0)
-(global-set-key (kbd "M-x") 'helm-M-x)
-(global-set-key (kbd "M-y") 'helm-show-kill-ring)
-(global-set-key (kbd "C-c o") 'helm-occur)
-(global-set-key (kbd "C-x b") 'helm-for-files)
-(global-set-key (kbd "C-x C-b") 'helm-for-files)
-(define-key helm-map (kbd "C-h") 'delete-backward-char)
-(define-key helm-map (kbd "TAB") 'helm-execute-persistent-action)
+
+(todo (global-set-key (kbd %1) %2)
+      ("M-x" 'helm-M-x)
+      ("M-y" 'helm-show-kill-ring)
+      ("C-c o" 'helm-occur)
+      ("C-x b" 'helm-for-files)
+      ("C-x C-b" 'helm-for-files))
+
+(todo (define-key helm-map (kbd %1) %2)
+      ("C-h" 'delete-backward-char)
+      ("TAB" 'helm-execute-persistent-action))
 
 (remove-hook
  'helm-after-update-hook
@@ -288,15 +285,12 @@
   'last-command-char
   'last-command-event)
 
-(defun helm-candidates (source num)
-  (assoc! source 'candidate-number-limit num))
-
-(todo-> helm-candidates
-        (helm-source-recentf 15)
-        (helm-source-buffers-list 15)
-        (helm-source-file-cache 10)
-        (helm-source-locate 5)
-        (helm-source-files-in-current-dir 5))
+(todo (assoc! %1 'candidate-number-limit %2)
+      (helm-source-recentf 15)
+      (helm-source-buffers-list 15)
+      (helm-source-file-cache 10)
+      (helm-source-locate 5)
+      (helm-source-files-in-current-dir 5))
 
 
 ;;-------------------------
