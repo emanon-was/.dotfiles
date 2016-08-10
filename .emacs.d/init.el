@@ -82,10 +82,10 @@
 (setq bookmark-default-file (tmp-directory "bookmark"))
 (setq bookmark-save-flag 1)
 (setq bookmark-sort-flag nil)
-(todo (global-set-key (kbd %1) %2)
-      ("\C-c r l" 'bookmark-bmenu-list)
-      ("\C-c r b" 'bookmark-jump)
-      ("\C-c r m" 'bookmark-set))
+(apply* (global-set-key (kbd %1) %2)
+        ("\C-c r l" 'bookmark-bmenu-list)
+        ("\C-c r b" 'bookmark-jump)
+        ("\C-c r m" 'bookmark-set))
 
 
 ;;-------------------------
@@ -98,27 +98,27 @@
   (file-cache-clear-cache))
 
 (file-cache-reset)
-(todo (global-set-key (kbd %1) %2)
-      ("\C-c c d" 'file-cache-add-directory)
-      ("\C-c c t" 'file-cache-add-directory-recursively))
+(apply* (global-set-key (kbd %1) %2)
+        ("\C-c c d" 'file-cache-add-directory)
+        ("\C-c c t" 'file-cache-add-directory-recursively))
 
 
 ;;---------------------
 ;; Setting global-set-keys
 ;;---------------------
-(todo (global-set-key (kbd %1) %2)
-      ("C-x ?" 'help-command)
-      ("C-h" 'delete-backward-char)
-      ("C-u" 'repeat)
-      ("C-x C-d" 'dired)
-      ("C-x g" 'rgrep)
-      ("C-x ," 'backward-word)
-      ("C-x ." 'forward-word))
+(apply* (global-set-key (kbd %1) %2)
+        ("C-x ?" 'help-command)
+        ("C-h" 'delete-backward-char)
+        ("C-u" 'repeat)
+        ("C-x C-d" 'dired)
+        ("C-x g" 'rgrep)
+        ("C-x ," 'backward-word)
+        ("C-x ." 'forward-word))
 
-(todo (define-key global-map %1 %2)
-      ([f1] 'start-kbd-macro)
-      ([f2] 'end-kbd-macro)
-      ([f3] 'call-last-kbd-macro))
+(apply* (define-key global-map %1 %2)
+        ([f1] 'start-kbd-macro)
+        ([f2] 'end-kbd-macro)
+        ([f3] 'call-last-kbd-macro))
 
 
 ;;---------------------
@@ -132,8 +132,8 @@
 ;;---------------------------
 (show-paren-mode 1)
 (setq skeleton-pair 1)
-(todo (global-set-key (kbd %) 'skeleton-pair-insert-maybe)
-      "(" "{" "[" "<")
+(apply* (global-set-key (kbd %) 'skeleton-pair-insert-maybe)
+        "(" "{" "[" "<")
 
 
 ;;-------------------------
@@ -187,27 +187,27 @@
          company-keywords
          company-dabbrev)))
 
-(todo (define-key company-active-map (kbd %1) %2)
-      ("C-h" nil)
-      ("M-n" nil)
-      ("M-p" nil)
-      ("C-n" 'company-select-next)
-      ("C-p" 'company-select-previous)
-      ("C-s" 'company-filter-candidates)
-      ("C-i" 'company-complete-selection))
+(apply* (define-key company-active-map (kbd %1) %2)
+        ("C-h" nil)
+        ("M-n" nil)
+        ("M-p" nil)
+        ("C-n" 'company-select-next)
+        ("C-p" 'company-select-previous)
+        ("C-s" 'company-filter-candidates)
+        ("C-i" 'company-complete-selection))
 
-(todo (define-key company-search-map (kbd %1) %2)
-      ("C-n" 'company-select-next)
-      ("C-p" 'company-select-previous))
+(apply* (define-key company-search-map (kbd %1) %2)
+        ("C-n" 'company-select-next)
+        ("C-p" 'company-select-previous))
 
-(todo set-face-attribute
-      ('company-tooltip nil :foreground "black" :background "lightgrey")
-      ('company-tooltip-common nil :foreground "black" :background "lightgrey")
-      ('company-tooltip-common-selection nil :foreground "white" :background "steelblue")
-      ('company-tooltip-selection nil :foreground "black" :background "steelblue")
-      ('company-preview-common nil :background nil :foreground "lightgrey" :underline t)
-      ('company-scrollbar-fg nil :background "orange")
-      ('company-scrollbar-bg nil :background "gray40"))
+(apply* set-face-attribute
+        ('company-tooltip nil :foreground "black" :background "lightgrey")
+        ('company-tooltip-common nil :foreground "black" :background "lightgrey")
+        ('company-tooltip-common-selection nil :foreground "white" :background "steelblue")
+        ('company-tooltip-selection nil :foreground "black" :background "steelblue")
+        ('company-preview-common nil :background nil :foreground "lightgrey" :underline t)
+        ('company-scrollbar-fg nil :background "orange")
+        ('company-scrollbar-bg nil :background "gray40"))
 
 
 ;;-------------------------
@@ -216,9 +216,9 @@
 (require 'key-combo)
 (global-key-combo-mode t)
 
-(todo (key-combo-define-global (kbd %1) %2)
-      ("C-a" '(back-to-indentation beginning-of-line beginning-of-buffer key-combo-return))
-      ("C-e" '(end-of-line end-of-buffer key-combo-return)))
+(apply* (key-combo-define-global (kbd %1) %2)
+        ("C-a" '(back-to-indentation beginning-of-line beginning-of-buffer key-combo-return))
+        ("C-e" '(end-of-line end-of-buffer key-combo-return)))
 
 
 ;;---------------------------
@@ -243,20 +243,20 @@
    (erb-tag :submode ruby-mode :front "<%[ \n]?" :back "[ \n]?%>")
    (gsp-tag :submode text-mode :front "<%[ \n]?" :back "[ \n]?%>")))
 
-(todo mmm-add-mode-ext-class
-      ('html-mode nil 'js-tag)
-      ('html-mode nil 'css-tag)
-      ('html-mode "\\.erb\\'" 'erb-tag)
-      ('html-mode "\\.gsp\\'" 'gsp-tag))
+(apply* mmm-add-mode-ext-class
+        ('html-mode nil 'js-tag)
+        ('html-mode nil 'css-tag)
+        ('html-mode "\\.erb\\'" 'erb-tag)
+        ('html-mode "\\.gsp\\'" 'gsp-tag))
 
 
 ;;---------------------------------------
 ;; Setting tmpbuf
 ;;---------------------------------------
 (require 'tempbuf)
-(todo (add-hook % 'turn-on-tempbuf-mode)
-      'find-file-hooks
-      'dired-mode-hook)
+(apply* (add-hook % 'turn-on-tempbuf-mode)
+        'find-file-hooks
+        'dired-mode-hook)
 
 
 ;;--------------------
@@ -266,31 +266,31 @@
 (helm-mode t)
 (setq helm-M-x-requires-pattern 0)
 
-(todo (global-set-key (kbd %1) %2)
-      ("M-x" 'helm-M-x)
-      ("M-y" 'helm-show-kill-ring)
-      ("C-c o" 'helm-occur)
-      ("C-x b" 'helm-for-files)
-      ("C-x C-b" 'helm-for-files))
+(apply* (global-set-key (kbd %1) %2)
+        ("M-x" 'helm-M-x)
+        ("M-y" 'helm-show-kill-ring)
+        ("C-c o" 'helm-occur)
+        ("C-x b" 'helm-for-files)
+        ("C-x C-b" 'helm-for-files))
 
-(todo (define-key helm-map (kbd %1) %2)
-      ("C-h" 'delete-backward-char)
-      ("TAB" 'helm-execute-persistent-action))
+(apply* (define-key helm-map (kbd %1) %2)
+        ("C-h" 'delete-backward-char)
+        ("TAB" 'helm-execute-persistent-action))
 
 (remove-hook
  'helm-after-update-hook
  'helm-ff-update-when-only-one-matched)
 
 (define-obsolete-variable-alias
-  'last-command-char
-  'last-command-event)
+    'last-command-char
+    'last-command-event)
 
-(todo (assoc! %1 'candidate-number-limit %2)
-      (helm-source-recentf 15)
-      (helm-source-buffers-list 15)
-      (helm-source-file-cache 10)
-      (helm-source-locate 5)
-      (helm-source-files-in-current-dir 5))
+(apply* (assoc! %1 'candidate-number-limit %2)
+        (helm-source-recentf 15)
+        (helm-source-buffers-list 15)
+        (helm-source-file-cache 10)
+        (helm-source-locate 5)
+        (helm-source-files-in-current-dir 5))
 
 
 ;;-------------------------
