@@ -52,7 +52,7 @@ markkeys h=^B:l=^F:$=^E
 # ----------------------
 # enabled mouse scroll
 # ----------------------
-termcapinfo xterm* ti@:te@
+term screen-256color
 
 bind r eval 'echo "Resize window"' 'command -c resize'
 bind -c resize ^]  command
