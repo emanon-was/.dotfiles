@@ -3,6 +3,7 @@
 ;;-----------------------------
 (require 'cl)
 (require 'cl-lib)
+(require 'seq)
 
 (setq lisp-indent-function #'common-lisp-indent-function)
 
@@ -59,7 +60,7 @@
       `(,form ,@args)))
 
 (defmacro apply* (form &rest args)
-  (labels ((apply-form (arg)
+  (cl-labels ((apply-form (arg)
              (if (listp arg)
                  (if (special-form-p (car arg))
                      `(funcall* ,form ,arg)
@@ -69,7 +70,7 @@
 
 (defmacro doto (x &rest forms)
   (let ((gx (gensym)))
-    (labels ((doto-form (form) `(funcall* ,form ,gx)))
+    (cl-labels ((doto-form (form) `(funcall* ,form ,gx)))
       `(let ((,gx ,x))
          ,@(mapcar #'doto-form forms)
          ,gx))))
