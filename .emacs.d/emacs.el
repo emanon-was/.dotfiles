@@ -3,7 +3,8 @@
 ;;-----------------------------
 (require 'cl)
 (require 'cl-lib)
-(require 'seq)
+(if (>= emacs-major-version 25)
+    (require 'seq))
 
 (setq lisp-indent-function #'common-lisp-indent-function)
 
