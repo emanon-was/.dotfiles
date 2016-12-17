@@ -65,7 +65,10 @@
 ;;-------------------
 (require 'dired-x)
 (require 'wdired)
+(require 'dired-subtree)
 (define-key dired-mode-map "r" 'wdired-change-to-wdired-mode)
+(define-key dired-mode-map (kbd "C-i") 'dired-subtree-toggle)
+(setq dired-subtree-use-backgrounds nil)
 
 
 ;;--------------------
@@ -297,4 +300,5 @@
 ;;-------------------------
 
 (load-configs "config")
+(require 'dired-subtree)
 
