@@ -103,10 +103,16 @@
 ;;-----------------------------
 
 (defun mkdir (path)
-  (if (file-directory-p path) nil (make-directory path)))
+  (if (file-directory-p path) nil (make-directory path t)))
+
+(defun dirname (path)
+  (file-name-directory path))
+
+(defun chmod (mode path)
+  (set-file-modes path mode))
 
 (defun tmp-directory (&optional file-name)
-  (let ((dir (file-truename "~/.tmp")))
+  (let ((dir (file-truename (format "%s/%s" "~/.tmp" user-login-name))))
     (if file-name (format "%s/%s" dir file-name) dir)))
 
 

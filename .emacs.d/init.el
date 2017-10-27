@@ -4,8 +4,7 @@
 
 (load (locate-user-emacs-file "emacs.el"))
 (add-to-load-path "elisp" "config" "package")
-(mkdir (tmp-directory))
-
+(doto (tmp-directory) mkdir (chmod #o777 (dirname %)))
 
 ;;-----------------------------
 ;; Load package
