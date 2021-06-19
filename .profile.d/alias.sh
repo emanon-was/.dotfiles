@@ -1,5 +1,11 @@
+if ls --help 2>&1 | grep -q -- --color
+then
+    alias ls='ls --color=auto -F'
+else
+    alias ls='ls -FG'
+fi
+
 alias la='ls -a';
-alias lf='ls -F';
 alias ll='ls -la';
 alias ps='\ps ux';
 alias psgrep='\ps aux | \grep -v grep | \grep --color=auto';
