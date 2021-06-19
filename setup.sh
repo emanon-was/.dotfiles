@@ -1,5 +1,38 @@
 #!/bin/bash
 
+#
+# Help function
+#
+help ()
+{
+    cat <<EOF
+
+ example)
+
+   [install]
+   $ cd ~/.dotfiles
+   $ bash setup.sh install
+
+   [restore]
+   $ cd ~/.dotfiles
+   $ bash setup.sh restore
+
+   [gnome]
+   $ cd ~/.dotfiles
+   $ bash setup.sh gnome [set|reset]
+
+   [spacemacs]
+   $ cd ~/.dotfiles
+   $ bash setup.sh spacemacs install
+
+   [help]
+   $ cd ~/.dotfiles
+   $ bash setup.sh help
+
+
+EOF
+}
+
 oldfiles=~/.dotfiles.old;
 ignore=(.git .svn .DS_Store README);
 
@@ -155,34 +188,6 @@ gnome-reset ()
     gconftool-2 --type string --set /apps/gnome-terminal/profiles/Default/font "Monospace 12"
 }
 
-#
-# Help function
-#
-help ()
-{
-    cat <<EOF
-
- example)
-
-   [install]
-   $ cd ~/.dotfiles
-   $ bash setup.sh install
-
-   [restore]
-   $ cd ~/.dotfiles
-   $ bash setup.sh restore
-
-   [gnome]
-   $ cd ~/.dotfiles
-   $ bash setup.sh gnome [set|reset]
-
-   [help]
-   $ cd ~/.dotfiles
-   $ bash setup.sh help
-
-
-EOF
-}
 
 
 gnome()
@@ -192,6 +197,27 @@ gnome()
             gnome-set;;
         "reset")
             gnome-reset;;
+        *)
+            help;;
+    esac
+}
+
+spacemacs-install()
+{
+    if [ -e ~/.emacs ]; then
+        mv -f ~/.emacs ~/.emacs~;
+    fi
+    if [ -e ~/.emacs.d ]; then
+        mv -f ~/.emacs.d ~/.emacs.d~;
+    fi
+    git clone --depth 1 -b develop https://github.com/syl20bnr/spacemacs ~/.emacs.d
+}
+
+spacemacs()
+{
+    case $1 in
+        "install")
+            spacemacs-install;;
         *)
             help;;
     esac
@@ -207,6 +233,8 @@ case $1 in
         restore;;
     "gnome")
         gnome $2;;
+    "spacemacs")
+        spacemacs $2;;
     "help")
         help;;
     *)

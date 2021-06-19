@@ -14,8 +14,7 @@ source-profiles ()
     done
 }
 
-source-profiles ~/.profile.d ~/.nix-profile/etc/profile.d/nix.sh
-
-auto-ssh-agent;
-auto-ssh-add;
+source-profiles \
+    ~/.nix-profile/etc/profile.d/nix.sh \
+    ~/.profile.d
 

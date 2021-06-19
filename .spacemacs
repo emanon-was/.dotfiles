@@ -33,7 +33,8 @@ This function should only modify configuration layer settings."
 
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '(
+   '(go
+     python
      (clojure :variables
               clojure-enable-clj-refactor t
               cider-repl-display-help-banner nil
@@ -535,22 +536,28 @@ before packages are loaded."
         (process-send-string proc text)
         (process-send-eof proc))))
 
-  (when (not window-system)
-    (xterm-mouse-mode -1)
-    (cond ((darwin-clipboard-p)
-           (progn
-             (setq interprogram-cut-function 'darwin-clipboard-cut)
-             (setq interprogram-paste-function 'darwin-clipboard-paste)))
-          ((linux-clipboard-p)
-           (progn
-             (setq interprogram-cut-function 'linux-clipboard-cut)
-             (setq interprogram-paste-function 'linux-clipboard-paste)))))
+  ;; (when (not window-system)
+  ;;   (xterm-mouse-mode -1)
+  ;;   (cond ((darwin-clipboard-p)
+  ;;          (progn
+  ;;            (setq interprogram-cut-function 'darwin-clipboard-cut)
+  ;;            (setq interprogram-paste-function 'darwin-clipboard-paste)))
+  ;;         ((linux-clipboard-p)
+  ;;          (progn
+  ;;            (setq interprogram-cut-function 'linux-clipboard-cut)
+  ;;            (setq interprogram-paste-function 'linux-clipboard-paste)))))
 
   ;;
   ;; Global key-combo
   ;;
   (global-key-combo-mode t)
   (key-combo-load-default)
+
+  ;;
+  ;; Global disable-mouse
+  ;;
+  (when (not window-system)
+    (xterm-mouse-mode 0))
 
   ;;
   ;; Parents color
@@ -593,15 +600,14 @@ This function is called at the very end of Spacemacs initialization."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(evil-want-Y-yank-to-eol nil)
  '(package-selected-packages
-   (quote
-    (tern nodejs-repl livid-mode skewer-mode js2-refactor multiple-cursors js2-mode js-doc import-js grizzl helm-gtags ggtags counsel-gtags add-node-modules-path yaml-mode ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package unfill toml-mode toc-org terraform-mode hcl-mode spaceline powerline restart-emacs request rainbow-delimiters racer popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree mwim move-text mmm-mode markdown-toc macrostep lorem-ipsum linum-relative link-hint key-combo indent-guide hydra lv hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile projectile helm-mode-manager helm-make helm-flx helm-descbinds helm-company helm-c-yasnippet helm-ag groovy-mode gradle-mode google-translate golden-ratio gh-md fuzzy flyspell-correct-helm flyspell-correct flycheck-rust flycheck-pos-tip pos-tip flycheck pkg-info epl flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist highlight evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu elisp-slime-nav dumb-jump f dockerfile-mode docker json-mode tablist s magit-popup docker-tramp json-snatcher json-reformat dired-subtree dired-hacks-utils dash diminish define-word company-statistics company column-enforce-mode clean-aindent-mode cargo markdown-mode rust-mode bind-map bind-key auto-yasnippet yasnippet auto-highlight-symbol auto-dictionary auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core async ac-ispell auto-complete popup afternoon-theme)))
+   '(helm-gtags godoctor go-tag go-rename go-impl go-guru go-gen-test go-fill-struct go-eldoc ggtags flycheck-golangci-lint dap-mode bui counsel-gtags company-go go-mode web-mode web-beautify tagedit slim-mode scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe rbenv rake pug-mode minitest livid-mode skewer-mode simple-httpd js2-refactor multiple-cursors js2-mode js-doc helm-css-scss haml-mode emmet-mode company-web web-completion-data company-tern dash-functional tern coffee-mode chruby bundler inf-ruby yaml-mode ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package unfill toml-mode toc-org terraform-mode hcl-mode spaceline powerline restart-emacs request rainbow-delimiters racer popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree mwim move-text mmm-mode markdown-toc macrostep lorem-ipsum linum-relative link-hint key-combo indent-guide hydra lv hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile projectile helm-mode-manager helm-make helm-flx helm-descbinds helm-company helm-c-yasnippet helm-ag groovy-mode gradle-mode google-translate golden-ratio gh-md fuzzy flyspell-correct-helm flyspell-correct flycheck-rust flycheck-pos-tip pos-tip flycheck pkg-info epl flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist highlight evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu elisp-slime-nav dumb-jump f dockerfile-mode docker json-mode tablist s magit-popup docker-tramp json-snatcher json-reformat dired-subtree dired-hacks-utils dash diminish define-word company-statistics company column-enforce-mode clean-aindent-mode cargo markdown-mode rust-mode bind-map bind-key auto-yasnippet yasnippet auto-highlight-symbol auto-dictionary auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core async ac-ispell auto-complete popup afternoon-theme))
  '(safe-local-variable-values
-   (quote
-    ((cider-ns-refresh-after-fn . "integrant.repl/resume")
+   '((cider-ns-refresh-after-fn . "integrant.repl/resume")
      (cider-ns-refresh-before-fn . "integrant.repl/suspend")
      (javascript-backend . tern)
-     (javascript-backend . lsp)))))
+     (javascript-backend . lsp))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

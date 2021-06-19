@@ -31,3 +31,6 @@ if [ -e $source_file ]; then
 fi
 unset source_file;
 
+if [ ! -z "$(command -v direnv)" ]; then
+    eval "$(direnv hook zsh)";
+fi
