@@ -1,3 +1,5 @@
+zshrc () { exit 0; }
+
 #
 # Prompt
 #
@@ -22,14 +24,9 @@ autoload -U compinit
 setopt complete_aliases
 compinit
 
-#
-# Share Config
-#
-source_file=~/.profile;
-if [ -e $source_file ]; then
-    source $source_file;
+if [ -z "$(command -v profile)" ]; then
+    source ~/.profile
 fi
-unset source_file;
 
 if [ ! -z "$(command -v direnv)" ]; then
     eval "$(direnv hook zsh)";
