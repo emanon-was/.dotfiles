@@ -1,20 +1,7 @@
-source-safe() { if [ -e $1 ]; then source $1; fi }
+load() { if [ -e $1 ]; then source $1; fi }
 
-source-profiles ()
-{
-    for P in $@; do
-        if [ -n "$P" -a -e $P ]; then
-            if   [ -f $P ]; then
-                source-safe $P;
-            elif [ -d $P ]; then
-                D=$P; if [ -L $P ]; then D=`readlink $P`; fi
-                for F in `find $D -name "*.sh"`; do source-safe $F; done
-            fi
-        fi
-    done
-}
+load ~/.nix-profile/etc/profile.d/nix.sh
+load ~/.profile.d/export.sh
+load ~/.profile.d/alias.sh
 
-source-profiles \
-    ~/.nix-profile/etc/profile.d/nix.sh \
-    ~/.profile.d
 
