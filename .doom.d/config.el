@@ -53,6 +53,7 @@
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
 
-(setq ranger-show-hidden 'format)
-(setq ranger-listing-dir-first nil)
-(define-key ranger-normal-mode-map (kbd "+") #'dired-create-directory)
+(after! ranger
+  (setq ranger-show-hidden 'format)
+  (setq ranger-listing-dir-first nil)
+  (define-key ranger-normal-mode-map (kbd "+") #'dired-create-directory))
