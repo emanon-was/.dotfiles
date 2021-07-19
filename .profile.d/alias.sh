@@ -18,6 +18,6 @@ alias df='\df -h';
 alias su='\su -l';
 alias nano='\nano -Suwik';
 
-if [ -z "$(command -v trash)" ]; then
+if [ ! -z "$(command -v trash)" ]; then
     alias rm='\trash-put';
 fi
