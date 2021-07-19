@@ -202,7 +202,7 @@ gnome()
     esac
 }
 
-spacemacs-install()
+emacs-dist-install()
 {
     if [ -e ~/.emacs ]; then
         mv -f ~/.emacs ~/.emacs~;
@@ -210,7 +210,12 @@ spacemacs-install()
     if [ -e ~/.emacs.d ]; then
         mv -f ~/.emacs.d ~/.emacs.d~;
     fi
-    git clone --depth 1 -b develop https://github.com/syl20bnr/spacemacs ~/.emacs.d
+    git clone --depth 1 -b $2 $1 ~/.emacs.d
+}
+
+spacemacs-install()
+{
+    emacs-dist-install "https://github.com/syl20bnr/spacemacs" "develop"
 }
 
 spacemacs()
@@ -218,6 +223,21 @@ spacemacs()
     case $1 in
         "install")
             spacemacs-install;;
+        *)
+            help;;
+    esac
+}
+
+doom-emacs-install()
+{
+    emacs-dist-install "https://github.com/hlissner/doom-emacs" "develop"
+}
+
+doom-emacs()
+{
+    case $1 in
+        "install")
+            doom-emacs-install;;
         *)
             help;;
     esac
@@ -235,6 +255,8 @@ case $1 in
         gnome $2;;
     "spacemacs")
         spacemacs $2;;
+    "doom-emacs")
+        doom-emacs $2;;
     "help")
         help;;
     *)
