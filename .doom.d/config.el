@@ -35,7 +35,6 @@
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type t)
 
-
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
 ;; - `load!' for loading external *.el files relative to this one
@@ -53,7 +52,24 @@
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
 
-(after! ranger
-  (setq ranger-show-hidden 'format)
-  (setq ranger-listing-dir-first nil)
-  (define-key ranger-normal-mode-map (kbd "+") #'dired-create-directory))
+;; n: normal
+;; v: visual
+;; i: insert
+;; o: operator
+;; r: replace
+;; m: motion
+;; e: emacs
+;; g: global
+
+(map! :nviomr "C-c" [escape])
+(map! :leader
+      (:desc "window-nav"
+       :prefix "w"
+       "SPC"
+       #'+hydra/window-nav/body))
+
+(after! dired
+  (setq dired-listing-switches "-ahl -v"))
+
+(setq x-select-enable-clipboard t)
+
