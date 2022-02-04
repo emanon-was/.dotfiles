@@ -61,7 +61,8 @@
 ;; e: emacs
 ;; g: global
 
-(map! :nviomr "C-c" [escape])
+(map! :viorm "C-c" [escape])
+(map! :n "C-z" [escape])
 (map! :leader
       (:desc "window-nav"
        :prefix "w"
