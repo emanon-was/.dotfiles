@@ -10,4 +10,5 @@ export GOPATH=$HOME/.go
 export CARGO_HOME=$HOME/.cargo
 export DOOM_EMACS_HOME=$HOME/.config/emacs
 export XDG_LOCAL_HOME=$HOME/.local
-export PATH=$GOPATH/bin:$CARGO_HOME/bin:$DOOM_EMACS_HOME/bin:$XDG_LOCAL_HOME/bin:$PATH
+export DOTFILES_HOME=$HOME/.dotfiles
+export PATH=$GOPATH/bin:$CARGO_HOME/bin:$DOOM_EMACS_HOME/bin:$XDG_LOCAL_HOME/bin:$DOTFILES_HOME/bin:$PATH
