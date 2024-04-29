@@ -1,0 +1,6 @@
+.bashrc
+.profile
+.profile.d
+.screenrc
+.tmux.conf
+.zshrc

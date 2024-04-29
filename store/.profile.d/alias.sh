@@ -17,6 +17,7 @@ alias du='\du -h';
 alias df='\df -h';
 alias su='\su -l';
 alias nano='\nano -Suwik';
+alias emacs='\emacs -nw';
 
 if [ ! -z "$(command -v trash)" ]; then
     alias rm='\trash-put';
