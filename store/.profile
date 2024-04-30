@@ -6,6 +6,6 @@ load ~/.profile.d/export.sh
 load ~/.profile.d/alias.sh
 
 ## for WSL
-if [ ! -z "$WSL_DISTRO_NAME" ]; then
-    source ~/.bashrc
-fi
+# if [ ! -z "$WSL_DISTRO_NAME" ]; then
+#     source ~/.bashrc
+# fi
