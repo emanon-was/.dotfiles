@@ -14,8 +14,8 @@ let
     "dotfiles-project"
   ];
 
-  common = ./scripts/common.sh;
-  scriptPath = name: ./scripts/${name}.sh;
+  common = ../dotfiles/scripts/common.sh;
+  scriptPath = name: ../dotfiles/scripts/${name}.sh;
 
   installScript = name: ''
     {
@@ -43,10 +43,10 @@ runCommand "dotfiles-dist"
 
   rm -rf "$out/home-files/.local/share/dotfiles/templates"
   mkdir -p "$out/home-files/.local/share/dotfiles/templates"
-  cp -R ${./templates}/. "$out/home-files/.local/share/dotfiles/templates"/
+  cp -R ${../dotfiles/templates}/. "$out/home-files/.local/share/dotfiles/templates"/
   chmod -R u+w "$out/home-files"
-  cp ${./dist/install.sh} "$out/install.sh"
-  cp ${./dist/uninstall.sh} "$out/uninstall.sh"
+  cp ${./install.sh} "$out/install.sh"
+  cp ${./uninstall.sh} "$out/uninstall.sh"
   chmod +x "$out/install.sh"
   chmod +x "$out/uninstall.sh"
 

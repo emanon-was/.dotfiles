@@ -19,10 +19,12 @@
   - Home Manager module と、Home Manager が使う設定ファイルの生成元。
   - `home/config/` に tmux、screen、Doom Emacs などの手書き設定を置く。
 - `pkgs/dotfiles/`
-  - `dotfiles` CLI と `dist` package の生成元。
+  - `dotfiles` CLI の生成元。
   - `pkgs/dotfiles/scripts/` に `dotfiles-*` サブコマンドを置く。
   - `pkgs/dotfiles/templates/` に `dotfiles project init ...` 用テンプレートを置く。
-  - `pkgs/dotfiles/dist/` に `dist/install.sh` などの生成元を置く。
+- `pkgs/dist/`
+  - `dotfiles-dist` package と `dist/install.sh` などの生成元。
+  - CLI scripts と project init templates は `pkgs/dotfiles/` から取り込む。
 - `notes/`
   - Home Manager 管理対象ではない個人メモ。
 - `dist/`

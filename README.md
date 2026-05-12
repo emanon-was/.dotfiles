@@ -166,7 +166,7 @@ make home-build
 make dist
 ```
 
-`make dist` は `.#dotfiles-dist` をビルドし、その成果物で `dist/` を再生成します。`dist/` 配下は生成物なので、修正が必要な場合は `pkgs/dotfiles/`、`home/` などの生成元を編集します。
+`make dist` は `.#dotfiles-dist` をビルドし、その成果物で `dist/` を再生成します。`dist/` 配下は生成物なので、修正が必要な場合は `pkgs/dist/`、`pkgs/dotfiles/`、`home/` などの生成元を編集します。
 
 ## メモ
 
