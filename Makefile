@@ -1,9 +1,34 @@
-.PHONY: plan init clean backup restore
+.PHONY: switch check update doctor gnome-apply doom-install doom-sync doom-upgrade plan init clean backup restore
 
 PWD := $(shell pwd)
 STORE := $(PWD)/store
 STORE_LIST := $(PWD)/store.list
 BACKUP := $(PWD)/backup
+DOTFILES := nix run .#dotfiles --
+
+switch:
+	@$(DOTFILES) switch
+
+check:
+	@$(DOTFILES) check
+
+update:
+	@$(DOTFILES) update
+
+doctor:
+	@$(DOTFILES) doctor
+
+gnome-apply:
+	@$(DOTFILES) gnome apply
+
+doom-install:
+	@$(DOTFILES) doom install
+
+doom-sync:
+	@$(DOTFILES) doom sync
+
+doom-upgrade:
+	@$(DOTFILES) doom upgrade
 
 plan:
 	@bin/.dotfiles-plan.sh $(STORE) $(STORE_LIST)
