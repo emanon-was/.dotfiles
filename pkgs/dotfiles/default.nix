@@ -14,7 +14,7 @@
 }:
 
 let
-  common = ./scripts/common.sh;
+  common = ./scripts/lib/common.sh;
 
   templates = runCommand "dotfiles-templates" { } ''
     mkdir -p "$out/share/dotfiles/templates"
