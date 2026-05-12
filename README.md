@@ -52,5 +52,5 @@ dotfiles configure gnome
 dotfiles configure doom install [--check]
 dotfiles configure doom sync
 dotfiles configure doom upgrade
-dotfiles template copy <nix|docker> [destination]
+dotfiles project init <nix|docker> [destination]
 ```

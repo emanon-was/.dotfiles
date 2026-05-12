@@ -138,8 +138,8 @@
   - 例:
 
     ```sh
-    dotfiles template copy nix
-    dotfiles template copy docker
+    dotfiles project init nix
+    dotfiles project init docker
     ```
 
   - コピー先が既に存在する場合の挙動を明示する。

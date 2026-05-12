@@ -44,7 +44,7 @@ writeShellApplication {
       dotfiles configure doom install [--check]
       dotfiles configure doom sync
       dotfiles configure doom upgrade
-      dotfiles template copy <nix|docker> [destination]
+      dotfiles project init <nix|docker> [destination]
     USAGE
     }
 
@@ -609,14 +609,15 @@ writeShellApplication {
       esac
     }
 
-    cmd_template() {
+    cmd_project() {
       case "''${1:-}" in
-        copy)
+        init)
           template="''${2:-}"
           destination="''${3:-.}"
-          [ -n "$template" ] || fail "template name is required"
+          [ -n "$template" ] || fail "project template name is required"
+          [ "$#" -le 3 ] || fail "unexpected argument for project init: $4"
           source="$DOTFILES_HOME/template/$template"
-          [ -d "$source" ] || fail "unknown template: $template"
+          [ -d "$source" ] || fail "unknown project template: $template"
           mkdir -p "$destination"
           cp -R "$source"/. "$destination"/
           ;;
@@ -648,9 +649,9 @@ writeShellApplication {
         shift
         cmd_configure "$@"
         ;;
-      template)
+      project)
         shift
-        cmd_template "$@"
+        cmd_project "$@"
         ;;
       -h|--help|help|"")
         usage
