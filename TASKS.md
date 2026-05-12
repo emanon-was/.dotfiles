@@ -246,7 +246,7 @@
 
 ## Phase 7: 運用改善
 
-- [ ] `dotfiles doctor` を強化する。
+- [x] `dotfiles doctor` を強化する。
   - Home Manager の profile/generation 状態を確認する。
   - `~/.config/doom/config.el` の symlink 状態と参照先を確認する。
   - Doom 側で管理する `~/.config/doom/init.el` と `~/.config/doom/packages.el` の有無を確認する。
