@@ -67,6 +67,30 @@ writeShellApplication {
       [ -x "$DOOM_BIN" ]
     }
 
+    directory_empty() {
+      [ -d "$1" ] && [ -z "$(find "$1" -mindepth 1 -maxdepth 1 -print -quit)" ]
+    }
+
+    doom_checkout_ready() {
+      [ -d "$DOOM_HOME/.git" ] && doom_installed
+    }
+
+    doom_config_ready() {
+      [ -f "$HOME/.config/doom/init.el" ] && [ -f "$HOME/.config/doom/packages.el" ]
+    }
+
+    doom_clone() {
+      if [ ! -e "$DOOM_HOME" ]; then
+        git clone --depth 1 https://github.com/doomemacs/doomemacs "$DOOM_HOME"
+      elif directory_empty "$DOOM_HOME"; then
+        git clone --depth 1 https://github.com/doomemacs/doomemacs "$DOOM_HOME"
+      elif doom_checkout_ready; then
+        status "[skip] Doom Emacs checkout already exists: $DOOM_HOME"
+      else
+        fail "$DOOM_HOME exists but is not a usable Doom Emacs checkout"
+      fi
+    }
+
     doom_sync() {
       if ! doom_installed; then
         fail "Doom Emacs is not installed at $DOOM_HOME. Run: dotfiles configure doom install"
@@ -206,11 +230,12 @@ writeShellApplication {
     cmd_doom() {
       case "''${1:-}" in
         install)
-          if [ -e "$DOOM_HOME" ]; then
-            fail "$DOOM_HOME already exists"
+          doom_clone
+          if doom_config_ready; then
+            status "[skip] Doom config bootstrap files already exist"
+          else
+            "$DOOM_BIN" install
           fi
-          git clone --depth 1 https://github.com/doomemacs/doomemacs "$DOOM_HOME"
-          "$DOOM_BIN" install
           doom_sync
           ;;
         sync)

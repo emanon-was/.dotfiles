@@ -26,6 +26,8 @@ nix run .#dotfiles -- configure doom install
 nix run .#dotfiles -- switch
 ```
 
+`configure doom install` reuses an existing Doom checkout and config bootstrap files when they are already present, then runs Doom sync.
+
 To switch without running Doom sync:
 
 ```sh

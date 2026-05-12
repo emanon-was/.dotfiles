@@ -139,7 +139,10 @@
 
 - [x] `dotfiles configure doom install` を実装する。
   - 既存の `bin/doomemacs-init.sh` 相当を移す。
-  - 既に `~/.config/emacs` が存在する場合の挙動を明示する。
+  - 既に使える `~/.config/emacs` checkout が存在する場合は再利用する。
+  - 空の `~/.config/emacs` が存在する場合は clone 先として使う。
+  - 壊れた `~/.config/emacs` が存在する場合は明示的に失敗する。
+  - `~/.config/doom/init.el` と `packages.el` が存在する場合は `doom install` をスキップし、`doom sync` を実行する。
   - clone と install を分けるか検討する。
 
 - [x] テンプレート操作を CLI 化する。
