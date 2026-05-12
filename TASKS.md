@@ -5,7 +5,7 @@
 ## 現状メモ
 
 - `store/` に `$HOME` へ配置したい dotfiles がある。
-- `store.list` は旧 symlink 管理対象の一覧。
+- 旧 `store.list` ベースの symlink 管理は廃止済み。
 - `Makefile` は旧 `bin/.dotfiles-*` と新しい `dotfiles` CLI の両方を呼べる。
 - `bin/` には個別セットアップ用スクリプトがある。
 - `config/doom` に Doom Emacs 設定がある。ユーザーは Doom Emacs を使用しているため、Doom 設定は正式に Home Manager 管理する。
@@ -14,12 +14,12 @@
 
 ## 方針
 
-- symlink 管理を Home Manager の宣言的設定へ置き換える。
+- symlink 管理を Home Manager の宣言的設定へ置き換え済み。
 - 副作用のある処理は Home Manager 評価時に実行しない。
 - `gsettings`、Doom Emacs install、テンプレートコピーなどは `dotfiles` CLI の明示サブコマンドにする。
 - Emacs 本体と Doom Emacs の設定ファイルは Home Manager で管理する。
 - Doom Emacs の更新・設定変更後には `doom sync` を実行できる導線を用意する。
-- 既存の `store/` は一気に消さず、移行が済んだものから段階的に Home Manager 側へ移す。
+- 既存の `store/` は `tmux`/`screen` などの移行元ファイル置き場として残す。
 - Nix の構成は flake ベースにする。
 
 ## Phase 1: Home Manager の入口を作る
@@ -95,9 +95,10 @@
     };
     ```
 
-- [ ] `store.list` ベースの symlink 管理を段階的に廃止する。
-  - Home Manager に移せたものから `store.list` 依存をなくす。
-  - 旧方式をすぐ削除せず、移行が完了するまで README に状態を明記する。
+- [x] `store.list` ベースの symlink 管理を廃止する。
+  - `store.list` を削除する。
+  - `bin/.dotfiles-*` の symlink 操作用スクリプトを削除する。
+  - `make plan/init/clean/backup/restore` を削除する。
 
 ## Phase 3: `dotfiles` CLI を作る
 
@@ -231,7 +232,7 @@
     dotfiles configure gnome
     ```
 
-  - 旧 `make init` ベースの説明は削除または deprecated と明記する。
+  - 旧 `make init` ベースの説明は削除する。
 
 ## Phase 6: 検証
 
@@ -252,4 +253,4 @@
 - 特に `store/.profile.d/export.sh` は既に変更済みなので、編集前に差分を確認する。
 - `gsettings` や `doom install` のような副作用コマンドを Home Manager activation に入れない。
 - `doom sync` は `dotfiles switch` から明示的に呼び出す。Home Manager module の評価や activation に重いネットワーク処理を混ぜない。
-- まず小さく Home Manager を導入し、動作確認しながら `store/` 依存を減らす。
+- `store/` に残っているファイルは Home Manager module から参照される設定ファイルとして扱う。

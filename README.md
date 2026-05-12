@@ -45,17 +45,3 @@ dotfiles configure doom sync
 dotfiles configure doom upgrade
 dotfiles template copy <nix|docker> [destination]
 ```
-
-## Legacy Commands
-
-The old symlink flow is still present during migration:
-
-```sh
-make plan
-make init
-make clean
-make backup
-make restore
-```
-
-Prefer the Home Manager flow for new work.
