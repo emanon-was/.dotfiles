@@ -1,4 +1,4 @@
-.PHONY: switch check update doctor configure-gnome configure-doom gnome-configure gnome-apply doom-install doom-sync doom-upgrade plan init clean backup restore
+.PHONY: switch check update doctor configure-gnome configure-doom plan init clean backup restore
 
 PWD := $(shell pwd)
 STORE := $(PWD)/store
@@ -23,21 +23,6 @@ configure-gnome:
 
 configure-doom:
 	@$(DOTFILES) configure doom sync
-
-gnome-configure:
-	@$(DOTFILES) configure gnome
-
-gnome-apply:
-	@$(DOTFILES) configure gnome
-
-doom-install:
-	@$(DOTFILES) configure doom install
-
-doom-sync:
-	@$(DOTFILES) configure doom sync
-
-doom-upgrade:
-	@$(DOTFILES) configure doom upgrade
 
 plan:
 	@bin/.dotfiles-plan.sh $(STORE) $(STORE_LIST)

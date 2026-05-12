@@ -203,18 +203,6 @@ writeShellApplication {
       esac
     }
 
-    cmd_gnome() {
-      case "''${1:-}" in
-        configure|apply)
-          gnome_configure
-          ;;
-        *)
-          usage
-          exit 2
-          ;;
-      esac
-    }
-
     cmd_doom() {
       case "''${1:-}" in
         install)
@@ -225,7 +213,7 @@ writeShellApplication {
           "$DOOM_BIN" install
           doom_sync
           ;;
-        sync|configure)
+        sync)
           doom_sync
           ;;
         upgrade)
@@ -280,14 +268,6 @@ writeShellApplication {
       configure)
         shift
         cmd_configure "$@"
-        ;;
-      gnome)
-        shift
-        cmd_gnome "$@"
-        ;;
-      doom)
-        shift
-        cmd_doom "$@"
         ;;
       template)
         shift
