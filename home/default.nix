@@ -1,4 +1,4 @@
-{ username, homeDirectory, dotfilesPackage, ... }:
+{ username, homeDirectory, ... }:
 
 {
   imports = [
@@ -8,6 +8,7 @@
     ./tmux.nix
     ./screen.nix
     ./emacs.nix
+    ./templates.nix
     ./gnome.nix
   ];
 
@@ -15,8 +16,6 @@
     inherit username homeDirectory;
     stateVersion = "25.11";
   };
-
-  home.file.".local/share/dotfiles/templates".source = "${dotfilesPackage}/share/dotfiles/templates";
 
   programs.home-manager.enable = true;
 }
