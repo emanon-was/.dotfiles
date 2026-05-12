@@ -10,7 +10,7 @@
 - 旧 `bin/` スクリプトは廃止済み。
 - `config/doom/config.el` に Home Manager 管理の Doom Emacs 設定がある。
 - Doom の `init.el` と `packages.el` は Doom 側の更新対象として扱い、この repo では管理しない。
-- `template/` にはプロジェクト用テンプレートがある。
+- `project-templates/` にはプロジェクト用テンプレートがある。
 
 ## 方針
 
