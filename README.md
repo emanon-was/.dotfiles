@@ -17,6 +17,7 @@ NixOS の system 側は stable を使い、このリポジトリの Home Manager
 │   ├── scripts/          `dotfiles-*` サブコマンドの shell script
 │   └── templates/        `dotfiles project init ...` で使うテンプレート
 ├── pkgs/dist/            `dotfiles-dist` package と配布用 script の生成元
+│   └── scripts/          `dist/install.sh` などに入る配布用 script
 ├── notes/                Home Manager 管理対象ではない個人メモ
 ├── dist/                 Nix build で生成した配布用成果物
 ├── flake.nix             Home Manager、CLI package、dist package の入口

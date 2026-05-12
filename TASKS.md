@@ -23,7 +23,8 @@
   - `pkgs/dotfiles/scripts/` に `dotfiles-*` サブコマンドを置く。
   - `pkgs/dotfiles/templates/` に `dotfiles project init ...` 用テンプレートを置く。
 - `pkgs/dist/`
-  - `dotfiles-dist` package と `dist/install.sh` などの生成元。
+  - `dotfiles-dist` package の生成元。
+  - `pkgs/dist/scripts/` に `dist/install.sh` などの配布用 script を置く。
   - CLI scripts と project init templates は `pkgs/dotfiles/` から取り込む。
 - `notes/`
   - Home Manager 管理対象ではない個人メモ。
