@@ -7,12 +7,10 @@
 let
   scripts = [
     "dotfiles"
-    "dotfiles-check"
     "dotfiles-configure"
     "dotfiles-doctor"
+    "dotfiles-flake"
     "dotfiles-project"
-    "dotfiles-switch"
-    "dotfiles-update"
   ];
 
   common = ./scripts/common.sh;

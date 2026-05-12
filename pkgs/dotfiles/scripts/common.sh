@@ -75,7 +75,7 @@ doom_check_config_current() {
 
   if [ ! -e "$active_config" ]; then
     status "[doom] config.el is not installed yet: $active_config"
-    fail "Run: dotfiles switch"
+    fail "Run: dotfiles flake switch"
   fi
 
   if cmp -s "$dotfiles_config" "$active_config"; then
@@ -89,7 +89,7 @@ doom_check_config_current() {
 
   status "[doom] config.el differs from dotfiles source"
   diff -u "$active_config" "$dotfiles_config" || true
-  fail "Run: dotfiles switch"
+  fail "Run: dotfiles flake switch"
 }
 
 doom_unlink_managed_config() {

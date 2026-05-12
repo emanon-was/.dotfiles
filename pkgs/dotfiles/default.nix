@@ -22,32 +22,31 @@ let
       text = builtins.readFile common + "\n" + builtins.readFile script;
     };
 
-  sharedRuntimeInputs = [
+  baseRuntimeInputs = [
     bash
     coreutils
     diffutils
     git
     gnugrep
     gnused
+  ];
+
+  flakeRuntimeInputs = baseRuntimeInputs ++ [
     nix
     home-manager.packages.${stdenv.hostPlatform.system}.home-manager
   ];
 
-  doctor = mkDotfilesCommand "dotfiles-doctor" sharedRuntimeInputs ./scripts/dotfiles-doctor.sh;
-  switch = mkDotfilesCommand "dotfiles-switch" sharedRuntimeInputs ./scripts/dotfiles-switch.sh;
-  check = mkDotfilesCommand "dotfiles-check" sharedRuntimeInputs ./scripts/dotfiles-check.sh;
-  update = mkDotfilesCommand "dotfiles-update" (sharedRuntimeInputs ++ [ check ]) ./scripts/dotfiles-update.sh;
-  configure = mkDotfilesCommand "dotfiles-configure" sharedRuntimeInputs ./scripts/dotfiles-configure.sh;
-  project = mkDotfilesCommand "dotfiles-project" sharedRuntimeInputs ./scripts/dotfiles-project.sh;
+  doctor = mkDotfilesCommand "dotfiles-doctor" baseRuntimeInputs ./scripts/dotfiles-doctor.sh;
+  flake = mkDotfilesCommand "dotfiles-flake" flakeRuntimeInputs ./scripts/dotfiles-flake.sh;
+  configure = mkDotfilesCommand "dotfiles-configure" baseRuntimeInputs ./scripts/dotfiles-configure.sh;
+  project = mkDotfilesCommand "dotfiles-project" baseRuntimeInputs ./scripts/dotfiles-project.sh;
   subcommands = [
     doctor
-    switch
-    check
-    update
+    flake
     configure
     project
   ];
-  dispatcher = mkDotfilesCommand "dotfiles" (sharedRuntimeInputs ++ subcommands) ./scripts/dotfiles.sh;
+  dispatcher = mkDotfilesCommand "dotfiles" (baseRuntimeInputs ++ subcommands) ./scripts/dotfiles.sh;
 in
 symlinkJoin {
   name = "dotfiles";

@@ -15,7 +15,7 @@ NixOS の system 側は stable を使い、このリポジトリの Home Manager
 - shell、tmux、screen、git、Emacs などのユーザー設定を Home Manager で管理する
 - `~/.config/doom/config.el` は Home Manager 経由で管理する
 - Doom Emacs の install、sync、upgrade は `dotfiles configure doom ...` で明示的に実行する
-- `dotfiles switch` 後には Doom sync も実行する
+- `dotfiles flake switch` 後には Doom sync も実行する
 - GNOME 設定のような副作用のある処理は Home Manager activation には入れず、`dotfiles configure gnome` として分ける
 
 初回セットアップ:
@@ -24,24 +24,24 @@ NixOS の system 側は stable を使い、このリポジトリの Home Manager
 git clone https://github.com/emanon-was/.dotfiles.git "$HOME/.dotfiles"
 cd "$HOME/.dotfiles"
 nix run .#dotfiles -- doctor
-nix run .#dotfiles -- switch
+nix run .#dotfiles -- flake switch
 ```
 
 Doom Emacs が未セットアップの場合:
 
 ```sh
 nix run .#dotfiles -- configure doom install
-nix run .#dotfiles -- switch
+nix run .#dotfiles -- flake switch
 ```
 
 通常の更新:
 
 ```sh
-dotfiles update
-dotfiles switch
+dotfiles flake update
+dotfiles flake switch
 ```
 
-`dotfiles switch` は内部で次のような処理を行います。
+`dotfiles flake switch` は内部で次のような処理を行います。
 
 ```sh
 home-manager -b hm-backup --flake "$DOTFILES_HOME#nixos" switch
@@ -51,7 +51,7 @@ dotfiles configure doom sync
 Doom sync を一時的に飛ばしたい場合:
 
 ```sh
-dotfiles switch --skip-doom-sync
+dotfiles flake switch --skip-doom-sync
 ```
 
 ### Nix なし / Home Manager なしの環境
@@ -94,9 +94,10 @@ DOTFILES_BIN_DIR="$HOME/bin" ./dist/install.sh
 
 ```sh
 dotfiles doctor
-dotfiles switch [--skip-doom-sync] [profile]
-dotfiles check
-dotfiles update
+dotfiles flake check
+dotfiles flake update
+dotfiles flake switch [--skip-doom-sync] [profile]
+dotfiles flake doctor
 dotfiles configure gnome
 dotfiles configure doom install [--check]
 dotfiles configure doom sync

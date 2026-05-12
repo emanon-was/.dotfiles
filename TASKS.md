@@ -110,17 +110,17 @@
   - 完了条件:
     - 不足しているものを exit code とメッセージで判別できる。
 
-- [x] `dotfiles switch` を実装する。
+- [x] `dotfiles flake switch` を実装する。
   - `home-manager -b hm-backup --flake "$DOTFILES_HOME#<profile>" switch` を呼ぶ。
   - profile 指定方法は引数または環境変数で決める。
 
-- [x] `dotfiles check` を実装する。
+- [x] `dotfiles flake check` を実装する。
   - `nix flake check` を実行する。
   - 必要なら Home Manager の評価チェックも追加する。
 
-- [x] `dotfiles update` を実装する。
+- [x] `dotfiles flake update` を実装する。
   - `nix flake update` を実行する。
-  - 実行後に `dotfiles check` を促すか、自動実行するか決める。
+  - 実行後に `dotfiles flake check` を促すか、自動実行するか決める。
 
 - [x] `dotfiles configure gnome` を実装する。
   - 既存の `bin/gnome-settings.sh` 相当を移す。
@@ -170,7 +170,7 @@
   - `~/.config/emacs/bin/doom sync` を実行する。
   - `~/.config/emacs` が存在しない場合は `dotfiles configure doom install` を促す。
   - 実行前に `~/.config/doom/config.el` と `home/config/doom/config.el` の差分を確認する。
-  - 差分がある場合は unified diff を表示し、`dotfiles switch` を促して停止する。
+  - 差分がある場合は unified diff を表示し、`dotfiles flake switch` を促して停止する。
   - Doom コマンドが失敗した場合は exit code をそのまま返す。
 
 - [x] `dotfiles configure doom upgrade` を実装する。
@@ -180,10 +180,10 @@
   - 推奨は `dotfiles configure doom upgrade` 内で `doom upgrade` 後に `doom sync` を実行する。
 
 - [x] Home Manager 更新後に Doom sync を実行する導線を作る。
-  - `dotfiles switch` の中で `home-manager switch` 成功後に `dotfiles configure doom sync` 相当を呼ぶ。
+  - `dotfiles flake switch` の中で `home-manager switch` 成功後に `dotfiles configure doom sync` 相当を呼ぶ。
   - または `--skip-doom-sync` のようなオプションを用意し、通常は sync する。
   - 完了条件:
-    - Doom 設定変更後に `dotfiles switch` だけで `doom sync` まで完了する。
+    - Doom 設定変更後に `dotfiles flake switch` だけで `doom sync` まで完了する。
     - Doom 未インストール環境では分かりやすいメッセージで止まるか、skip できる。
 
 - [x] `scrap/.emacs.d` の扱いを決める。
@@ -227,6 +227,7 @@
     ```sh
     home-manager switch --flake .#<profile>
     dotfiles doctor
+    dotfiles flake doctor
     dotfiles configure gnome
     ```
 
@@ -244,7 +245,7 @@
   - この環境では GNOME/gsettings がないため、検証は skip 扱いにする。
 - [x] `dotfiles configure doom install` を確認する。
 - [x] `dotfiles configure doom sync` を確認する。
-- [x] `dotfiles switch` 後に Doom sync が実行されることを確認する。
+- [x] `dotfiles flake switch` 後に Doom sync が実行されることを確認する。
 
 ## Phase 7: 運用改善
 
@@ -253,6 +254,13 @@
   - `~/.config/doom/config.el` の symlink 状態と参照先を確認する。
   - Doom 側で管理する `~/.config/doom/init.el` と `~/.config/doom/packages.el` の有無を確認する。
   - Doom checkout `~/.config/emacs` と `doom` executable の状態を確認する。
+
+- [x] flake 依存コマンドを `dotfiles flake` 配下へ移動する。
+  - `dotfiles flake check`
+  - `dotfiles flake update`
+  - `dotfiles flake switch`
+  - `dotfiles flake doctor`
+  - `dotfiles doctor` は Nix/Home Manager 前提ではない汎用診断にする。
   - straight recipe repositories の存在、branch、remote、追跡状態を確認する。
   - system は stable、home は unstable という運用前提を確認しやすい表示にする。
 
@@ -284,4 +292,4 @@
 
 - ユーザーの未コミット変更を勝手に戻さない。
 - `gsettings` や `doom install` のような副作用コマンドを Home Manager activation に入れない。
-- `doom sync` は `dotfiles switch` から明示的に呼び出す。Home Manager module の評価や activation に重いネットワーク処理を混ぜない。
+- `doom sync` は `dotfiles flake switch` から明示的に呼び出す。Home Manager module の評価や activation に重いネットワーク処理を混ぜない。

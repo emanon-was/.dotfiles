@@ -2,9 +2,10 @@ usage() {
   cat <<'USAGE'
 Usage:
   dotfiles doctor
-  dotfiles switch [--skip-doom-sync] [profile]
-  dotfiles check
-  dotfiles update
+  dotfiles flake check
+  dotfiles flake update
+  dotfiles flake switch [--skip-doom-sync] [profile]
+  dotfiles flake doctor
   dotfiles configure gnome
   dotfiles configure doom install [--check]
   dotfiles configure doom sync
@@ -24,6 +25,15 @@ case "${1:-}" in
   *)
     subcommand="$1"
     shift
+
+    case "$subcommand" in
+      check|update|switch)
+        printf 'error: dotfiles %s was moved under dotfiles flake\n' "$subcommand" >&2
+        printf 'usage: dotfiles flake %s\n' "$subcommand" >&2
+        exit 2
+        ;;
+    esac
+
     executable="dotfiles-$subcommand"
 
     dotfiles_path="$0"
