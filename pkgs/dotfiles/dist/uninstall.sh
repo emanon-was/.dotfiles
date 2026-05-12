@@ -47,6 +47,10 @@ remove_link() {
       rm "$link_path"
       printf 'removed command link: %s\n' "$link_path"
       ;;
+    */bin/dotfiles*)
+      rm "$link_path"
+      printf 'removed command link: %s\n' "$link_path"
+      ;;
     "$prefix/home-files/"*)
       rm "$link_path"
       printf 'removed home link: %s\n' "$link_path"
@@ -70,7 +74,11 @@ if [ -d "$bin_dir" ]; then
   done
 fi
 
-rm -f "$command_store"/dotfiles*
+if [ -d "$command_store" ]; then
+  for link_path in "$command_store"/dotfiles*; do
+    remove_link "$link_path"
+  done
+fi
 
 chmod -R u+w \
   "$prefix/home-files" 2>/dev/null || true

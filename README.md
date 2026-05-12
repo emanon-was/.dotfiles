@@ -68,7 +68,7 @@ Nix を使わない環境では `dist/` を使います。`dist/` は Nix build 
 $HOME
 ```
 
-`dotfiles` コマンド群は以下へ配置されます。
+`dotfiles` コマンド群は以下へ symlink されます。
 
 ```text
 $HOME/.bin
