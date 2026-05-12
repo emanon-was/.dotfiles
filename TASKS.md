@@ -288,6 +288,18 @@
   - commit 対象は `dotfiles-*` scripts と project templates にする。
   - Nix store 固有パスや runtime dependency が生成物へ混入しないことを検証する。
 
+- [ ] screen 設定を `tmux.nix` から分離する。
+  - 現状は `home/tmux.nix` に `home.file.".screenrc"` も入っており、screen 設定の所在が分かりにくい。
+  - `home/screen.nix` を作り、`home/config/screen/screenrc` の配置はそこへ移す。
+  - `home/default.nix` の imports に `./screen.nix` を追加する。
+  - `home/tmux.nix` は tmux の設定だけを扱う。
+
+- [ ] `dist/install.sh` に対応する uninstall を実装する。
+  - `dist/install.sh` で配置した `$prefix` と `$DOTFILES_BIN_DIR/dotfiles*` symlink を削除できるようにする。
+  - standalone script として `dist/uninstall.sh` にするか、`./dist/install.sh --uninstall` にするかを決める。
+  - 誤ってユーザーの手書きファイルを消さないよう、symlink 先や prefix を確認してから削除する。
+  - `pkgs/dotfiles/dist.nix` と README にも反映する。
+
 ## 注意点
 
 - ユーザーの未コミット変更を勝手に戻さない。
