@@ -68,10 +68,10 @@ Nix を使わない環境では `dist/` を使います。`dist/` は Nix build 
 $HOME
 ```
 
-`dotfiles` コマンド群は以下へ symlink されます。
+`dotfiles` コマンド群は以下へ配置されます。
 
 ```text
-$HOME/.local/bin
+$HOME/.bin
 ```
 
 必要ならインストール先を指定できます。
@@ -87,6 +87,7 @@ DOTFILES_BIN_DIR="$HOME/bin" ./dist/install.sh
 ```
 
 `dist/home-files/` には Home Manager から生成した `$HOME` 用 dotfiles が入ります。Nix なし環境で使う場合は、この内容を確認して必要なものだけ `$HOME` に配置します。
+`install.sh` は `home-files` の内容をコピーせず、`$HOME/.bashrc` などから `home-files` 内のファイルへ symlink を作成します。
 
 アンインストールする場合:
 

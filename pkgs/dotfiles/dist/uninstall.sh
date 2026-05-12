@@ -11,7 +11,7 @@ Environment:
 
 Default:
   prefix            $HOME
-  DOTFILES_BIN_DIR  $HOME/.local/bin
+  DOTFILES_BIN_DIR  $HOME/.bin
 USAGE
 }
 
@@ -23,7 +23,7 @@ case "${1:-}" in
 esac
 
 prefix="${1:-$HOME}"
-bin_dir="${DOTFILES_BIN_DIR:-$HOME/.local/bin}"
+bin_dir="${DOTFILES_BIN_DIR:-$HOME/.bin}"
 
 case "$prefix" in
   ""|"/")
@@ -32,15 +32,24 @@ case "$prefix" in
     ;;
 esac
 
+command_store="$prefix/bin"
+if [ "$prefix" = "$HOME" ]; then
+  command_store="$HOME/.bin"
+fi
+
 remove_link() {
   link_path="$1"
   [ -L "$link_path" ] || return 0
 
   link_target="$(readlink "$link_path")"
   case "$link_target" in
-    "$prefix"/bin/dotfiles*)
+    "$command_store"/dotfiles*)
       rm "$link_path"
-      printf 'removed link: %s\n' "$link_path"
+      printf 'removed command link: %s\n' "$link_path"
+      ;;
+    "$prefix/home-files/"*)
+      rm "$link_path"
+      printf 'removed home link: %s\n' "$link_path"
       ;;
     *)
       printf 'skipped link with unexpected target: %s -> %s\n' "$link_path" "$link_target"
@@ -48,25 +57,34 @@ remove_link() {
   esac
 }
 
+if [ -d "$prefix/home-files" ]; then
+  find "$prefix/home-files" -mindepth 1 \( -type f -o -type l \) | while IFS= read -r source_path; do
+    relative_path="${source_path#"$prefix/home-files/"}"
+    remove_link "$HOME/$relative_path"
+  done
+fi
+
 if [ -d "$bin_dir" ]; then
   for link_path in "$bin_dir"/dotfiles*; do
     remove_link "$link_path"
   done
 fi
 
+rm -f "$command_store"/dotfiles*
+
+chmod -R u+w \
+  "$prefix/project-templates/nix" \
+  "$prefix/project-templates/docker" \
+  "$prefix/home/config" \
+  "$prefix/home-files" 2>/dev/null || true
+rm -rf \
+  "$prefix/project-templates/nix" \
+  "$prefix/project-templates/docker" \
+  "$prefix/home/config" \
+  "$prefix/home-files"
+
 if [ "$prefix" = "$HOME" ]; then
-  rm -f "$prefix"/bin/dotfiles*
-  chmod -R u+w \
-    "$prefix/project-templates/nix" \
-    "$prefix/project-templates/docker" \
-    "$prefix/home/config" \
-    "$prefix/home-files" 2>/dev/null || true
-  rm -rf \
-    "$prefix/project-templates/nix" \
-    "$prefix/project-templates/docker" \
-    "$prefix/home/config" \
-    "$prefix/home-files"
-  rmdir "$prefix/project-templates" "$prefix/home" "$prefix/bin" 2>/dev/null || true
+  rmdir "$prefix/project-templates" "$prefix/home" "$command_store" 2>/dev/null || true
   printf 'removed managed files from: %s\n' "$prefix"
 elif [ -e "$prefix" ]; then
   chmod -R u+w "$prefix" 2>/dev/null || true
