@@ -62,6 +62,7 @@ dotfiles project init <nix|docker> [destination]
 
 `dist/` contains generated artifacts for environments that do not use this flake directly.
 Do not edit files under `dist/` by hand.
+Standalone dotfiles for `$HOME` are generated under `dist/home-files/`.
 
 ```sh
 make dist
