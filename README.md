@@ -88,6 +88,14 @@ DOTFILES_BIN_DIR="$HOME/bin" ./dist/install.sh
 
 `dist/home-files/` には Home Manager から生成した `$HOME` 用 dotfiles が入ります。Nix なし環境で使う場合は、この内容を確認して必要なものだけ `$HOME` に配置します。
 
+アンインストールする場合:
+
+```sh
+./dist/uninstall.sh
+```
+
+`install.sh` と同じ `prefix` や `DOTFILES_BIN_DIR` を指定していた場合は、同じ値を渡します。
+
 ## dotfiles コマンド
 
 `dotfiles` は Cargo 風の dispatcher です。`dotfiles doctor` を実行すると、PATH 上の `dotfiles-doctor` が実行されます。

@@ -41,7 +41,9 @@ runCommand "dotfiles-dist"
   cp -RL ${homeFiles}/. "$out/home-files"/
   chmod -R u+w "$out/home-files"
   cp ${./dist/install.sh} "$out/install.sh"
+  cp ${./dist/uninstall.sh} "$out/uninstall.sh"
   chmod +x "$out/install.sh"
+  chmod +x "$out/uninstall.sh"
 
   # Home Manager generated files can contain store paths for activation-time
   # helpers and managed shell plugins. The dist payload is meant to be usable

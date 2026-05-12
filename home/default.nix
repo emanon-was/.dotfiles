@@ -6,6 +6,7 @@
     ./shells.nix
     ./git.nix
     ./tmux.nix
+    ./screen.nix
     ./emacs.nix
     ./gnome.nix
   ];
