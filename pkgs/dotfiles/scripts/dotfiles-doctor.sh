@@ -42,14 +42,25 @@ doctor_dotfiles_home() {
   fi
 
   doom_config="$(doom_config_source)"
-  for path in "$doom_config" "$DOTFILES_HOME/project-templates/nix" "$DOTFILES_HOME/project-templates/docker"; do
-    if [ -e "$path" ]; then
-      ok "dotfiles path: $path"
-    else
-      missing "dotfiles path: $path"
-      failed=1
-    fi
-  done
+  if [ -e "$doom_config" ]; then
+    ok "dotfiles path: $doom_config"
+  else
+    missing "dotfiles path: $doom_config"
+    failed=1
+  fi
+
+  if [ -d "$DOTFILES_HOME/project-templates" ]; then
+    for path in "$DOTFILES_HOME/project-templates/nix" "$DOTFILES_HOME/project-templates/docker"; do
+      if [ -e "$path" ]; then
+        ok "dotfiles path: $path"
+      else
+        missing "dotfiles path: $path"
+        failed=1
+      fi
+    done
+  else
+    skip "project templates: $DOTFILES_HOME/project-templates"
+  fi
 
   return "$failed"
 }

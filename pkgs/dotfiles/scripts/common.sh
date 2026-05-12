@@ -9,14 +9,18 @@ if [ -z "${DOTFILES_HOME:-}" ]; then
   dotfiles_bin_dir="$(dirname "${dotfiles_command_path:-$0}")"
   dotfiles_search_dir="$dotfiles_bin_dir"
   DOTFILES_HOME=""
+  dotfiles_home_candidate=""
   while [ -n "$dotfiles_search_dir" ] && [ "$dotfiles_search_dir" != "/" ]; do
-    if [ -d "$dotfiles_search_dir/project-templates" ] && [ -d "$dotfiles_search_dir/home-files" ]; then
+    if [ -d "$dotfiles_search_dir/project-templates" ]; then
       DOTFILES_HOME="$dotfiles_search_dir"
       break
     fi
+    if [ -z "$dotfiles_home_candidate" ] && [ -d "$dotfiles_search_dir/home-files" ]; then
+      dotfiles_home_candidate="$dotfiles_search_dir"
+    fi
     dotfiles_search_dir="$(dirname "$dotfiles_search_dir")"
   done
-  DOTFILES_HOME="${DOTFILES_HOME:-$HOME/.dotfiles}"
+  DOTFILES_HOME="${DOTFILES_HOME:-${dotfiles_home_candidate:-$HOME/.dotfiles}}"
 fi
 DOTFILES_PROFILE="${DOTFILES_PROFILE:-nixos}"
 DOOM_HOME="${DOOM_HOME:-$HOME/.config/emacs}"
