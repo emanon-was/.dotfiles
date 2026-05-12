@@ -41,7 +41,7 @@ writeShellApplication {
       dotfiles check
       dotfiles update
       dotfiles configure gnome
-      dotfiles configure doom install
+      dotfiles configure doom install [--check]
       dotfiles configure doom sync
       dotfiles configure doom upgrade
       dotfiles template copy <nix|docker> [destination]
@@ -210,6 +210,75 @@ writeShellApplication {
       "$DOOM_BIN" sync
     }
 
+    doom_install_check() {
+      require_dotfiles_home
+
+      original_home="$HOME"
+      original_doom_home="$DOOM_HOME"
+      original_doom_bin="$DOOM_BIN"
+      check_root="$(mktemp -d)"
+
+      cleanup_doom_install_check() {
+        HOME="$original_home"
+        DOOM_HOME="$original_doom_home"
+        DOOM_BIN="$original_doom_bin"
+        rm -rf "$check_root"
+      }
+      trap cleanup_doom_install_check RETURN
+
+      HOME="$check_root/home"
+      DOOM_HOME="$HOME/.config/emacs"
+      DOOM_BIN="$DOOM_HOME/bin/doom"
+      export DOTFILES_HOME
+
+      status "[doom-check] using temporary HOME: $HOME"
+      mkdir -p "$DOOM_HOME/.git" "$DOOM_HOME/bin" "$HOME/.config/doom"
+
+      cat > "$DOOM_BIN" <<'FAKE_DOOM'
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    case "''${1:-}" in
+      install)
+        mkdir -p "$HOME/.config/doom"
+        cp "$DOTFILES_HOME/config/doom/config.el" "$HOME/.config/doom/config.el"
+        touch "$HOME/.config/doom/init.el" "$HOME/.config/doom/packages.el"
+        ;;
+      sync)
+        ;;
+      *)
+        printf 'unexpected fake doom command: %s\n' "''${1:-}" >&2
+        exit 2
+        ;;
+    esac
+    FAKE_DOOM
+      chmod +x "$DOOM_BIN"
+
+      ln -s "$DOTFILES_HOME/config/doom/config.el" "$HOME/.config/doom/config.el"
+
+      status "[doom-check] verifying isolated Doom checkout detection"
+      doom_checkout_ready || fail "temporary Doom checkout was not detected as ready"
+
+      status "[doom-check] verifying generated config comparison and symlink restore"
+      doom_run_with_generated_config_check "$DOOM_BIN" install
+
+      active_config="$HOME/.config/doom/config.el"
+      if [ ! -L "$active_config" ]; then
+        fail "managed config.el symlink was not restored"
+      fi
+      if [ "$(readlink "$active_config")" != "$DOTFILES_HOME/config/doom/config.el" ]; then
+        fail "managed config.el symlink points to an unexpected target"
+      fi
+
+      status "[doom-check] verifying bootstrap config detection"
+      doom_config_ready || fail "temporary Doom bootstrap files were not created"
+
+      status "[doom-check] verifying sync preflight check"
+      doom_sync
+
+      status "[doom-check] install check passed"
+    }
+
     gnome_configure() {
       have gsettings || fail "gsettings is not available"
       gsettings set org.gnome.desktop.interface gtk-key-theme "Emacs"
@@ -318,6 +387,20 @@ writeShellApplication {
     cmd_doom() {
       case "''${1:-}" in
         install)
+          shift
+          case "''${1:-}" in
+            --check)
+              shift
+              [ "$#" -eq 0 ] || fail "unexpected argument for doom install --check: $1"
+              doom_install_check
+              return
+              ;;
+            "")
+              ;;
+            *)
+              fail "unknown option for doom install: $1"
+              ;;
+          esac
           status "[doom] ensuring Doom Emacs checkout"
           doom_clone
           if doom_config_ready; then

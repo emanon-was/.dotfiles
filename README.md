@@ -29,6 +29,12 @@ nix run .#dotfiles -- switch
 Before Doom sync runs, `dotfiles` verifies that the active `~/.config/doom/config.el` matches `config/doom/config.el`; if not, it prints a unified diff and asks you to run `dotfiles switch`.
 During Doom install/upgrade, `dotfiles` temporarily removes the managed `config.el` symlink, compares any Doom-generated `config.el` with `config/doom/config.el`, then restores the symlink.
 
+To verify the install flow without touching the real Doom directories:
+
+```sh
+nix run .#dotfiles -- configure doom install --check
+```
+
 To switch without running Doom sync:
 
 ```sh
@@ -43,7 +49,7 @@ dotfiles switch [--skip-doom-sync] [profile]
 dotfiles check
 dotfiles update
 dotfiles configure gnome
-dotfiles configure doom install
+dotfiles configure doom install [--check]
 dotfiles configure doom sync
 dotfiles configure doom upgrade
 dotfiles template copy <nix|docker> [destination]

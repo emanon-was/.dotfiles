@@ -254,11 +254,11 @@
   - straight recipe repositories の存在、branch、remote、追跡状態を確認する。
   - system は stable、home は unstable という運用前提を確認しやすい表示にする。
 
-- [ ] `dotfiles configure doom install --check` を追加する。
+- [x] `dotfiles configure doom install --check` を追加する。
   - 新規環境を想定して、一時ディレクトリへ `HOME` と `DOOM_HOME` を向けた検証を行う。
   - 実環境の `~/.config/emacs` と `~/.config/doom` は変更しない。
   - clone/install 判定、Doom 生成 `config.el` との差分確認、symlink 復元の流れを検証する。
-  - ネットワークを伴う実 install が必要な場合は、その旨を明示してから実行する。
+  - 実際の clone/install は行わず、fake Doom checkout で安全に検証する。
 
 ## 注意点
 
