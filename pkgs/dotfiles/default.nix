@@ -15,40 +15,11 @@
 
 let
   common = ./scripts/common.sh;
-  scriptPath = name: ./scripts/${name}.sh;
-
-  commandNames = [
-    "dotfiles"
-    "dotfiles-configure"
-    "dotfiles-doctor"
-    "dotfiles-flake"
-    "dotfiles-project"
-  ];
 
   templates = runCommand "dotfiles-templates" { } ''
     mkdir -p "$out/share/dotfiles/templates"
     cp -R ${./templates}/. "$out/share/dotfiles/templates"/
   '';
-
-  portableCommands = runCommand "dotfiles-portable-commands" { } ''
-    mkdir -p "$out/share/dotfiles/portable-bin"
-    ${builtins.concatStringsSep "\n" (map (name: ''
-      {
-        printf '%s\n' '#!/usr/bin/env bash'
-        cat ${common}
-        printf '\n'
-        cat ${scriptPath name}
-      } > "$out/share/dotfiles/portable-bin/${name}"
-      chmod +x "$out/share/dotfiles/portable-bin/${name}"
-    '') commandNames)}
-  '';
-
-  mkDotfilesCommand = name: runtimeInputs: script: extraText:
-    writeShellApplication {
-      inherit name runtimeInputs;
-      excludeShellChecks = [ "SC2329" ];
-      text = extraText + builtins.readFile common + "\n" + builtins.readFile script;
-    };
 
   baseRuntimeInputs = [
     bash
@@ -64,19 +35,67 @@ let
     home-manager.packages.${stdenv.hostPlatform.system}.home-manager
   ];
 
-  doctor = mkDotfilesCommand "dotfiles-doctor" baseRuntimeInputs ./scripts/dotfiles-doctor.sh "";
-  flake = mkDotfilesCommand "dotfiles-flake" flakeRuntimeInputs ./scripts/dotfiles-flake.sh "";
-  configure = mkDotfilesCommand "dotfiles-configure" baseRuntimeInputs ./scripts/dotfiles-configure.sh "";
-  project = mkDotfilesCommand "dotfiles-project" baseRuntimeInputs ./scripts/dotfiles-project.sh ''
-    DOTFILES_BUILT_TEMPLATES="${templates}/share/dotfiles/templates"
-  '';
-  subcommands = [
-    doctor
-    flake
-    configure
-    project
+  commandText = command:
+    (command.nixExtraText or "") + builtins.readFile common + "\n" + builtins.readFile command.script;
+
+  portableCommandSource = command:
+    builtins.toFile "${command.name}-portable" (
+      "#!/usr/bin/env bash\n"
+      + (command.portableExtraText or "")
+      + builtins.readFile common
+      + "\n"
+      + builtins.readFile command.script
+    );
+
+  mkDotfilesCommand = command:
+    writeShellApplication {
+      inherit (command) name runtimeInputs;
+      excludeShellChecks = [ "SC2329" ];
+      text = commandText command;
+    };
+
+  commandDefinitions = [
+    {
+      name = "dotfiles-doctor";
+      runtimeInputs = baseRuntimeInputs;
+      script = ./scripts/dotfiles-doctor.sh;
+    }
+    {
+      name = "dotfiles-flake";
+      runtimeInputs = flakeRuntimeInputs;
+      script = ./scripts/dotfiles-flake.sh;
+    }
+    {
+      name = "dotfiles-configure";
+      runtimeInputs = baseRuntimeInputs;
+      script = ./scripts/dotfiles-configure.sh;
+    }
+    {
+      name = "dotfiles-project";
+      runtimeInputs = baseRuntimeInputs;
+      script = ./scripts/dotfiles-project.sh;
+      nixExtraText = ''
+        DOTFILES_BUILT_TEMPLATES="${templates}/share/dotfiles/templates"
+      '';
+    }
   ];
-  dispatcher = mkDotfilesCommand "dotfiles" (baseRuntimeInputs ++ subcommands) ./scripts/dotfiles.sh "";
+
+  subcommands = map mkDotfilesCommand commandDefinitions;
+  dispatcherCommand = {
+    name = "dotfiles";
+    runtimeInputs = baseRuntimeInputs ++ subcommands;
+    script = ./scripts/dotfiles.sh;
+  };
+  dispatcher = mkDotfilesCommand dispatcherCommand;
+
+  portableCommandDefinitions = [ dispatcherCommand ] ++ commandDefinitions;
+  portableCommands = runCommand "dotfiles-portable-commands" { } ''
+    mkdir -p "$out/share/dotfiles/portable-bin"
+    ${builtins.concatStringsSep "\n" (map (command: ''
+      cp ${portableCommandSource command} "$out/share/dotfiles/portable-bin/${command.name}"
+      chmod +x "$out/share/dotfiles/portable-bin/${command.name}"
+    '') portableCommandDefinitions)}
+  '';
 in
 symlinkJoin {
   name = "dotfiles";
