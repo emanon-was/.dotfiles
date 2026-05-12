@@ -10,7 +10,7 @@ Environment:
   DOTFILES_BIN_DIR  Directory for dotfiles command symlinks.
 
 Default:
-  prefix            $HOME/.local/share/dotfiles
+  prefix            $HOME
   DOTFILES_BIN_DIR  $HOME/.local/bin
 USAGE
 }
@@ -23,7 +23,7 @@ case "${1:-}" in
 esac
 
 dist_root="$(cd "$(dirname "$0")" && pwd -P)"
-prefix="${1:-$HOME/.local/share/dotfiles}"
+prefix="${1:-$HOME}"
 bin_dir="${DOTFILES_BIN_DIR:-$HOME/.local/bin}"
 
 [ -d "$dist_root/bin" ] || {
@@ -43,8 +43,22 @@ bin_dir="${DOTFILES_BIN_DIR:-$HOME/.local/bin}"
 
 mkdir -p "$prefix/bin" "$prefix/project-templates" "$prefix/home" "$prefix/home-files" "$bin_dir"
 
-chmod -R u+w "$prefix/bin" "$prefix/project-templates" "$prefix/home" "$prefix/home-files" 2>/dev/null || true
-rm -rf "$prefix/bin" "$prefix/project-templates" "$prefix/home" "$prefix/home-files"
+if [ "$prefix" = "$HOME" ]; then
+  rm -f "$prefix"/bin/dotfiles*
+  chmod -R u+w \
+    "$prefix/project-templates/nix" \
+    "$prefix/project-templates/docker" \
+    "$prefix/home/config" \
+    "$prefix/home-files" 2>/dev/null || true
+  rm -rf \
+    "$prefix/project-templates/nix" \
+    "$prefix/project-templates/docker" \
+    "$prefix/home/config" \
+    "$prefix/home-files"
+else
+  chmod -R u+w "$prefix/bin" "$prefix/project-templates" "$prefix/home" "$prefix/home-files" 2>/dev/null || true
+  rm -rf "$prefix/bin" "$prefix/project-templates" "$prefix/home" "$prefix/home-files"
+fi
 mkdir -p "$prefix/bin" "$prefix/project-templates" "$prefix/home" "$prefix/home-files"
 
 cp -R "$dist_root/bin"/. "$prefix/bin"/

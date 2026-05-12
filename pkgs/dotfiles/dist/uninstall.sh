@@ -10,7 +10,7 @@ Environment:
   DOTFILES_BIN_DIR  Directory containing dotfiles command symlinks.
 
 Default:
-  prefix            $HOME/.local/share/dotfiles
+  prefix            $HOME
   DOTFILES_BIN_DIR  $HOME/.local/bin
 USAGE
 }
@@ -22,11 +22,11 @@ case "${1:-}" in
     ;;
 esac
 
-prefix="${1:-$HOME/.local/share/dotfiles}"
+prefix="${1:-$HOME}"
 bin_dir="${DOTFILES_BIN_DIR:-$HOME/.local/bin}"
 
 case "$prefix" in
-  ""|"/"|"$HOME")
+  ""|"/")
     printf 'error: refusing to remove unsafe prefix: %s\n' "$prefix" >&2
     exit 1
     ;;
@@ -54,7 +54,21 @@ if [ -d "$bin_dir" ]; then
   done
 fi
 
-if [ -e "$prefix" ]; then
+if [ "$prefix" = "$HOME" ]; then
+  rm -f "$prefix"/bin/dotfiles*
+  chmod -R u+w \
+    "$prefix/project-templates/nix" \
+    "$prefix/project-templates/docker" \
+    "$prefix/home/config" \
+    "$prefix/home-files" 2>/dev/null || true
+  rm -rf \
+    "$prefix/project-templates/nix" \
+    "$prefix/project-templates/docker" \
+    "$prefix/home/config" \
+    "$prefix/home-files"
+  rmdir "$prefix/project-templates" "$prefix/home" "$prefix/bin" 2>/dev/null || true
+  printf 'removed managed files from: %s\n' "$prefix"
+elif [ -e "$prefix" ]; then
   chmod -R u+w "$prefix" 2>/dev/null || true
   rm -rf "$prefix"
   printf 'removed: %s\n' "$prefix"

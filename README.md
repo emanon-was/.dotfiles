@@ -65,7 +65,7 @@ Nix を使わない環境では `dist/` を使います。`dist/` は Nix build 
 デフォルトでは以下にインストールされます。
 
 ```text
-$HOME/.local/share/dotfiles
+$HOME
 ```
 
 `dotfiles` コマンド群は以下へ symlink されます。
