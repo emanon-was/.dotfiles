@@ -26,13 +26,13 @@ dist_root="$(cd "$(dirname "$0")" && pwd -P)"
 prefix="${1:-$HOME}"
 bin_dir="${DOTFILES_BIN_DIR:-$HOME/.bin}"
 
-[ -d "$dist_root/bin" ] || {
-  printf 'error: dist bin directory not found: %s\n' "$dist_root/bin" >&2
+[ -d "$dist_root/home-files" ] || {
+  printf 'error: dist home-files directory not found: %s\n' "$dist_root/home-files" >&2
   exit 1
 }
 
-[ -d "$dist_root/home-files" ] || {
-  printf 'error: dist home-files directory not found: %s\n' "$dist_root/home-files" >&2
+[ -d "$dist_root/home-files/.local/bin" ] || {
+  printf 'error: dist home-files bin directory not found: %s\n' "$dist_root/home-files/.local/bin" >&2
   exit 1
 }
 
@@ -114,7 +114,7 @@ find "$prefix/home-files" -mindepth 1 \( -type f -o -type l \) | while IFS= read
   printf 'linked home file: %s -> %s\n' "$target_path" "$source_path"
 done
 
-find "$dist_root/bin" -mindepth 1 -maxdepth 1 -type f | while IFS= read -r source_path; do
+find "$dist_root/home-files/.local/bin" -mindepth 1 -maxdepth 1 -type f | while IFS= read -r source_path; do
   command_name="$(basename "$source_path")"
   command_path="$command_store/$command_name"
 
@@ -124,7 +124,7 @@ find "$dist_root/bin" -mindepth 1 -maxdepth 1 -type f | while IFS= read -r sourc
       :
     else
       case "$current_target" in
-        "$dist_root/bin/"*)
+        "$dist_root/home-files/.local/bin/"*)
           rm "$command_path"
           ln -s "$source_path" "$command_path"
           ;;

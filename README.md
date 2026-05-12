@@ -97,6 +97,8 @@ $HOME
 $HOME/.bin
 ```
 
+コマンドの実体は `dist/home-files/.local/bin` に生成されます。
+
 必要ならインストール先を指定できます。
 
 ```sh

@@ -8,12 +8,16 @@ if [ -z "${DOTFILES_HOME:-}" ]; then
     dotfiles_command_path="$(readlink -f "$dotfiles_command_path" 2>/dev/null || printf '%s\n' "$dotfiles_command_path")"
   fi
   dotfiles_bin_dir="$(dirname "${dotfiles_command_path:-$0}")"
-  dotfiles_dist_home="$(cd "$dotfiles_bin_dir/.." 2>/dev/null && pwd -P || true)"
-  if [ -n "$dotfiles_dist_home" ] && [ -d "$dotfiles_dist_home/project-templates" ]; then
-    DOTFILES_HOME="$dotfiles_dist_home"
-  else
-    DOTFILES_HOME="$HOME/.dotfiles"
-  fi
+  dotfiles_search_dir="$dotfiles_bin_dir"
+  DOTFILES_HOME=""
+  while [ -n "$dotfiles_search_dir" ] && [ "$dotfiles_search_dir" != "/" ]; do
+    if [ -d "$dotfiles_search_dir/project-templates" ] && [ -d "$dotfiles_search_dir/home-files" ]; then
+      DOTFILES_HOME="$dotfiles_search_dir"
+      break
+    fi
+    dotfiles_search_dir="$(dirname "$dotfiles_search_dir")"
+  done
+  DOTFILES_HOME="${DOTFILES_HOME:-$HOME/.dotfiles}"
 fi
 DOTFILES_PROFILE="${DOTFILES_PROFILE:-nixos}"
 DOOM_HOME="${DOOM_HOME:-$HOME/.config/emacs}"
@@ -293,59 +297,80 @@ gnome_configure() {
   gsettings set org.gnome.desktop.interface monospace-font-name "Monospace 11"
 }
 
-usage() {
+usage_configure() {
   cat <<'USAGE'
 Usage:
-  dotfiles doctor
-  dotfiles flake check
-  dotfiles flake update
-  dotfiles flake switch [--skip-doom-sync] [profile]
-  dotfiles flake doctor
   dotfiles configure gnome
   dotfiles configure doom install [--check]
   dotfiles configure doom sync
   dotfiles configure doom upgrade
-  dotfiles project init <nix|docker> [destination]
 USAGE
 }
 
+cmd_doom() {
+  case "${1:-}" in
+    install)
+      shift
+      case "${1:-}" in
+        --check)
+          shift
+          [ "$#" -eq 0 ] || fail "unexpected argument for doom install --check: $1"
+          doom_install_check
+          return
+          ;;
+        "")
+          ;;
+        *)
+          fail "unknown option for doom install: $1"
+          ;;
+      esac
+      status "[doom] ensuring Doom Emacs checkout"
+      doom_clone
+      if doom_config_ready; then
+        status "[doom] config bootstrap files already exist"
+      else
+        status "[doom] running Doom install"
+        doom_run_with_generated_config_check "$DOOM_BIN" install
+      fi
+      doom_sync
+      ;;
+    sync)
+      doom_sync
+      ;;
+    upgrade)
+      if ! doom_installed; then
+        fail "Doom Emacs is not installed at $DOOM_HOME. Run: dotfiles configure doom install"
+      fi
+      doom_refresh_recipe_repositories
+      status "[doom] upgrading Doom Emacs"
+      doom_run_with_generated_config_check "$DOOM_BIN" upgrade
+      doom_sync
+      ;;
+    *)
+      usage_configure
+      exit 2
+      ;;
+  esac
+}
+
 case "${1:-}" in
-  -h|--help|help|"")
-    usage
-    ;;
-  -*)
-    usage
-    exit 2
-    ;;
-  *)
-    subcommand="$1"
+  gnome)
     shift
-
-    case "$subcommand" in
-      check|update|switch)
-        printf 'error: dotfiles %s was moved under dotfiles flake\n' "$subcommand" >&2
-        printf 'usage: dotfiles flake %s\n' "$subcommand" >&2
-        exit 2
-        ;;
-    esac
-
-    executable="dotfiles-$subcommand"
-
-    dotfiles_path="$0"
-    if command -v readlink >/dev/null 2>&1; then
-      dotfiles_path="$(readlink -f "$dotfiles_path" 2>/dev/null || printf '%s\n' "$dotfiles_path")"
-    fi
-    sibling_executable="$(dirname "$dotfiles_path")/$executable"
-
-    if [ -n "$sibling_executable" ] && [ -x "$sibling_executable" ]; then
-      exec "$sibling_executable" "$@"
-    fi
-
-    if ! command -v "$executable" >/dev/null 2>&1; then
-      printf 'error: unknown dotfiles command: %s\n' "$subcommand" >&2
-      usage >&2
+    if [ "$#" -gt 0 ]; then
+      usage_configure
       exit 2
     fi
-    exec "$executable" "$@"
+    gnome_configure
+    ;;
+  doom)
+    shift
+    cmd_doom "$@"
+    ;;
+  -h|--help|help|"")
+    usage_configure
+    ;;
+  *)
+    usage_configure
+    exit 2
     ;;
 esac

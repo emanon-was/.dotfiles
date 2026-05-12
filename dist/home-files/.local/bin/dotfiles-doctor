@@ -8,12 +8,16 @@ if [ -z "${DOTFILES_HOME:-}" ]; then
     dotfiles_command_path="$(readlink -f "$dotfiles_command_path" 2>/dev/null || printf '%s\n' "$dotfiles_command_path")"
   fi
   dotfiles_bin_dir="$(dirname "${dotfiles_command_path:-$0}")"
-  dotfiles_dist_home="$(cd "$dotfiles_bin_dir/.." 2>/dev/null && pwd -P || true)"
-  if [ -n "$dotfiles_dist_home" ] && [ -d "$dotfiles_dist_home/project-templates" ]; then
-    DOTFILES_HOME="$dotfiles_dist_home"
-  else
-    DOTFILES_HOME="$HOME/.dotfiles"
-  fi
+  dotfiles_search_dir="$dotfiles_bin_dir"
+  DOTFILES_HOME=""
+  while [ -n "$dotfiles_search_dir" ] && [ "$dotfiles_search_dir" != "/" ]; do
+    if [ -d "$dotfiles_search_dir/project-templates" ] && [ -d "$dotfiles_search_dir/home-files" ]; then
+      DOTFILES_HOME="$dotfiles_search_dir"
+      break
+    fi
+    dotfiles_search_dir="$(dirname "$dotfiles_search_dir")"
+  done
+  DOTFILES_HOME="${DOTFILES_HOME:-$HOME/.dotfiles}"
 fi
 DOTFILES_PROFILE="${DOTFILES_PROFILE:-nixos}"
 DOOM_HOME="${DOOM_HOME:-$HOME/.config/emacs}"

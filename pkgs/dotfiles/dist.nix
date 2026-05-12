@@ -23,8 +23,8 @@ let
       cat ${common}
       printf '\n'
       cat ${scriptPath name}
-    } > "$out/bin/${name}"
-    chmod +x "$out/bin/${name}"
+    } > "$out/home-files/.local/bin/${name}"
+    chmod +x "$out/home-files/.local/bin/${name}"
   '';
 in
 runCommand "dotfiles-dist"
@@ -33,7 +33,7 @@ runCommand "dotfiles-dist"
     coreutils
   ];
 } ''
-  mkdir -p "$out/bin" "$out/project-templates" "$out/home/config" "$out/home-files"
+  mkdir -p "$out/project-templates" "$out/home/config" "$out/home-files/.local/bin"
 
   ${builtins.concatStringsSep "\n" (map installScript scripts)}
 
