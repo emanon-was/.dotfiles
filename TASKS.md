@@ -8,7 +8,8 @@
 - 旧 `store.list` ベースの symlink 管理は廃止済み。
 - `Makefile` は新しい `dotfiles` CLI を呼ぶ。
 - 旧 `bin/` スクリプトは廃止済み。
-- `config/doom` に Doom Emacs 設定がある。ユーザーは Doom Emacs を使用しているため、Doom 設定は正式に Home Manager 管理する。
+- `config/doom/config.el` に Home Manager 管理の Doom Emacs 設定がある。
+- Doom の `init.el` と `packages.el` は Doom 側の更新対象として扱い、この repo では管理しない。
 - `template/` にはプロジェクト用テンプレートがある。
 - `store/.profile.d/export.sh` に未コミット変更があるため、編集時は既存変更を壊さないこと。
 
@@ -156,7 +157,8 @@
 - [x] Doom Emacs を Home Manager 管理へ移行する。
   - `programs.emacs.enable = true;` を使って Emacs 本体を管理する。
   - 必要な Emacs package、フォント、補助ツールがあれば `home.packages` に追加する。
-  - `config/doom` を正式管理対象として扱い、`home.file.".config/doom"` などで配置する。
+  - `config/doom/config.el` を正式管理対象として扱い、`home.file.".config/doom/config.el"` で配置する。
+  - `init.el` と `packages.el` は Doom の更新で変わりうるため Home Manager 管理に含めない。
   - 完了条件:
     - `~/.config/doom/config.el` が Home Manager 経由で管理される。
     - Doom Emacs が Home Manager 管理の Emacs で起動できる。
