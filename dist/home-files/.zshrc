@@ -13,7 +13,7 @@ ZSH_AUTOSUGGEST_STRATEGY=(history)
 HISTSIZE="65535"
 SAVEHIST="65535"
 
-HISTFILE="/home/nixos/.zsh_history"
+HISTFILE="$HOME/.zsh_history"
 mkdir -p "$(dirname "$HISTFILE")"
 
 # Set shell options

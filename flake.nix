@@ -22,6 +22,7 @@
         inherit home-manager;
       };
       dotfilesDist = pkgs.callPackage ./pkgs/dotfiles/dist.nix {
+        inherit username;
         homeFiles = "${self.homeConfigurations.${username}.activationPackage}/home-files";
         homeSessionVars = "${self.homeConfigurations.${username}.activationPackage}/home-path/etc/profile.d/hm-session-vars.sh";
       };

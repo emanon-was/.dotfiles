@@ -2,6 +2,7 @@
 , coreutils
 , homeFiles
 , homeSessionVars
+, username
 }:
 
 let
@@ -60,6 +61,7 @@ runCommand "dotfiles-dist"
     -e '/zsh-autosuggestions\.zsh/d' \
     -e '/zsh-syntax-highlighting\.zsh/d' \
     -e '/\/nix\/store\/.*direnv hook zsh/d' \
+    -e 's#HISTFILE="\/home\/[^/"]*\/\.zsh_history"#HISTFILE="$HOME/.zsh_history"#' \
     "$out/home-files/.zshrc"
   sed -i \
     -e '/hm-session-vars.sh/d' \
@@ -74,6 +76,10 @@ runCommand "dotfiles-dist"
 
   if grep -R '/nix/store' "$out"; then
     printf 'error: generated dist contains Nix store paths\n' >&2
+    exit 1
+  fi
+  if grep -R '/home/${username}' "$out"; then
+    printf 'error: generated dist contains fixed home paths\n' >&2
     exit 1
   fi
 ''
