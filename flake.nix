@@ -23,6 +23,7 @@
       };
       dotfilesDist = pkgs.callPackage ./pkgs/dotfiles/dist.nix {
         homeFiles = "${self.homeConfigurations.${username}.activationPackage}/home-files";
+        homeSessionVars = "${self.homeConfigurations.${username}.activationPackage}/home-path/etc/profile.d/hm-session-vars.sh";
       };
     in
     {

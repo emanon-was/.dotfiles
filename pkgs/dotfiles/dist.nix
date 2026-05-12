@@ -1,6 +1,7 @@
 { runCommand
 , coreutils
 , homeFiles
+, homeSessionVars
 }:
 
 let
@@ -62,6 +63,13 @@ runCommand "dotfiles-dist"
   sed -i \
     -e '/hm-session-vars.sh/d' \
     "$out/home-files/.profile"
+  {
+    printf '\n# Portable Home Manager session variables.\n'
+    grep '^export ' ${homeSessionVars} \
+      | grep -v '^export __HM_SESS_VARS_SOURCED=' \
+      | grep -v '^export LOCALE_ARCHIVE' \
+      | sed -E 's#/home/[^/:"]+#$HOME#g'
+  } >> "$out/home-files/.profile"
 
   if grep -R '/nix/store' "$out"; then
     printf 'error: generated dist contains Nix store paths\n' >&2
