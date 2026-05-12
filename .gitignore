@@ -1,8 +1,14 @@
 /*
 !/.gitignore
 !/README.md
+!/TASKS.md
 !/Makefile
+!/flake.nix
+!/flake.lock
 !/bin
+!/config
+!/home
+!/pkgs
 !/store
 !/store.list
 !/template
