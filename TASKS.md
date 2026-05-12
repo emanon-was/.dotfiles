@@ -268,9 +268,9 @@
   - `dotfiles project init docker` は `docker.mk` を配置する。
 
 - [x] `project-templates/nix` の Nix ファイル名を整理する。
-  - `dotfiles project init nix` は legacy `nix-shell` 用 template として扱う。
-  - `default.nix` は用途が曖昧なため、`shell.nix` に変更する。
-  - flake/devShell 用 template が必要になったら、`nix-flake` のように別 template として追加する。
+  - `dotfiles project init nix` は direnv から `use flake` で読める devShell template として扱う。
+  - `flake.nix` を標準の入口にする。
+  - legacy `nix-shell` 用 template が必要になったら、`nix-shell` のように別 template として追加する。
 
 - [ ] Nix build で生成した成果物を repo に commit する配布フローを設計する。
   - Nix なしの環境でも `dotfiles` CLI や project template を展開できるようにする。
