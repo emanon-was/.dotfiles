@@ -6,7 +6,7 @@
 
 - 旧 `store/` は廃止済み。
 - 旧 `store.list` ベースの symlink 管理は廃止済み。
-- `Makefile` は新しい `dotfiles` CLI を呼ぶ。
+- `Makefile` は repo 開発用の Nix build/check/dist 操作に使う。
 - `dotfiles` CLI は Cargo 風に `dotfiles-<subcommand>` executable へ dispatch する。
 - 旧 `bin/` スクリプトは廃止済み。
 - `config/doom/config.el` に Home Manager 管理の Doom Emacs 設定がある。
@@ -194,18 +194,18 @@
 ## Phase 5: 旧構成の整理
 
 - [x] `Makefile` を整理する。
-  - `dotfiles` CLI の薄いラッパーにする。
+  - `dotfiles` CLI の互換ラッパーではなく、repo 開発用の Nix build/check/dist 操作に限定する。
   - 例:
 
     ```make
-    switch:
-    	dotfiles switch
+    flake-check:
+    	nix flake check
 
-    check:
-    	dotfiles check
+    home-build:
+    	nix build .#homeConfigurations.nixos.activationPackage --no-link
 
-    doctor:
-    	dotfiles doctor
+    dist:
+    	nix build .#dotfiles-dist --no-link
     ```
 
 - [x] 旧スクリプトを統合する。

@@ -66,3 +66,12 @@ Do not edit files under `dist/` by hand.
 ```sh
 make dist
 ```
+
+Repository maintenance targets:
+
+```sh
+make flake-check
+make dotfiles-build
+make dist-build
+make home-build
+```

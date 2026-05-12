@@ -1,24 +1,16 @@
-.PHONY: switch check update doctor configure-gnome configure-doom dist
+.PHONY: flake-check dotfiles-build dist-build home-build dist
 
-DOTFILES := nix run .#dotfiles --
+flake-check:
+	nix flake check
 
-switch:
-	@$(DOTFILES) switch
+dotfiles-build:
+	nix build .#dotfiles --no-link
 
-check:
-	@$(DOTFILES) check
+dist-build:
+	nix build .#dotfiles-dist --no-link
 
-update:
-	@$(DOTFILES) update
-
-doctor:
-	@$(DOTFILES) doctor
-
-configure-gnome:
-	@$(DOTFILES) configure gnome
-
-configure-doom:
-	@$(DOTFILES) configure doom sync
+home-build:
+	nix build .#homeConfigurations.nixos.activationPackage --no-link
 
 dist:
 	@chmod -R u+w dist 2>/dev/null || true
