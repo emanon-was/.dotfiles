@@ -106,6 +106,65 @@ writeShellApplication {
       fail "Run: dotfiles switch"
     }
 
+    doom_unlink_managed_config() {
+      DOOM_CONFIG_WAS_LINK=0
+      DOOM_CONFIG_LINK_TARGET=""
+      active_config="$HOME/.config/doom/config.el"
+
+      if [ -L "$active_config" ]; then
+        DOOM_CONFIG_WAS_LINK=1
+        DOOM_CONFIG_LINK_TARGET="$(readlink "$active_config")"
+        status "[doom] temporarily removing managed config.el symlink"
+        rm "$active_config"
+      elif [ -e "$active_config" ]; then
+        status "[doom] config.el is not a symlink; leaving it in place"
+      else
+        status "[doom] config.el is absent before Doom command"
+      fi
+    }
+
+    doom_compare_generated_config_and_restore() {
+      dotfiles_config="$DOTFILES_HOME/config/doom/config.el"
+      active_config="$HOME/.config/doom/config.el"
+      diff_status=0
+
+      [ -f "$dotfiles_config" ] || fail "Doom config source does not exist: $dotfiles_config"
+
+      if [ -f "$active_config" ] && [ ! -L "$active_config" ]; then
+        if cmp -s "$active_config" "$dotfiles_config"; then
+          status "[doom] generated config.el matches dotfiles source"
+        else
+          status "[doom] generated config.el differs from dotfiles source"
+          diff -u "$active_config" "$dotfiles_config" || true
+          diff_status=1
+        fi
+      else
+        status "[doom] no generated config.el to compare"
+      fi
+
+      if [ "$DOOM_CONFIG_WAS_LINK" -eq 1 ]; then
+        if [ -e "$active_config" ] || [ -L "$active_config" ]; then
+          rm "$active_config"
+        fi
+        ln -s "$DOOM_CONFIG_LINK_TARGET" "$active_config"
+        status "[doom] restored managed config.el symlink"
+      fi
+
+      if [ "$diff_status" -ne 0 ]; then
+        fail "Review generated config.el diff before continuing"
+      fi
+    }
+
+    doom_run_with_generated_config_check() {
+      doom_unlink_managed_config
+      set +e
+      "$@"
+      command_status="$?"
+      set -e
+      doom_compare_generated_config_and_restore
+      return "$command_status"
+    }
+
     doom_refresh_recipe_repositories() {
       recipes_dir="$DOOM_HOME/.local/straight/repos"
       [ -d "$recipes_dir" ] || return 0
@@ -283,7 +342,7 @@ writeShellApplication {
             status "[doom] config bootstrap files already exist"
           else
             status "[doom] running Doom install"
-            "$DOOM_BIN" install
+            doom_run_with_generated_config_check "$DOOM_BIN" install
           fi
           doom_sync
           ;;
@@ -296,7 +355,7 @@ writeShellApplication {
           fi
           doom_refresh_recipe_repositories
           status "[doom] upgrading Doom Emacs"
-          "$DOOM_BIN" upgrade
+          doom_run_with_generated_config_check "$DOOM_BIN" upgrade
           doom_sync
           ;;
         *)

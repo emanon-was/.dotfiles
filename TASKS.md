@@ -143,6 +143,7 @@
   - 空の `~/.config/emacs` が存在する場合は clone 先として使う。
   - 壊れた `~/.config/emacs` が存在する場合は明示的に失敗する。
   - `~/.config/doom/init.el` と `packages.el` が存在する場合は `doom install` をスキップし、`doom sync` を実行する。
+  - `doom install` 実行時は `config.el` symlink を一時的に外し、Doom が生成した `config.el` と `config/doom/config.el` の差分を確認してから symlink を戻す。
   - clone と install を分けるか検討する。
 
 - [x] テンプレート操作を CLI 化する。
@@ -184,6 +185,7 @@
 
 - [x] `dotfiles configure doom upgrade` を実装する。
   - `~/.config/emacs/bin/doom upgrade` を実行する。
+  - `doom upgrade` 実行時は `config.el` symlink を一時的に外し、Doom が生成した `config.el` と `config/doom/config.el` の差分を確認してから symlink を戻す。
   - upgrade 後に `doom sync` を実行するか、明示的に案内するか決める。
   - 推奨は `dotfiles configure doom upgrade` 内で `doom upgrade` 後に `doom sync` を実行する。
 

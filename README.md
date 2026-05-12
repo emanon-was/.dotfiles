@@ -27,7 +27,8 @@ nix run .#dotfiles -- switch
 ```
 
 `configure doom install` reuses an existing Doom checkout and config bootstrap files when they are already present, then runs Doom sync.
-Before Doom sync/install/upgrade runs, `dotfiles` verifies that the active `~/.config/doom/config.el` matches `config/doom/config.el`; if not, it prints a unified diff and asks you to run `dotfiles switch`.
+Before Doom sync runs, `dotfiles` verifies that the active `~/.config/doom/config.el` matches `config/doom/config.el`; if not, it prints a unified diff and asks you to run `dotfiles switch`.
+During Doom install/upgrade, `dotfiles` temporarily removes the managed `config.el` symlink, compares any Doom-generated `config.el` with `config/doom/config.el`, then restores the symlink.
 
 To switch without running Doom sync:
 
