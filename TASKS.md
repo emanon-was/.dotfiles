@@ -106,9 +106,10 @@ make dist
 
 ## 未完了タスク
 
-現時点では未完了タスクなし。
-
-新しい作業を始める場合は、この section に `- [ ] ...` として追加する。
+- [ ] README の古い `pkgs/dotfiles/dist/` 説明を `pkgs/dist/` 構成に合わせる。
+- [ ] Doom 関連 helper の重複を `scripts/lib/doom.sh` に切り出す。
+- [ ] project templates 探索 helper の重複を `scripts/lib/templates.sh` に切り出す。
+- [ ] helper 切り出し後に `dist/` を再生成し、Nix package 版と portable dist 版の参照先を検証する。
 
 ## 注意点
 
