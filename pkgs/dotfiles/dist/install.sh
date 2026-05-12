@@ -41,6 +41,26 @@ if [ "$prefix" = "$HOME" ]; then
   command_store="$HOME/.bin"
 fi
 
+backup_path() {
+  original_path="$1"
+  backup_candidate="$original_path.backup"
+  index=1
+
+  while [ -e "$backup_candidate" ] || [ -L "$backup_candidate" ]; do
+    backup_candidate="$original_path.backup.$index"
+    index=$((index + 1))
+  done
+
+  printf '%s\n' "$backup_candidate"
+}
+
+move_aside() {
+  target_path="$1"
+  backup_target="$(backup_path "$target_path")"
+  mv "$target_path" "$backup_target"
+  printf 'moved existing path: %s -> %s\n' "$target_path" "$backup_target"
+}
+
 mkdir -p "$command_store" "$prefix/home-files" "$bin_dir"
 
 chmod -R u+w \
@@ -50,6 +70,23 @@ rm -rf "$prefix/home-files"
 mkdir -p "$command_store" "$prefix/home-files"
 
 cp -R "$dist_root/home-files"/. "$prefix/home-files"/
+
+find "$prefix/home-files" -mindepth 1 -type d | while IFS= read -r source_path; do
+  relative_path="${source_path#"$prefix/home-files/"}"
+  target_path="$HOME/$relative_path"
+
+  if [ -L "$target_path" ]; then
+    move_aside "$target_path"
+    mkdir -p "$target_path"
+  elif [ -d "$target_path" ]; then
+    :
+  elif [ -e "$target_path" ]; then
+    move_aside "$target_path"
+    mkdir -p "$target_path"
+  else
+    mkdir -p "$target_path"
+  fi
+done
 
 find "$prefix/home-files" -mindepth 1 \( -type f -o -type l \) | while IFS= read -r source_path; do
   relative_path="${source_path#"$prefix/home-files/"}"
@@ -66,13 +103,11 @@ find "$prefix/home-files" -mindepth 1 \( -type f -o -type l \) | while IFS= read
         rm "$target_path"
         ;;
       *)
-        printf 'error: refusing to replace symlink with unexpected target: %s -> %s\n' "$target_path" "$current_target" >&2
-        exit 1
+        move_aside "$target_path"
         ;;
     esac
   elif [ -e "$target_path" ]; then
-    printf 'error: refusing to replace existing file: %s\n' "$target_path" >&2
-    exit 1
+    move_aside "$target_path"
   fi
 
   ln -s "$source_path" "$target_path"
@@ -94,8 +129,8 @@ find "$dist_root/bin" -mindepth 1 -maxdepth 1 -type f | while IFS= read -r sourc
           ln -s "$source_path" "$command_path"
           ;;
         *)
-          printf 'error: refusing to replace command symlink with unexpected target: %s -> %s\n' "$command_path" "$current_target" >&2
-          exit 1
+          move_aside "$command_path"
+          ln -s "$source_path" "$command_path"
           ;;
       esac
     fi
@@ -103,8 +138,8 @@ find "$dist_root/bin" -mindepth 1 -maxdepth 1 -type f | while IFS= read -r sourc
     rm "$command_path"
     ln -s "$source_path" "$command_path"
   elif [ -e "$command_path" ]; then
-    printf 'error: refusing to replace existing command file: %s\n' "$command_path" >&2
-    exit 1
+    move_aside "$command_path"
+    ln -s "$source_path" "$command_path"
   else
     ln -s "$source_path" "$command_path"
   fi
