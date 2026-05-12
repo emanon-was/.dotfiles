@@ -79,6 +79,22 @@ writeShellApplication {
       [ -f "$HOME/.config/doom/init.el" ] && [ -f "$HOME/.config/doom/packages.el" ]
     }
 
+    doom_refresh_recipe_repositories() {
+      recipes_dir="$DOOM_HOME/.local/straight/repos"
+      [ -d "$recipes_dir" ] || return 0
+
+      status "[doom] refreshing straight recipe repositories"
+      for repo in org-elpa melpa nongnu-elpa gnu-elpa-mirror el-get emacsmirror-mirror; do
+        repo_path="$recipes_dir/$repo"
+        if [ -d "$repo_path/.git" ]; then
+          status "[doom] updating recipe repository: $repo"
+          git -C "$repo_path" pull --ff-only
+        else
+          status "[doom] recipe repository not present: $repo"
+        fi
+      done
+    }
+
     doom_clone() {
       if [ ! -e "$DOOM_HOME" ]; then
         status "[doom] cloning Doom Emacs into $DOOM_HOME"
@@ -250,6 +266,7 @@ writeShellApplication {
           if ! doom_installed; then
             fail "Doom Emacs is not installed at $DOOM_HOME. Run: dotfiles configure doom install"
           fi
+          doom_refresh_recipe_repositories
           status "[doom] upgrading Doom Emacs"
           "$DOOM_BIN" upgrade
           doom_sync
