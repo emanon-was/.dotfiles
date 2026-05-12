@@ -6,6 +6,8 @@
 
 NixOS の system 側は stable を使い、このリポジトリの Home Manager 側は `nixos-unstable` を使います。system 側の `configuration.nix` には極力寄せず、ユーザー環境の設定は Home Manager と `dotfiles` コマンドへ寄せます。
 
+詳細な現在仕様は [SPEC.md](./SPEC.md) にまとめています。
+
 ## ディレクトリ構成
 
 ```text
@@ -23,6 +25,7 @@ NixOS の system 側は stable を使い、このリポジトリの Home Manager
 ├── flake.nix             Home Manager、CLI package、dist package の入口
 ├── flake.lock            flake input の lock file
 ├── Makefile              repo 開発用の build/check/dist 操作
+├── SPEC.md               現在仕様
 └── TASKS.md              作業方針と残タスク
 ```
 
