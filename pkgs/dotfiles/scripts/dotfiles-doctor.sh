@@ -67,7 +67,7 @@ doctor_dotfiles_home() {
   fi
 
   templates_dir="${DOTFILES_TEMPLATES:-${DOTFILES_BUILT_TEMPLATES:-$DOTFILES_HOME/home-files/.local/share/dotfiles/templates}}"
-  if [ ! -d "$templates_dir" ] && [ -d "$DOTFILES_HOME/pkgs/dotfiles/templates" ]; then
+  if [ -z "${DOTFILES_PORTABLE_DIST:-}" ] && [ ! -d "$templates_dir" ] && [ -d "$DOTFILES_HOME/pkgs/dotfiles/templates" ]; then
     templates_dir="$DOTFILES_HOME/pkgs/dotfiles/templates"
   fi
 

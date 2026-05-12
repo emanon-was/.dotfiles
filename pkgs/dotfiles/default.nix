@@ -41,6 +41,7 @@ let
   portableCommandSource = command:
     builtins.toFile "${command.name}-portable" (
       "#!/usr/bin/env bash\n"
+      + "DOTFILES_PORTABLE_DIST=1\n"
       + (command.portableExtraText or "")
       + builtins.readFile common
       + "\n"

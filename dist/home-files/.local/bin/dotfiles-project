@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
+DOTFILES_PORTABLE_DIST=1
 # shellcheck disable=SC2329
 set -u
 
-if [ -z "${DOTFILES_HOME:-}" ]; then
+if [ -n "${DOTFILES_PORTABLE_DIST:-}" ] || [ -z "${DOTFILES_HOME:-}" ]; then
   dotfiles_command_path="$0"
   if [ -n "$dotfiles_command_path" ] && command -v readlink >/dev/null 2>&1; then
     dotfiles_command_path="$(readlink -f "$dotfiles_command_path" 2>/dev/null || printf '%s\n' "$dotfiles_command_path")"
@@ -13,7 +14,11 @@ if [ -z "${DOTFILES_HOME:-}" ]; then
   dotfiles_home_candidate=""
   while [ -n "$dotfiles_search_dir" ] && [ "$dotfiles_search_dir" != "/" ]; do
     if [ -d "$dotfiles_search_dir/pkgs/dotfiles/templates" ]; then
-      DOTFILES_HOME="$dotfiles_search_dir"
+      if [ -n "${DOTFILES_PORTABLE_DIST:-}" ] && [ -n "$dotfiles_home_candidate" ]; then
+        DOTFILES_HOME="$dotfiles_home_candidate"
+      else
+        DOTFILES_HOME="$dotfiles_search_dir"
+      fi
       break
     fi
     if [ -z "$dotfiles_home_candidate" ] && [ -d "$dotfiles_search_dir/home-files" ]; then
@@ -72,13 +77,13 @@ case "${1:-}" in
     [ -n "$template" ] || fail "project template name is required"
     [ "$#" -le 3 ] || fail "unexpected argument for project init: $4"
     templates_dir="${DOTFILES_TEMPLATES:-${DOTFILES_BUILT_TEMPLATES:-$DOTFILES_HOME/home-files/.local/share/dotfiles/templates}}"
-    if [ ! -d "$templates_dir" ] && [ -d "$DOTFILES_HOME/pkgs/dotfiles/templates" ]; then
+    if [ -z "${DOTFILES_PORTABLE_DIST:-}" ] && [ ! -d "$templates_dir" ] && [ -d "$DOTFILES_HOME/pkgs/dotfiles/templates" ]; then
       templates_dir="$DOTFILES_HOME/pkgs/dotfiles/templates"
     fi
-    if [ ! -d "$templates_dir" ] && [ -d "$(dirname "$DOTFILES_HOME")/pkgs/dotfiles/templates" ]; then
+    if [ -z "${DOTFILES_PORTABLE_DIST:-}" ] && [ ! -d "$templates_dir" ] && [ -d "$(dirname "$DOTFILES_HOME")/pkgs/dotfiles/templates" ]; then
       templates_dir="$(dirname "$DOTFILES_HOME")/pkgs/dotfiles/templates"
     fi
-    if [ ! -d "$templates_dir" ] && [ -d "$HOME/.dotfiles/pkgs/dotfiles/templates" ]; then
+    if [ -z "${DOTFILES_PORTABLE_DIST:-}" ] && [ ! -d "$templates_dir" ] && [ -d "$HOME/.dotfiles/pkgs/dotfiles/templates" ]; then
       templates_dir="$HOME/.dotfiles/pkgs/dotfiles/templates"
     fi
     source="$templates_dir/$template"

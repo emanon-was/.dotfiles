@@ -1,7 +1,7 @@
 # shellcheck disable=SC2329
 set -u
 
-if [ -z "${DOTFILES_HOME:-}" ]; then
+if [ -n "${DOTFILES_PORTABLE_DIST:-}" ] || [ -z "${DOTFILES_HOME:-}" ]; then
   dotfiles_command_path="$0"
   if [ -n "$dotfiles_command_path" ] && command -v readlink >/dev/null 2>&1; then
     dotfiles_command_path="$(readlink -f "$dotfiles_command_path" 2>/dev/null || printf '%s\n' "$dotfiles_command_path")"
@@ -12,7 +12,11 @@ if [ -z "${DOTFILES_HOME:-}" ]; then
   dotfiles_home_candidate=""
   while [ -n "$dotfiles_search_dir" ] && [ "$dotfiles_search_dir" != "/" ]; do
     if [ -d "$dotfiles_search_dir/pkgs/dotfiles/templates" ]; then
-      DOTFILES_HOME="$dotfiles_search_dir"
+      if [ -n "${DOTFILES_PORTABLE_DIST:-}" ] && [ -n "$dotfiles_home_candidate" ]; then
+        DOTFILES_HOME="$dotfiles_home_candidate"
+      else
+        DOTFILES_HOME="$dotfiles_search_dir"
+      fi
       break
     fi
     if [ -z "$dotfiles_home_candidate" ] && [ -d "$dotfiles_search_dir/home-files" ]; then
