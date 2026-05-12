@@ -21,7 +21,7 @@
 - `pkgs/dotfiles/`
   - `dotfiles` CLI と `dist` package の生成元。
   - `pkgs/dotfiles/scripts/` に `dotfiles-*` サブコマンドを置く。
-  - `pkgs/dotfiles/project-init/` に `dotfiles project init ...` 用テンプレートを置く。
+  - `pkgs/dotfiles/templates/` に `dotfiles project init ...` 用テンプレートを置く。
   - `pkgs/dotfiles/dist/` に `dist/install.sh` などの生成元を置く。
 - `notes/`
   - Home Manager 管理対象ではない個人メモ。
@@ -79,7 +79,7 @@ dotfiles project init <nix|docker> [destination]
 - `dist/` は `make dist` で生成する。
 - `dist/install.sh` は `home-files` を install 対象にする。
 - command の生成先は `dist/home-files/.local/bin`。
-- project init 用テンプレートは `dist/` に含めない。
+- project init 用テンプレートは `home-files/.local/share/dotfiles/templates/` として `dist/` に含める。
 - default prefix は `$HOME`。
 - `home-files` は `$prefix/home-files` に配置し、`$HOME/.bashrc` などから symlink する。
 - command は `home-files` の通常展開として `$HOME/.local/bin` に symlink する。

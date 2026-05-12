@@ -39,6 +39,10 @@ runCommand "dotfiles-dist"
 
   cp -RL ${homeFiles}/. "$out/home-files"/
   chmod -R u+w "$out/home-files"
+  rm -rf "$out/home-files/.local/share/dotfiles/templates"
+  mkdir -p "$out/home-files/.local/share/dotfiles/templates"
+  cp -R ${./templates}/. "$out/home-files/.local/share/dotfiles/templates"/
+  chmod -R u+w "$out/home-files"
   cp ${./dist/install.sh} "$out/install.sh"
   cp ${./dist/uninstall.sh} "$out/uninstall.sh"
   chmod +x "$out/install.sh"

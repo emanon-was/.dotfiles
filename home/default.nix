@@ -1,4 +1,4 @@
-{ username, homeDirectory, ... }:
+{ username, homeDirectory, dotfilesPackage, ... }:
 
 {
   imports = [
@@ -15,6 +15,8 @@
     inherit username homeDirectory;
     stateVersion = "25.11";
   };
+
+  home.file.".local/share/dotfiles/templates".source = "${dotfilesPackage}/share/dotfiles/templates";
 
   programs.home-manager.enable = true;
 }

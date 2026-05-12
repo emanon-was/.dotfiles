@@ -15,7 +15,7 @@ NixOS の system 側は stable を使い、このリポジトリの Home Manager
 │   └── config/           Home Manager で配置する手書き設定の生成元
 ├── pkgs/dotfiles/        `dotfiles` CLI と `dist/` 生成 package の生成元
 │   ├── scripts/          `dotfiles-*` サブコマンドの shell script
-│   ├── project-init/     `dotfiles project init ...` で使うテンプレート
+│   ├── templates/        `dotfiles project init ...` で使うテンプレート
 │   └── dist/             `dist/install.sh` など配布用 script の生成元
 ├── notes/                Home Manager 管理対象ではない個人メモ
 ├── dist/                 Nix build で生成した配布用成果物
@@ -109,7 +109,7 @@ $HOME/.local/bin
 `install.sh` は `home-files` の内容をコピーせず、`$HOME/.bashrc` などから `home-files` 内のファイルへ symlink を作成します。
 既存ファイルや既存 symlink がある場合は `.backup` 付きの別名へ退避してから symlink を作成します。既存ディレクトリは残し、その配下に必要な symlink を作成します。
 `uninstall.sh` は管理対象 symlink を削除したあと、対応する `.backup` が残っていれば元の名前へ戻します。
-`dist/` は home-files の展開専用です。project init 用テンプレートは含めません。
+`dist/` は home-files の展開専用です。project init 用テンプレートは `home-files/.local/share/dotfiles/templates/` に含まれます。
 
 アンインストールする場合:
 
@@ -154,9 +154,10 @@ home/config/doom/config.el
 dotfiles configure doom install --check
 ```
 
-## project init
+## templates
 
-プロジェクト用テンプレートは `pkgs/dotfiles/project-init/` にあります。`dotfiles` CLI の実装データとして扱います。
+プロジェクト用テンプレートの生成元は `pkgs/dotfiles/templates/` です。
+Nix package では `share/dotfiles/templates/` に入り、Home Manager と dist では `~/.local/share/dotfiles/templates/` に配置されます。
 
 ```sh
 dotfiles project init nix
