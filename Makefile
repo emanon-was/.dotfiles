@@ -1,5 +1,7 @@
 .PHONY: flake-check dotfiles-build dist-build home-build dist
 
+PROFILE ?= $(shell id -un)
+
 # flake 全体の評価と checks を確認する。
 flake-check:
 	nix flake check
@@ -14,7 +16,7 @@ dist-build:
 
 # Home Manager activation package を build する。
 home-build:
-	nix build .#homeConfigurations.nixos.activationPackage --no-link
+	nix build .#homeConfigurations.$(PROFILE).activationPackage --no-link
 
 # dist/ を Nix build の成果物で再生成する。
 dist:

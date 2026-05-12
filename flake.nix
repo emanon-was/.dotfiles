@@ -16,16 +16,36 @@
         inherit system;
         config.allowUnfree = true;
       };
-      username = "nixos";
-      homeDirectory = "/home/${username}";
+      usernames = [
+        "nixos"
+        "emanon"
+      ];
+      distUsername = builtins.elemAt usernames 0;
       dotfilesPackage = pkgs.callPackage ./pkgs/dotfiles {
         inherit home-manager;
       };
       dotfilesDist = pkgs.callPackage ./pkgs/dist {
-        inherit dotfilesPackage username;
-        homeFiles = "${self.homeConfigurations.${username}.activationPackage}/home-files";
-        homeSessionVars = "${self.homeConfigurations.${username}.activationPackage}/home-path/etc/profile.d/hm-session-vars.sh";
+        inherit dotfilesPackage;
+        username = distUsername;
+        homeFiles = "${self.homeConfigurations.${distUsername}.activationPackage}/home-files";
+        homeSessionVars = "${self.homeConfigurations.${distUsername}.activationPackage}/home-path/etc/profile.d/hm-session-vars.sh";
       };
+      mkHomeConfiguration = username:
+        let
+          homeDirectory = "/home/${username}";
+        in
+        {
+          name = username;
+          value = home-manager.lib.homeManagerConfiguration {
+            inherit pkgs;
+            extraSpecialArgs = {
+              inherit self username homeDirectory dotfilesPackage;
+            };
+            modules = [
+              ./home
+            ];
+          };
+        };
     in
     {
       packages.${system} = {
@@ -43,14 +63,6 @@
         default = self.apps.${system}.dotfiles;
       };
 
-      homeConfigurations.${username} = home-manager.lib.homeManagerConfiguration {
-        inherit pkgs;
-        extraSpecialArgs = {
-          inherit self username homeDirectory dotfilesPackage;
-        };
-        modules = [
-          ./home
-        ];
-      };
+      homeConfigurations = builtins.listToAttrs (map mkHomeConfiguration usernames);
     };
 }

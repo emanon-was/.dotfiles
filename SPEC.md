@@ -32,7 +32,9 @@
 ## Home Manager
 
 - `flake.nix` は Home Manager standalone profile を提供する。
-- profile の既定値は `nixos`。
+- profile は `homeConfigurations.<user>` として定義する。
+- `dotfiles` CLI の既定 profile は実行時の `$USER`。
+- 現在定義している profile は `nixos` と `emanon`。
 - `home/default.nix` から機能別 module を import する。
 - shell、git、tmux、screen、Emacs、GNOME 関連は Home Manager module で管理する。
 - `home/screen.nix` と `home/tmux.nix` は分離する。

@@ -71,7 +71,7 @@ dotfiles flake switch
 `dotfiles flake switch` は内部で次のような処理を行います。
 
 ```sh
-home-manager -b hm-backup --flake "$DOTFILES_HOME#nixos" switch
+home-manager -b hm-backup --flake "$DOTFILES_HOME#$USER" switch
 dotfiles configure doom sync
 ```
 

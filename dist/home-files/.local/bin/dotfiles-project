@@ -28,7 +28,7 @@ if [ -n "${DOTFILES_PORTABLE_DIST:-}" ] || [ -z "${DOTFILES_HOME:-}" ]; then
   done
   DOTFILES_HOME="${DOTFILES_HOME:-${dotfiles_home_candidate:-$HOME/.dotfiles}}"
 fi
-DOTFILES_PROFILE="${DOTFILES_PROFILE:-nixos}"
+DOTFILES_PROFILE="${DOTFILES_PROFILE:-${USER:-nixos}}"
 
 status() {
   printf '%s\n' "$*"
