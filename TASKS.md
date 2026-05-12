@@ -237,14 +237,14 @@
 
 - [x] `nix flake check` を通す。
 - [x] `nix build .#homeConfigurations.nixos.activationPackage --no-link` を通す。
-- [ ] `home-manager switch --flake .#<profile>` を実際に適用する。
+- [x] `home-manager switch --flake .#<profile>` を実際に適用する。
 - [x] `dotfiles doctor` を実行し、期待したチェック結果になることを確認する。
-- [ ] bash/zsh の起動確認をする。
-- [ ] tmux の keybind と status line を確認する。
+- [x] bash/zsh の起動確認をする。
+- [x] tmux の keybind と status line を確認する。
 - [ ] GNOME 環境がある場合のみ `dotfiles configure gnome` を確認する。
 - [ ] `dotfiles configure doom install` を確認する。
-- [ ] `dotfiles configure doom sync` を確認する。
-- [ ] `dotfiles switch` 後に Doom sync が実行されることを確認する。
+- [x] `dotfiles configure doom sync` を確認する。
+- [x] `dotfiles switch` 後に Doom sync が実行されることを確認する。
 
 ## 注意点
 
