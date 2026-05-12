@@ -109,7 +109,7 @@ $HOME/.local/bin
 `install.sh` は `home-files` の内容をコピーせず、`$HOME/.bashrc` などから `home-files` 内のファイルへ symlink を作成します。
 既存ファイルや既存 symlink がある場合は `.backup` 付きの別名へ退避してから symlink を作成します。既存ディレクトリは残し、その配下に必要な symlink を作成します。
 `uninstall.sh` は管理対象 symlink を削除したあと、対応する `.backup` が残っていれば元の名前へ戻します。
-`project-templates/` と `home/config/` は `dist/` には含まれますが、`install.sh` では展開しません。
+`project-templates/` は `dist/` に含まれますが、`install.sh` では展開しません。
 
 アンインストールする場合:
 

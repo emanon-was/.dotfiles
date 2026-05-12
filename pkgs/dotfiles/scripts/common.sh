@@ -55,6 +55,16 @@ require_dotfiles_home() {
   [ -d "$DOTFILES_HOME" ] || fail "DOTFILES_HOME does not exist: $DOTFILES_HOME"
 }
 
+doom_config_source() {
+  if [ -f "$DOTFILES_HOME/home/config/doom/config.el" ]; then
+    printf '%s\n' "$DOTFILES_HOME/home/config/doom/config.el"
+  elif [ -f "$DOTFILES_HOME/home-files/.config/doom/config.el" ]; then
+    printf '%s\n' "$DOTFILES_HOME/home-files/.config/doom/config.el"
+  else
+    printf '%s\n' "$DOTFILES_HOME/home/config/doom/config.el"
+  fi
+}
+
 directory_empty() {
   [ -d "$1" ] && [ -z "$(find "$1" -mindepth 1 -maxdepth 1 -print -quit)" ]
 }
@@ -88,7 +98,7 @@ doom_config_ready() {
 }
 
 doom_check_config_current() {
-  dotfiles_config="$DOTFILES_HOME/home/config/doom/config.el"
+  dotfiles_config="$(doom_config_source)"
   active_config="$HOME/.config/doom/config.el"
 
   [ -f "$dotfiles_config" ] || fail "Doom config source does not exist: $dotfiles_config"
@@ -131,7 +141,7 @@ doom_unlink_managed_config() {
 }
 
 doom_compare_generated_config_and_restore() {
-  dotfiles_config="$DOTFILES_HOME/home/config/doom/config.el"
+  dotfiles_config="$(doom_config_source)"
   active_config="$HOME/.config/doom/config.el"
   diff_status=0
 
@@ -238,7 +248,9 @@ doom_install_check() {
   HOME="$check_root/home"
   DOOM_HOME="$HOME/.config/emacs"
   DOOM_BIN="$DOOM_HOME/bin/doom"
+  DOTFILES_DOOM_CONFIG_SOURCE="$(doom_config_source)"
   export DOTFILES_HOME
+  export DOTFILES_DOOM_CONFIG_SOURCE
 
   status "[doom-check] using temporary HOME: $HOME"
   mkdir -p "$DOOM_HOME/.git" "$DOOM_HOME/bin" "$HOME/.config/doom"
@@ -250,7 +262,7 @@ set -euo pipefail
 case "${1:-}" in
   install)
     mkdir -p "$HOME/.config/doom"
-    cp "$DOTFILES_HOME/home/config/doom/config.el" "$HOME/.config/doom/config.el"
+    cp "$DOTFILES_DOOM_CONFIG_SOURCE" "$HOME/.config/doom/config.el"
     touch "$HOME/.config/doom/init.el" "$HOME/.config/doom/packages.el"
     ;;
   sync)
@@ -263,7 +275,7 @@ esac
 FAKE_DOOM
   chmod +x "$DOOM_BIN"
 
-  ln -s "$DOTFILES_HOME/home/config/doom/config.el" "$HOME/.config/doom/config.el"
+  ln -s "$(doom_config_source)" "$HOME/.config/doom/config.el"
 
   status "[doom-check] verifying isolated Doom checkout detection"
   doom_checkout_ready || fail "temporary Doom checkout was not detected as ready"
@@ -275,7 +287,7 @@ FAKE_DOOM
   if [ ! -L "$active_config" ]; then
     fail "managed config.el symlink was not restored"
   fi
-  if [ "$(readlink "$active_config")" != "$DOTFILES_HOME/home/config/doom/config.el" ]; then
+  if [ "$(readlink "$active_config")" != "$(doom_config_source)" ]; then
     fail "managed config.el symlink points to an unexpected target"
   fi
 

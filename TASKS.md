@@ -80,7 +80,7 @@ dotfiles project init <nix|docker> [destination]
 - `dist/` は `make dist` で生成する。
 - `dist/install.sh` は `home-files` を install 対象にする。
 - command の生成先は `dist/home-files/.local/bin`。
-- `project-templates/` と `home/config/` は `dist/` に含めても、`install.sh` では展開しない。
+- `project-templates/` は `dist/` に含めても、`install.sh` では展開しない。
 - default prefix は `$HOME`。
 - `home-files` は `$prefix/home-files` に配置し、`$HOME/.bashrc` などから symlink する。
 - command は `home-files` の通常展開として `$HOME/.local/bin` に symlink する。

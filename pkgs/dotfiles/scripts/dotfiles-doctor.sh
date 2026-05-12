@@ -41,11 +41,8 @@ doctor_dotfiles_home() {
     return 1
   fi
 
-  for path in \
-    "$DOTFILES_HOME/home/config/doom/config.el" \
-    "$DOTFILES_HOME/project-templates/nix" \
-    "$DOTFILES_HOME/project-templates/docker"
-  do
+  doom_config="$(doom_config_source)"
+  for path in "$doom_config" "$DOTFILES_HOME/project-templates/nix" "$DOTFILES_HOME/project-templates/docker"; do
     if [ -e "$path" ]; then
       ok "dotfiles path: $path"
     else
@@ -91,7 +88,7 @@ doctor_doom_checkout() {
 
 doctor_doom_config() {
   failed=0
-  dotfiles_config="$DOTFILES_HOME/home/config/doom/config.el"
+  dotfiles_config="$(doom_config_source)"
   active_config="$HOME/.config/doom/config.el"
 
   if [ -f "$dotfiles_config" ]; then

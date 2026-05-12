@@ -33,12 +33,11 @@ runCommand "dotfiles-dist"
     coreutils
   ];
 } ''
-  mkdir -p "$out/project-templates" "$out/home/config" "$out/home-files/.local/bin"
+  mkdir -p "$out/project-templates" "$out/home-files/.local/bin"
 
   ${builtins.concatStringsSep "\n" (map installScript scripts)}
 
   cp -R ${../../project-templates}/. "$out/project-templates"/
-  cp -R ${../../home/config}/. "$out/home/config"/
   cp -RL ${homeFiles}/. "$out/home-files"/
   chmod -R u+w "$out/home-files"
   cp ${./dist/install.sh} "$out/install.sh"
