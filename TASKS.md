@@ -6,8 +6,8 @@
 
 - `store/` に `$HOME` へ配置したい dotfiles がある。
 - 旧 `store.list` ベースの symlink 管理は廃止済み。
-- `Makefile` は旧 `bin/.dotfiles-*` と新しい `dotfiles` CLI の両方を呼べる。
-- `bin/` には個別セットアップ用スクリプトがある。
+- `Makefile` は新しい `dotfiles` CLI を呼ぶ。
+- 旧 `bin/` スクリプトは廃止済み。
 - `config/doom` に Doom Emacs 設定がある。ユーザーは Doom Emacs を使用しているため、Doom 設定は正式に Home Manager 管理する。
 - `template/` にはプロジェクト用テンプレートがある。
 - `store/.profile.d/export.sh` に未コミット変更があるため、編集時は既存変更を壊さないこと。
@@ -195,8 +195,7 @@
 ## Phase 5: 旧構成の整理
 
 - [x] `Makefile` を整理する。
-  - 旧 `bin/.dotfiles-*` 呼び出しは移行期間用に残す。
-  - `dotfiles` CLI の薄いラッパーを追加する。
+  - `dotfiles` CLI の薄いラッパーにする。
   - 例:
 
     ```make
@@ -210,7 +209,7 @@
     	dotfiles doctor
     ```
 
-- [ ] 旧スクリプトを統合する。
+- [x] 旧スクリプトを統合する。
   - 対象:
 
     ```text
@@ -219,7 +218,7 @@
     bin/doomemacs-init.sh
     ```
 
-  - Home Manager または `dotfiles` CLI に移せたら削除または互換ラッパー化する。
+  - Home Manager または `dotfiles` CLI に移せたため削除する。
   - Doom 関連は `dotfiles configure doom install`, `dotfiles configure doom sync`, `dotfiles configure doom upgrade` に統合する。
 
 - [x] README を更新する。

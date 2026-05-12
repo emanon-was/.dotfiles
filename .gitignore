@@ -5,7 +5,6 @@
 !/Makefile
 !/flake.nix
 !/flake.lock
-!/bin
 !/config
 !/home
 !/notes
