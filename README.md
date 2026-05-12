@@ -105,12 +105,6 @@ $HOME/.local/bin
 ./dist/install.sh "$HOME/.local/share/dotfiles"
 ```
 
-`DOTFILES_BIN_DIR` を指定すると、コマンドの symlink 先を変えられます。
-
-```sh
-DOTFILES_BIN_DIR="$HOME/.bin" ./dist/install.sh
-```
-
 `dist/home-files/` には Home Manager から生成した `$HOME` 用 dotfiles が入ります。Nix なし環境で使う場合は、この内容を確認して必要なものだけ `$HOME` に配置します。
 `install.sh` は `home-files` の内容をコピーせず、`$HOME/.bashrc` などから `home-files` 内のファイルへ symlink を作成します。
 既存ファイルや既存 symlink がある場合は `.backup` 付きの別名へ退避してから symlink を作成します。既存ディレクトリは残し、その配下に必要な symlink を作成します。
@@ -123,7 +117,7 @@ DOTFILES_BIN_DIR="$HOME/.bin" ./dist/install.sh
 ./dist/uninstall.sh
 ```
 
-`install.sh` と同じ `prefix` や `DOTFILES_BIN_DIR` を指定していた場合は、同じ値を渡します。
+`install.sh` で `prefix` を指定していた場合は、同じ値を渡します。
 
 ## dotfiles コマンド
 

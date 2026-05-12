@@ -6,12 +6,8 @@ usage() {
 Usage:
   ./uninstall.sh [prefix]
 
-Environment:
-  DOTFILES_BIN_DIR  Directory containing dotfiles command symlinks.
-
 Default:
   prefix            $HOME
-  DOTFILES_BIN_DIR  $HOME/.local/bin
 USAGE
 }
 
@@ -22,9 +18,7 @@ case "${1:-}" in
     ;;
 esac
 
-dist_root="$(cd "$(dirname "$0")" && pwd -P)"
 prefix="${1:-$HOME}"
-bin_dir="${DOTFILES_BIN_DIR:-$HOME/.local/bin}"
 
 case "$prefix" in
   ""|"/")
@@ -59,11 +53,6 @@ remove_link() {
       printf 'removed home link: %s\n' "$link_path"
       restore_backup "$link_path"
       ;;
-    "$dist_root/home-files/.local/bin/"*|*/dist/bin/dotfiles*)
-      rm "$link_path"
-      printf 'removed legacy command link: %s\n' "$link_path"
-      restore_backup "$link_path"
-      ;;
     *)
       printf 'skipped link with unexpected target: %s -> %s\n' "$link_path" "$link_target"
       ;;
@@ -81,19 +70,6 @@ if [ -d "$prefix/home-files" ]; then
     target_path="$HOME/$relative_path"
     rmdir "$target_path" 2>/dev/null || true
     restore_backup "$target_path"
-  done
-fi
-
-if [ -d "$bin_dir" ]; then
-  for link_path in "$bin_dir"/dotfiles*; do
-    remove_link "$link_path"
-  done
-fi
-
-legacy_bin_dir="$HOME/.bin"
-if [ "$bin_dir" != "$legacy_bin_dir" ] && [ -d "$legacy_bin_dir" ]; then
-  for link_path in "$legacy_bin_dir"/dotfiles*; do
-    remove_link "$link_path"
   done
 fi
 
