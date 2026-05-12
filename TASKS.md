@@ -77,12 +77,10 @@ dotfiles project init <nix|docker> [destination]
 ### dist
 
 - `dist/` は `make dist` で生成する。
-- `dist/install.sh` は `home-files` を install 対象にする。
+- `dist/install.sh` は `dist/home-files` から `$HOME` へ直接 symlink する。
 - command の生成先は `dist/home-files/.local/bin`。
 - project init 用テンプレートは `home-files/.local/share/dotfiles/templates/` として `dist/` に含める。
-- default prefix は `$HOME`。
-- `home-files` は `$prefix/home-files` に配置し、`$HOME/.bashrc` などから symlink する。
-- command は `home-files` の通常展開として `$HOME/.local/bin` に symlink する。
+- command は `dist/home-files` の通常展開として `$HOME/.local/bin` に symlink する。
 - 既存ファイルや既存 symlink は `.backup`, `.backup.1`, ... に退避してから symlink する。
 - 既存ディレクトリは残し、その配下の対象ファイルを個別に symlink する。
 - 既存ディレクトリ symlink は `.backup` へ退避し、実ディレクトリを作って配下に symlink する。

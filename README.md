@@ -85,13 +85,8 @@ Nix を使わない環境では `dist/` を使います。`dist/` は Nix build 
 ./dist/install.sh
 ```
 
-デフォルトでは以下に `home-files` が配置されます。
-
-```text
-$HOME
-```
-
-`dotfiles` コマンド群は以下へ symlink されます。
+`dist/install.sh` は `dist/home-files/` の内容を `$HOME` へ直接 symlink します。`$HOME/home-files` のような管理用 copy は作りません。
+`dotfiles` コマンド群も通常の home file として以下へ symlink されます。
 
 ```text
 $HOME/.local/bin
@@ -99,14 +94,7 @@ $HOME/.local/bin
 
 コマンドの実体は `dist/home-files/.local/bin` に生成されます。
 
-必要ならインストール先を指定できます。
-
-```sh
-./dist/install.sh "$HOME/.local/share/dotfiles"
-```
-
 `dist/home-files/` には Home Manager から生成した `$HOME` 用 dotfiles が入ります。Nix なし環境で使う場合は、この内容を確認して必要なものだけ `$HOME` に配置します。
-`install.sh` は `home-files` の内容をコピーせず、`$HOME/.bashrc` などから `home-files` 内のファイルへ symlink を作成します。
 既存ファイルや既存 symlink がある場合は `.backup` 付きの別名へ退避してから symlink を作成します。既存ディレクトリは残し、その配下に必要な symlink を作成します。
 `uninstall.sh` は管理対象 symlink を削除したあと、対応する `.backup` が残っていれば元の名前へ戻します。
 `dist/` は home-files の展開専用です。project init 用テンプレートは `home-files/.local/share/dotfiles/templates/` に含まれます。
@@ -116,8 +104,6 @@ $HOME/.local/bin
 ```sh
 ./dist/uninstall.sh
 ```
-
-`install.sh` で `prefix` を指定していた場合は、同じ値を渡します。
 
 ## dotfiles コマンド
 

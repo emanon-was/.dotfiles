@@ -4,10 +4,7 @@ set -eu
 usage() {
   cat <<'USAGE'
 Usage:
-  ./uninstall.sh [prefix]
-
-Default:
-  prefix            $HOME
+  ./uninstall.sh
 USAGE
 }
 
@@ -18,14 +15,19 @@ case "${1:-}" in
     ;;
 esac
 
-prefix="${1:-$HOME}"
+[ "$#" -eq 0 ] || {
+  printf 'error: unexpected argument: %s\n' "$1" >&2
+  usage >&2
+  exit 2
+}
 
-case "$prefix" in
-  ""|"/")
-    printf 'error: refusing to remove unsafe prefix: %s\n' "$prefix" >&2
-    exit 1
-    ;;
-esac
+dist_root="$(cd "$(dirname "$0")" && pwd -P)"
+source_root="$dist_root/home-files"
+
+[ -d "$source_root" ] || {
+  printf 'error: dist home-files directory not found: %s\n' "$source_root" >&2
+  exit 1
+}
 
 restore_backup() {
   original_path="$1"
@@ -48,41 +50,25 @@ remove_link() {
 
   link_target="$(readlink "$link_path")"
   case "$link_target" in
-    "$prefix/home-files/"*)
+    "$source_root/"*)
       rm "$link_path"
       printf 'removed home link: %s\n' "$link_path"
       restore_backup "$link_path"
       ;;
-    *)
-      printf 'skipped link with unexpected target: %s -> %s\n' "$link_path" "$link_target"
-      ;;
+    *) ;;
   esac
 }
 
-if [ -d "$prefix/home-files" ]; then
-  find "$prefix/home-files" -mindepth 1 \( -type f -o -type l \) | while IFS= read -r source_path; do
-    relative_path="${source_path#"$prefix/home-files/"}"
-    remove_link "$HOME/$relative_path"
-  done
+find "$source_root" -mindepth 1 \( -type f -o -type l \) | while IFS= read -r source_path; do
+  relative_path="${source_path#"$source_root/"}"
+  remove_link "$HOME/$relative_path"
+done
 
-  find "$prefix/home-files" -mindepth 1 -type d | sort -r | while IFS= read -r source_path; do
-    relative_path="${source_path#"$prefix/home-files/"}"
-    target_path="$HOME/$relative_path"
-    rmdir "$target_path" 2>/dev/null || true
-    restore_backup "$target_path"
-  done
-fi
+find "$source_root" -mindepth 1 -type d | sort -r | while IFS= read -r source_path; do
+  relative_path="${source_path#"$source_root/"}"
+  target_path="$HOME/$relative_path"
+  rmdir "$target_path" 2>/dev/null || true
+  restore_backup "$target_path"
+done
 
-chmod -R u+w \
-  "$prefix/home-files" 2>/dev/null || true
-rm -rf "$prefix/home-files"
-
-if [ "$prefix" = "$HOME" ]; then
-  printf 'removed managed files from: %s\n' "$prefix"
-elif [ -e "$prefix" ]; then
-  chmod -R u+w "$prefix" 2>/dev/null || true
-  rm -rf "$prefix"
-  printf 'removed: %s\n' "$prefix"
-else
-  printf 'already absent: %s\n' "$prefix"
-fi
+printf 'removed managed links from: %s\n' "$HOME"
