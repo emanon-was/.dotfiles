@@ -24,8 +24,6 @@ if [ -z "${DOTFILES_HOME:-}" ]; then
   DOTFILES_HOME="${DOTFILES_HOME:-${dotfiles_home_candidate:-$HOME/.dotfiles}}"
 fi
 DOTFILES_PROFILE="${DOTFILES_PROFILE:-nixos}"
-DOOM_HOME="${DOOM_HOME:-$HOME/.config/emacs}"
-DOOM_BIN="$DOOM_HOME/bin/doom"
 
 status() {
   printf '%s\n' "$*"
@@ -59,6 +57,19 @@ have() {
 require_dotfiles_home() {
   [ -d "$DOTFILES_HOME" ] || fail "DOTFILES_HOME does not exist: $DOTFILES_HOME"
 }
+
+usage_configure() {
+  cat <<'USAGE'
+Usage:
+  dotfiles configure gnome
+  dotfiles configure doom install [--check]
+  dotfiles configure doom sync
+  dotfiles configure doom upgrade
+USAGE
+}
+
+DOOM_HOME="${DOOM_HOME:-$HOME/.config/emacs}"
+DOOM_BIN="$DOOM_HOME/bin/doom"
 
 doom_config_source() {
   if [ -f "$DOTFILES_HOME/home/config/doom/config.el" ]; then
@@ -311,16 +322,6 @@ gnome_configure() {
   gsettings set org.gnome.desktop.interface document-font-name "Sans 11"
   gsettings set org.gnome.desktop.interface font-name "Sans-serif 10"
   gsettings set org.gnome.desktop.interface monospace-font-name "Monospace 11"
-}
-
-usage_configure() {
-  cat <<'USAGE'
-Usage:
-  dotfiles configure gnome
-  dotfiles configure doom install [--check]
-  dotfiles configure doom sync
-  dotfiles configure doom upgrade
-USAGE
 }
 
 cmd_doom() {

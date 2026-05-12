@@ -43,7 +43,15 @@ flake_switch() {
   home-manager -b hm-backup --flake "$DOTFILES_HOME#$profile" switch
 
   if [ "$skip_doom_sync" -eq 0 ]; then
-    doom_sync
+    dotfiles_path="$0"
+    if command -v readlink >/dev/null 2>&1; then
+      dotfiles_path="$(readlink -f "$dotfiles_path" 2>/dev/null || printf '%s\n' "$dotfiles_path")"
+    fi
+    configure_command="$(dirname "$dotfiles_path")/dotfiles-configure"
+    if [ ! -x "$configure_command" ]; then
+      configure_command="dotfiles-configure"
+    fi
+    "$configure_command" doom sync
   else
     status "[skip] doom sync"
   fi
