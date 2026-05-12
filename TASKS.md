@@ -178,6 +178,8 @@
 - [x] `dotfiles configure doom sync` を実装する。
   - `~/.config/emacs/bin/doom sync` を実行する。
   - `~/.config/emacs` が存在しない場合は `dotfiles configure doom install` を促す。
+  - 実行前に `~/.config/doom/config.el` と `config/doom/config.el` の差分を確認する。
+  - 差分がある場合は unified diff を表示し、`dotfiles switch` を促して停止する。
   - Doom コマンドが失敗した場合は exit code をそのまま返す。
 
 - [x] `dotfiles configure doom upgrade` を実装する。

@@ -3,6 +3,7 @@
 , writeShellApplication
 , bash
 , coreutils
+, diffutils
 , git
 , gnugrep
 , gnused
@@ -16,6 +17,7 @@ writeShellApplication {
   runtimeInputs = [
     bash
     coreutils
+    diffutils
     git
     gnugrep
     gnused
@@ -79,6 +81,31 @@ writeShellApplication {
       [ -f "$HOME/.config/doom/init.el" ] && [ -f "$HOME/.config/doom/packages.el" ]
     }
 
+    doom_check_config_current() {
+      dotfiles_config="$DOTFILES_HOME/config/doom/config.el"
+      active_config="$HOME/.config/doom/config.el"
+
+      [ -f "$dotfiles_config" ] || fail "Doom config source does not exist: $dotfiles_config"
+
+      if [ ! -e "$active_config" ]; then
+        status "[doom] config.el is not installed yet: $active_config"
+        fail "Run: dotfiles switch"
+      fi
+
+      if cmp -s "$dotfiles_config" "$active_config"; then
+        if [ -L "$active_config" ]; then
+          status "[doom] config.el is current: $active_config -> $(readlink "$active_config")"
+        else
+          status "[doom] config.el is current: $active_config"
+        fi
+        return 0
+      fi
+
+      status "[doom] config.el differs from dotfiles source"
+      diff -u "$active_config" "$dotfiles_config" || true
+      fail "Run: dotfiles switch"
+    }
+
     doom_refresh_recipe_repositories() {
       recipes_dir="$DOOM_HOME/.local/straight/repos"
       [ -d "$recipes_dir" ] || return 0
@@ -113,6 +140,7 @@ writeShellApplication {
       if ! doom_installed; then
         fail "Doom Emacs is not installed at $DOOM_HOME. Run: dotfiles configure doom install"
       fi
+      doom_check_config_current
       status "[doom] syncing Doom profile"
       "$DOOM_BIN" sync
     }
