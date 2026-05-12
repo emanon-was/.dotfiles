@@ -81,11 +81,13 @@ writeShellApplication {
 
     doom_clone() {
       if [ ! -e "$DOOM_HOME" ]; then
+        status "[doom] cloning Doom Emacs into $DOOM_HOME"
         git clone --depth 1 https://github.com/doomemacs/doomemacs "$DOOM_HOME"
       elif directory_empty "$DOOM_HOME"; then
+        status "[doom] cloning Doom Emacs into empty directory $DOOM_HOME"
         git clone --depth 1 https://github.com/doomemacs/doomemacs "$DOOM_HOME"
       elif doom_checkout_ready; then
-        status "[skip] Doom Emacs checkout already exists: $DOOM_HOME"
+        status "[doom] checkout already exists: $DOOM_HOME"
       else
         fail "$DOOM_HOME exists but is not a usable Doom Emacs checkout"
       fi
@@ -95,6 +97,7 @@ writeShellApplication {
       if ! doom_installed; then
         fail "Doom Emacs is not installed at $DOOM_HOME. Run: dotfiles configure doom install"
       fi
+      status "[doom] syncing Doom profile"
       "$DOOM_BIN" sync
     }
 
@@ -230,10 +233,12 @@ writeShellApplication {
     cmd_doom() {
       case "''${1:-}" in
         install)
+          status "[doom] ensuring Doom Emacs checkout"
           doom_clone
           if doom_config_ready; then
-            status "[skip] Doom config bootstrap files already exist"
+            status "[doom] config bootstrap files already exist"
           else
+            status "[doom] running Doom install"
             "$DOOM_BIN" install
           fi
           doom_sync
@@ -245,6 +250,7 @@ writeShellApplication {
           if ! doom_installed; then
             fail "Doom Emacs is not installed at $DOOM_HOME. Run: dotfiles configure doom install"
           fi
+          status "[doom] upgrading Doom Emacs"
           "$DOOM_BIN" upgrade
           doom_sync
           ;;
