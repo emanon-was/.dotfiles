@@ -35,10 +35,12 @@ runCommand "dotfiles-dist"
 } ''
   mkdir -p "$out/home-files/.local/bin"
 
-  ${builtins.concatStringsSep "\n" (map installScript scripts)}
-
   cp -RL ${homeFiles}/. "$out/home-files"/
   chmod -R u+w "$out/home-files"
+  rm -f "$out/home-files/.local/bin"/dotfiles*
+  mkdir -p "$out/home-files/.local/bin"
+  ${builtins.concatStringsSep "\n" (map installScript scripts)}
+
   rm -rf "$out/home-files/.local/share/dotfiles/templates"
   mkdir -p "$out/home-files/.local/share/dotfiles/templates"
   cp -R ${./templates}/. "$out/home-files/.local/share/dotfiles/templates"/

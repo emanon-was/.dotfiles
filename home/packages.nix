@@ -1,8 +1,7 @@
-{ dotfilesPackage, pkgs, ... }:
+{ pkgs, ... }:
 
 {
   home.packages = [
-    dotfilesPackage
     pkgs.direnv
     pkgs.git
     pkgs.ripgrep

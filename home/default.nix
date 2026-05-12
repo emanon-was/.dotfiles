@@ -8,7 +8,7 @@
     ./tmux.nix
     ./screen.nix
     ./emacs.nix
-    ./templates.nix
+    ./dotfiles.nix
     ./gnome.nix
   ];
 
