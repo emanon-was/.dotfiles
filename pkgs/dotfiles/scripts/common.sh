@@ -2,7 +2,7 @@
 set -u
 
 if [ -z "${DOTFILES_HOME:-}" ]; then
-  dotfiles_command_path="$(command -v "${0##*/}" 2>/dev/null || true)"
+  dotfiles_command_path="$0"
   if [ -n "$dotfiles_command_path" ] && command -v readlink >/dev/null 2>&1; then
     dotfiles_command_path="$(readlink -f "$dotfiles_command_path" 2>/dev/null || printf '%s\n' "$dotfiles_command_path")"
   fi
@@ -68,7 +68,7 @@ doom_config_ready() {
 }
 
 doom_check_config_current() {
-  dotfiles_config="$DOTFILES_HOME/config/doom/config.el"
+  dotfiles_config="$DOTFILES_HOME/home/config/doom/config.el"
   active_config="$HOME/.config/doom/config.el"
 
   [ -f "$dotfiles_config" ] || fail "Doom config source does not exist: $dotfiles_config"
@@ -110,7 +110,7 @@ doom_unlink_managed_config() {
 }
 
 doom_compare_generated_config_and_restore() {
-  dotfiles_config="$DOTFILES_HOME/config/doom/config.el"
+  dotfiles_config="$DOTFILES_HOME/home/config/doom/config.el"
   active_config="$HOME/.config/doom/config.el"
   diff_status=0
 
@@ -228,7 +228,7 @@ set -euo pipefail
 case "${1:-}" in
   install)
     mkdir -p "$HOME/.config/doom"
-    cp "$DOTFILES_HOME/config/doom/config.el" "$HOME/.config/doom/config.el"
+    cp "$DOTFILES_HOME/home/config/doom/config.el" "$HOME/.config/doom/config.el"
     touch "$HOME/.config/doom/init.el" "$HOME/.config/doom/packages.el"
     ;;
   sync)
@@ -241,7 +241,7 @@ esac
 FAKE_DOOM
   chmod +x "$DOOM_BIN"
 
-  ln -s "$DOTFILES_HOME/config/doom/config.el" "$HOME/.config/doom/config.el"
+  ln -s "$DOTFILES_HOME/home/config/doom/config.el" "$HOME/.config/doom/config.el"
 
   status "[doom-check] verifying isolated Doom checkout detection"
   doom_checkout_ready || fail "temporary Doom checkout was not detected as ready"
@@ -253,7 +253,7 @@ FAKE_DOOM
   if [ ! -L "$active_config" ]; then
     fail "managed config.el symlink was not restored"
   fi
-  if [ "$(readlink "$active_config")" != "$DOTFILES_HOME/config/doom/config.el" ]; then
+  if [ "$(readlink "$active_config")" != "$DOTFILES_HOME/home/config/doom/config.el" ]; then
     fail "managed config.el symlink points to an unexpected target"
   fi
 

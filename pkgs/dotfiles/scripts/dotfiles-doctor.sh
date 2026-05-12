@@ -115,7 +115,7 @@ doctor_doom_checkout() {
 
 doctor_doom_config() {
   failed=0
-  dotfiles_config="$DOTFILES_HOME/config/doom/config.el"
+  dotfiles_config="$DOTFILES_HOME/home/config/doom/config.el"
   active_config="$HOME/.config/doom/config.el"
 
   if [ -f "$dotfiles_config" ]; then

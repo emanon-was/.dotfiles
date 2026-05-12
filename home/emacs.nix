@@ -13,5 +13,5 @@
     fd
   ];
 
-  home.file.".config/doom/config.el".source = ../config/doom/config.el;
+  home.file.".config/doom/config.el".source = ./config/doom/config.el;
 }

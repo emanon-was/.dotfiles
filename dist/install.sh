@@ -36,14 +36,20 @@ bin_dir="${DOTFILES_BIN_DIR:-$HOME/.local/bin}"
   exit 1
 }
 
-mkdir -p "$prefix/bin" "$prefix/project-templates" "$prefix/home-files" "$bin_dir"
+[ -d "$dist_root/home" ] || {
+  printf 'error: dist home directory not found: %s\n' "$dist_root/home" >&2
+  exit 1
+}
 
-chmod -R u+w "$prefix/bin" "$prefix/project-templates" "$prefix/home-files" 2>/dev/null || true
-rm -rf "$prefix/bin" "$prefix/project-templates" "$prefix/home-files"
-mkdir -p "$prefix/bin" "$prefix/project-templates" "$prefix/home-files"
+mkdir -p "$prefix/bin" "$prefix/project-templates" "$prefix/home" "$prefix/home-files" "$bin_dir"
+
+chmod -R u+w "$prefix/bin" "$prefix/project-templates" "$prefix/home" "$prefix/home-files" 2>/dev/null || true
+rm -rf "$prefix/bin" "$prefix/project-templates" "$prefix/home" "$prefix/home-files"
+mkdir -p "$prefix/bin" "$prefix/project-templates" "$prefix/home" "$prefix/home-files"
 
 cp -R "$dist_root/bin"/. "$prefix/bin"/
 cp -R "$dist_root/project-templates"/. "$prefix/project-templates"/
+cp -R "$dist_root/home"/. "$prefix/home"/
 if [ -d "$dist_root/home-files" ]; then
   cp -R "$dist_root/home-files"/. "$prefix/home-files"/
 fi

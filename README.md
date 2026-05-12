@@ -111,10 +111,10 @@ Doom Emacs 本体は `~/.config/emacs` に置きます。Doom の `init.el` や 
 このリポジトリで管理する Doom 設定は以下です。
 
 ```text
-config/doom/config.el
+home/config/doom/config.el
 ```
 
-`dotfiles configure doom install` と `dotfiles configure doom upgrade` では、Doom が生成・更新する `config.el` と `config/doom/config.el` の差分を確認してから、Home Manager 管理の symlink を戻します。
+`dotfiles configure doom install` と `dotfiles configure doom upgrade` では、Doom が生成・更新する `config.el` と `home/config/doom/config.el` の差分を確認してから、Home Manager 管理の symlink を戻します。
 
 初回 install の流れだけを検証したい場合:
 

@@ -9,7 +9,7 @@
 - `Makefile` は repo 開発用の Nix build/check/dist 操作に使う。
 - `dotfiles` CLI は Cargo 風に `dotfiles-<subcommand>` executable へ dispatch する。
 - 旧 `bin/` スクリプトは廃止済み。
-- `config/doom/config.el` に Home Manager 管理の Doom Emacs 設定がある。
+- `home/config/doom/config.el` に Home Manager 管理の Doom Emacs 設定がある。
 - Doom の `init.el` と `packages.el` は Doom 側の更新対象として扱い、この repo では管理しない。
 - `project-templates/` にはプロジェクト用テンプレートがある。
 
@@ -20,7 +20,7 @@
 - `gsettings`、Doom Emacs install、テンプレートコピーなどは `dotfiles` CLI の明示サブコマンドにする。
 - Emacs 本体と Doom Emacs の設定ファイルは Home Manager で管理する。
 - Doom Emacs の更新・設定変更後には `doom sync` を実行できる導線を用意する。
-- tmux/screen などの手書き設定は `config/` 配下に置く。
+- tmux/screen などの手書き設定は `home/config/` 配下に置く。
 - Nix の構成は flake ベースにする。
 
 ## Phase 1: Home Manager の入口を作る
@@ -66,12 +66,12 @@
     - 旧 shell 設定の内容が Home Manager module に反映される。
 
 - [x] tmux 設定を移行する。
-  - `config/tmux/tmux.conf` を `programs.tmux.extraConfig` で読む。
+  - `home/config/tmux/tmux.conf` を `programs.tmux.extraConfig` で読む。
   - 完了条件:
     - prefix、status line、copy mode、pane keybind が再現される。
 
 - [x] screen 設定を移行する。
-  - `config/screen/screenrc` を `home.file.".screenrc".source` で管理する。
+  - `home/config/screen/screenrc` を `home.file.".screenrc".source` で管理する。
   - 利用頻度が低ければ無理に module 化しない。
 
 - [x] git 設定を移行する。
@@ -133,7 +133,7 @@
   - 空の `~/.config/emacs` が存在する場合は clone 先として使う。
   - 壊れた `~/.config/emacs` が存在する場合は明示的に失敗する。
   - `~/.config/doom/init.el` と `packages.el` が存在する場合は `doom install` をスキップし、`doom sync` を実行する。
-  - `doom install` 実行時は `config.el` symlink を一時的に外し、Doom が生成した `config.el` と `config/doom/config.el` の差分を確認してから symlink を戻す。
+  - `doom install` 実行時は `config.el` symlink を一時的に外し、Doom が生成した `config.el` と `home/config/doom/config.el` の差分を確認してから symlink を戻す。
   - clone と install を分けるか検討する。
 
 - [x] テンプレート操作を CLI 化する。
@@ -151,7 +151,7 @@
 - [x] Doom Emacs を Home Manager 管理へ移行する。
   - `programs.emacs.enable = true;` を使って Emacs 本体を管理する。
   - 必要な Emacs package、フォント、補助ツールがあれば `home.packages` に追加する。
-  - `config/doom/config.el` を正式管理対象として扱い、`home.file.".config/doom/config.el"` で配置する。
+  - `home/config/doom/config.el` を正式管理対象として扱い、`home.file.".config/doom/config.el"` で配置する。
   - `init.el` と `packages.el` は Doom の更新で変わりうるため Home Manager 管理に含めない。
   - 完了条件:
     - `~/.config/doom/config.el` が Home Manager 経由で管理される。
@@ -169,13 +169,13 @@
 - [x] `dotfiles configure doom sync` を実装する。
   - `~/.config/emacs/bin/doom sync` を実行する。
   - `~/.config/emacs` が存在しない場合は `dotfiles configure doom install` を促す。
-  - 実行前に `~/.config/doom/config.el` と `config/doom/config.el` の差分を確認する。
+  - 実行前に `~/.config/doom/config.el` と `home/config/doom/config.el` の差分を確認する。
   - 差分がある場合は unified diff を表示し、`dotfiles switch` を促して停止する。
   - Doom コマンドが失敗した場合は exit code をそのまま返す。
 
 - [x] `dotfiles configure doom upgrade` を実装する。
   - `~/.config/emacs/bin/doom upgrade` を実行する。
-  - `doom upgrade` 実行時は `config.el` symlink を一時的に外し、Doom が生成した `config.el` と `config/doom/config.el` の差分を確認してから symlink を戻す。
+  - `doom upgrade` 実行時は `config.el` symlink を一時的に外し、Doom が生成した `config.el` と `home/config/doom/config.el` の差分を確認してから symlink を戻す。
   - upgrade 後に `doom sync` を実行するか、明示的に案内するか決める。
   - 推奨は `dotfiles configure doom upgrade` 内で `doom upgrade` 後に `doom sync` を実行する。
 

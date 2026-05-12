@@ -26,12 +26,11 @@ case "${1:-}" in
     shift
     executable="dotfiles-$subcommand"
 
-    dotfiles_path="$(command -v dotfiles 2>/dev/null || true)"
-    if [ -n "$dotfiles_path" ]; then
-      sibling_executable="$(dirname "$dotfiles_path")/$executable"
-    else
-      sibling_executable=""
+    dotfiles_path="$0"
+    if command -v readlink >/dev/null 2>&1; then
+      dotfiles_path="$(readlink -f "$dotfiles_path" 2>/dev/null || printf '%s\n' "$dotfiles_path")"
     fi
+    sibling_executable="$(dirname "$dotfiles_path")/$executable"
 
     if [ -n "$sibling_executable" ] && [ -x "$sibling_executable" ]; then
       exec "$sibling_executable" "$@"
