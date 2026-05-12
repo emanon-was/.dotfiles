@@ -264,6 +264,7 @@
 
 - [ ] `project-templates/docker` の内容とファイル名を整理する。
   - 現在の `Makefile` は、プロジェクト本体の作業用 `Makefile` と衝突する可能性がある。
+  - `Makefile` の中身自体も整理し、build/push/run/shell/cmd/local-run の責務、変数名、AWS ECR 前提、tag 生成、TTY 判定を見直す。
   - `Dockerfile`, `compose.yaml`, `docker.mk`, `Makefile.docker`, `Taskfile.yml` など、用途と衝突しにくさのバランスを検討する。
   - `dotfiles project init docker` が何を置くべきかを決める。
 
