@@ -37,6 +37,21 @@ if [ "$prefix" = "$HOME" ]; then
   command_store="$HOME/.bin"
 fi
 
+restore_backup() {
+  original_path="$1"
+  backup_path="$original_path.backup"
+
+  [ -e "$backup_path" ] || [ -L "$backup_path" ] || return 0
+
+  if [ -e "$original_path" ] || [ -L "$original_path" ]; then
+    printf 'skipped backup restore, path exists: %s\n' "$original_path"
+    return 0
+  fi
+
+  mv "$backup_path" "$original_path"
+  printf 'restored backup: %s -> %s\n' "$backup_path" "$original_path"
+}
+
 remove_link() {
   link_path="$1"
   [ -L "$link_path" ] || return 0
@@ -46,14 +61,17 @@ remove_link() {
     "$command_store"/dotfiles*)
       rm "$link_path"
       printf 'removed command link: %s\n' "$link_path"
+      restore_backup "$link_path"
       ;;
     */bin/dotfiles*)
       rm "$link_path"
       printf 'removed command link: %s\n' "$link_path"
+      restore_backup "$link_path"
       ;;
     "$prefix/home-files/"*)
       rm "$link_path"
       printf 'removed home link: %s\n' "$link_path"
+      restore_backup "$link_path"
       ;;
     *)
       printf 'skipped link with unexpected target: %s -> %s\n' "$link_path" "$link_target"
@@ -65,6 +83,13 @@ if [ -d "$prefix/home-files" ]; then
   find "$prefix/home-files" -mindepth 1 \( -type f -o -type l \) | while IFS= read -r source_path; do
     relative_path="${source_path#"$prefix/home-files/"}"
     remove_link "$HOME/$relative_path"
+  done
+
+  find "$prefix/home-files" -mindepth 1 -type d | sort -r | while IFS= read -r source_path; do
+    relative_path="${source_path#"$prefix/home-files/"}"
+    target_path="$HOME/$relative_path"
+    rmdir "$target_path" 2>/dev/null || true
+    restore_backup "$target_path"
   done
 fi
 
