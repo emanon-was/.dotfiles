@@ -12,3 +12,8 @@ export DOOM_EMACS_HOME=$HOME/.config/emacs
 export XDG_LOCAL_HOME=$HOME/.local
 export DOTFILES_HOME=$HOME/.dotfiles
 export PATH=$GOPATH/bin:$CARGO_HOME/bin:$DOOM_EMACS_HOME/bin:$XDG_LOCAL_HOME/bin:$DOTFILES_HOME/bin:$PATH
+
+if [ ! -z "$WSL_DISTRO_NAME" ]; then
+    export GDK_SCALE=2
+    export GDK_DPI_SCALE=0.75
+fi
