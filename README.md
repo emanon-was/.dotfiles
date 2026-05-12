@@ -5,6 +5,8 @@ Home Manager based dotfiles.
 NixOS system configuration is expected to stay on a stable NixOS channel.
 This Home Manager flake intentionally follows `nixos-unstable` for user packages and tools.
 
+Personal Emacs Lisp notes that are not part of the active Doom Emacs configuration live under `notes/emacs`.
+
 ## Setup
 
 ```sh

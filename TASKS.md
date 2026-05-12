@@ -186,9 +186,10 @@
     - Doom 設定変更後に `dotfiles switch` だけで `doom sync` まで完了する。
     - Doom 未インストール環境では分かりやすいメッセージで止まるか、skip できる。
 
-- [ ] `scrap/.emacs.d` の扱いを決める。
-  - Doom に寄せるなら不要な旧 Emacs 設定として整理候補にする。
-  - 使うなら Home Manager 管理対象に昇格する。
+- [x] `scrap/.emacs.d` の扱いを決める。
+  - 旧 Emacs 設定としては廃止する。
+  - 落書き用に残したい `emacs.el` だけ `notes/emacs/emacs.el` へ移す。
+  - `notes/emacs` は Home Manager 管理対象ではなく、個人用メモ置き場として扱う。
 
 ## Phase 5: 旧構成の整理
 
