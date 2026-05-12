@@ -4,6 +4,9 @@ set -u
 
 if [ -z "${DOTFILES_HOME:-}" ]; then
   dotfiles_command_path="$(command -v "${0##*/}" 2>/dev/null || true)"
+  if [ -n "$dotfiles_command_path" ] && command -v readlink >/dev/null 2>&1; then
+    dotfiles_command_path="$(readlink -f "$dotfiles_command_path" 2>/dev/null || printf '%s\n' "$dotfiles_command_path")"
+  fi
   dotfiles_bin_dir="$(dirname "${dotfiles_command_path:-$0}")"
   dotfiles_dist_home="$(cd "$dotfiles_bin_dir/.." 2>/dev/null && pwd -P || true)"
   if [ -n "$dotfiles_dist_home" ] && [ -d "$dotfiles_dist_home/project-templates" ]; then

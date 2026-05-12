@@ -67,6 +67,12 @@ Do not edit files under `dist/` by hand.
 make dist
 ```
 
+To install generated artifacts without using Nix:
+
+```sh
+./dist/install.sh
+```
+
 Repository maintenance targets:
 
 ```sh

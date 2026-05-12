@@ -37,6 +37,8 @@ runCommand "dotfiles-dist"
   ${builtins.concatStringsSep "\n" (map installScript scripts)}
 
   cp -R ${../../project-templates}/. "$out/project-templates"/
+  cp ${./dist/install.sh} "$out/install.sh"
+  chmod +x "$out/install.sh"
 
   if grep -R '/nix/store' "$out"; then
     printf 'error: generated dist contains Nix store paths\n' >&2
