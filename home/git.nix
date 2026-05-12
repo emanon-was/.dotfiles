@@ -1,7 +1,9 @@
 {
   programs.git = {
     enable = true;
-    userName = "Daigo Kawasaki";
-    userEmail = "emanon.was@gmail.com";
+    settings.user = {
+      name = "Daigo Kawasaki";
+      email = "emanon.was@gmail.com";
+    };
   };
 }

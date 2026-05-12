@@ -2,6 +2,9 @@
 
 Home Manager based dotfiles.
 
+NixOS system configuration is expected to stay on a stable NixOS channel.
+This Home Manager flake intentionally follows `nixos-unstable` for user packages and tools.
+
 ## Setup
 
 ```sh
