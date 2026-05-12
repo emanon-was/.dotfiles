@@ -130,7 +130,7 @@
   - `nix flake update` を実行する。
   - 実行後に `dotfiles check` を促すか、自動実行するか決める。
 
-- [x] `dotfiles gnome apply` を実装する。
+- [x] `dotfiles gnome configure` を実装する。
   - 既存の `bin/gnome-settings.sh` 相当を移す。
   - `gsettings` が存在しない環境では分かりやすく失敗する。
   - 将来的に `dconf.settings` へ移行できる余地を残す。
@@ -228,7 +228,7 @@
     ```sh
     home-manager switch --flake .#<profile>
     dotfiles doctor
-    dotfiles gnome apply
+    dotfiles gnome configure
     ```
 
   - 旧 `make init` ベースの説明は削除または deprecated と明記する。
@@ -241,7 +241,7 @@
 - [x] `dotfiles doctor` を実行し、期待したチェック結果になることを確認する。
 - [ ] bash/zsh の起動確認をする。
 - [ ] tmux の keybind と status line を確認する。
-- [ ] GNOME 環境がある場合のみ `dotfiles gnome apply` を確認する。
+- [ ] GNOME 環境がある場合のみ `dotfiles gnome configure` を確認する。
 - [ ] `dotfiles doom install` を確認する。
 - [ ] `dotfiles doom sync` を確認する。
 - [ ] `dotfiles switch` 後に Doom sync が実行されることを確認する。

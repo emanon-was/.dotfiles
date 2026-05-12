@@ -39,7 +39,7 @@ dotfiles doctor
 dotfiles switch [--skip-doom-sync] [profile]
 dotfiles check
 dotfiles update
-dotfiles gnome apply
+dotfiles gnome configure
 dotfiles doom install
 dotfiles doom sync
 dotfiles doom upgrade

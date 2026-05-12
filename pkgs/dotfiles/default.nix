@@ -38,7 +38,7 @@ writeShellApplication {
       dotfiles switch [--skip-doom-sync] [profile]
       dotfiles check
       dotfiles update
-      dotfiles gnome apply
+      dotfiles gnome configure
       dotfiles doom install
       dotfiles doom sync
       dotfiles doom upgrade
@@ -176,7 +176,7 @@ writeShellApplication {
 
     cmd_gnome() {
       case "''${1:-}" in
-        apply)
+        configure|apply)
           have gsettings || fail "gsettings is not available"
           gsettings set org.gnome.desktop.interface gtk-key-theme "Emacs"
           gsettings set org.gnome.desktop.interface document-font-name "Sans 11"
