@@ -262,6 +262,16 @@
   - clone/install 判定、Doom 生成 `config.el` との差分確認、symlink 復元の流れを検証する。
   - 実際の clone/install は行わず、fake Doom checkout で安全に検証する。
 
+- [ ] `project-templates/docker` の内容とファイル名を整理する。
+  - 現在の `Makefile` は、プロジェクト本体の作業用 `Makefile` と衝突する可能性がある。
+  - `Dockerfile`, `compose.yaml`, `docker.mk`, `Makefile.docker`, `Taskfile.yml` など、用途と衝突しにくさのバランスを検討する。
+  - `dotfiles project init docker` が何を置くべきかを決める。
+
+- [ ] `project-templates/nix` の Nix ファイル名を整理する。
+  - 現在の `default.nix` が適切か、`shell.nix`, `flake.nix`, `devshell.nix` などとどう使い分けるかを決める。
+  - `dotfiles project init nix` が legacy nix-shell 用なのか、flake/devShell 用なのかを明確にする。
+  - 必要なら template 名を `nix-shell` / `nix-flake` のように分ける。
+
 ## 注意点
 
 - ユーザーの未コミット変更を勝手に戻さない。
