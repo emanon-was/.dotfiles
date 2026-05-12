@@ -16,35 +16,36 @@
         inherit system;
         config.allowUnfree = true;
       };
-      usernames = [
-        "nixos"
-        "emanon"
-      ];
-      distUsername = builtins.elemAt usernames 0;
+      distUsername = "dotfiles";
+      distHomeDirectory = "/home/${distUsername}";
+      currentUsername =
+        let
+          value = builtins.getEnv "DOTFILES_USERNAME";
+        in
+        if value != "" then value else distUsername;
+      currentHomeDirectory =
+        let
+          value = builtins.getEnv "DOTFILES_HOME_DIRECTORY";
+        in
+        if value != "" then value else "/home/${currentUsername}";
       dotfilesPackage = pkgs.callPackage ./pkgs/dotfiles {
         inherit home-manager;
       };
       dotfilesDist = pkgs.callPackage ./pkgs/dist {
         inherit dotfilesPackage;
         username = distUsername;
-        homeFiles = "${self.homeConfigurations.${distUsername}.activationPackage}/home-files";
-        homeSessionVars = "${self.homeConfigurations.${distUsername}.activationPackage}/home-path/etc/profile.d/hm-session-vars.sh";
+        homeFiles = "${self.homeConfigurations.dist.activationPackage}/home-files";
+        homeSessionVars = "${self.homeConfigurations.dist.activationPackage}/home-path/etc/profile.d/hm-session-vars.sh";
       };
-      mkHomeConfiguration = username:
-        let
-          homeDirectory = "/home/${username}";
-        in
-        {
-          name = username;
-          value = home-manager.lib.homeManagerConfiguration {
-            inherit pkgs;
-            extraSpecialArgs = {
-              inherit self username homeDirectory dotfilesPackage;
-            };
-            modules = [
-              ./home
-            ];
+      mkHomeConfigurationFor = { username, homeDirectory }:
+        home-manager.lib.homeManagerConfiguration {
+          inherit pkgs;
+          extraSpecialArgs = {
+            inherit self username homeDirectory dotfilesPackage;
           };
+          modules = [
+            ./home
+          ];
         };
     in
     {
@@ -63,6 +64,15 @@
         default = self.apps.${system}.dotfiles;
       };
 
-      homeConfigurations = builtins.listToAttrs (map mkHomeConfiguration usernames);
+      homeConfigurations = {
+        current = mkHomeConfigurationFor {
+          username = currentUsername;
+          homeDirectory = currentHomeDirectory;
+        };
+        dist = mkHomeConfigurationFor {
+          username = distUsername;
+          homeDirectory = distHomeDirectory;
+        };
+      };
     };
 }

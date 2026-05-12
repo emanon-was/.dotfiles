@@ -3,7 +3,7 @@ usage_flake() {
 Usage:
   dotfiles flake check
   dotfiles flake update
-  dotfiles flake switch [--skip-doom-sync] [profile]
+  dotfiles flake switch [--skip-doom-sync] [current|dist|user]
   dotfiles flake doctor
 USAGE
 }
@@ -24,6 +24,7 @@ flake_switch() {
 
   skip_doom_sync=0
   profile="$DOTFILES_PROFILE"
+  switch_target_seen=0
 
   while [ "$#" -gt 0 ]; do
     case "$1" in
@@ -34,13 +35,41 @@ flake_switch() {
         fail "unknown option for flake switch: $1"
         ;;
       *)
-        profile="$1"
+        [ "$switch_target_seen" -eq 0 ] || fail "unexpected argument for flake switch: $1"
+        switch_target_seen=1
+        case "$1" in
+          current|dist)
+            profile="$1"
+            ;;
+          root)
+            profile="current"
+            DOTFILES_USERNAME="root"
+            if [ "${DOTFILES_HOME_DIRECTORY_DEFAULTED:-0}" -eq 1 ]; then
+              DOTFILES_HOME_DIRECTORY="/root"
+            fi
+            export DOTFILES_USERNAME DOTFILES_HOME_DIRECTORY
+            ;;
+          *)
+            profile="current"
+            DOTFILES_USERNAME="$1"
+            if [ "${DOTFILES_HOME_DIRECTORY_DEFAULTED:-0}" -eq 1 ]; then
+              DOTFILES_HOME_DIRECTORY="/home/$1"
+            fi
+            export DOTFILES_USERNAME DOTFILES_HOME_DIRECTORY
+            ;;
+        esac
         ;;
     esac
     shift
   done
 
-  home-manager -b hm-backup --flake "$DOTFILES_HOME#$profile" switch
+  home_manager_args=""
+  if [ "$profile" = "current" ]; then
+    home_manager_args="--impure"
+  fi
+
+  # shellcheck disable=SC2086
+  home-manager -b hm-backup --flake "$DOTFILES_HOME#$profile" $home_manager_args switch
 
   if [ "$skip_doom_sync" -eq 0 ]; then
     dotfiles_path="$0"
@@ -102,6 +131,10 @@ flake_doctor_home_manager() {
 
   if [ -d "$DOTFILES_HOME" ]; then
     ok "Home Manager profile: $DOTFILES_HOME#$DOTFILES_PROFILE"
+    if [ "$DOTFILES_PROFILE" = "current" ]; then
+      ok "Home Manager user: $DOTFILES_USERNAME"
+      ok "Home Manager home: $DOTFILES_HOME_DIRECTORY"
+    fi
   fi
 }
 

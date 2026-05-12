@@ -71,7 +71,8 @@ dotfiles flake switch
 `dotfiles flake switch` は内部で次のような処理を行います。
 
 ```sh
-home-manager -b hm-backup --flake "$DOTFILES_HOME#$USER" switch
+DOTFILES_USERNAME="$USER" DOTFILES_HOME_DIRECTORY="$HOME" \
+  home-manager -b hm-backup --flake "$DOTFILES_HOME#current" --impure switch
 dotfiles configure doom sync
 ```
 
@@ -117,7 +118,7 @@ $HOME/.local/bin
 dotfiles doctor
 dotfiles flake check
 dotfiles flake update
-dotfiles flake switch [--skip-doom-sync] [profile]
+dotfiles flake switch [--skip-doom-sync] [current|dist|user]
 dotfiles flake doctor
 dotfiles configure gnome
 dotfiles configure doom install [--check]

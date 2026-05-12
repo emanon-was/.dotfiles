@@ -1,6 +1,8 @@
 .PHONY: flake-check dotfiles-build dist-build home-build dist
 
-PROFILE ?= $(shell id -un)
+PROFILE ?= current
+DOTFILES_USERNAME ?= $(shell id -un)
+DOTFILES_HOME_DIRECTORY ?= $(HOME)
 
 # flake 全体の評価と checks を確認する。
 flake-check:
@@ -16,7 +18,8 @@ dist-build:
 
 # Home Manager activation package を build する。
 home-build:
-	nix build .#homeConfigurations.$(PROFILE).activationPackage --no-link
+	DOTFILES_USERNAME="$(DOTFILES_USERNAME)" DOTFILES_HOME_DIRECTORY="$(DOTFILES_HOME_DIRECTORY)" \
+		nix build .#homeConfigurations.$(PROFILE).activationPackage --impure --no-link
 
 # dist/ を Nix build の成果物で再生成する。
 dist:

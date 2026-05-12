@@ -32,9 +32,13 @@
 ## Home Manager
 
 - `flake.nix` は Home Manager standalone profile を提供する。
-- profile は `homeConfigurations.<user>` として定義する。
-- `dotfiles` CLI の既定 profile は実行時の `$USER`。
-- 現在定義している profile は `nixos` と `emanon`。
+- 任意ユーザー向けの profile は `homeConfigurations.current` として定義する。
+- `current` profile は `DOTFILES_USERNAME` と `DOTFILES_HOME_DIRECTORY` から username と home directory を決める。
+- `dist` profile は `dotfiles-dist` 生成用。
+- `dotfiles` CLI の既定 profile は `current`。
+- `dotfiles` CLI は `DOTFILES_USERNAME` の既定値に `$USER`、`DOTFILES_HOME_DIRECTORY` の既定値に `$HOME` を使う。
+- `dotfiles flake switch <user>` は `<user>` を `DOTFILES_USERNAME` として扱う。
+- `DOTFILES_HOME_DIRECTORY` が明示されていない場合、`root` は `/root`、それ以外は `/home/<user>` を home directory にする。
 - `home/default.nix` から機能別 module を import する。
 - shell、git、tmux、screen、Emacs、GNOME 関連は Home Manager module で管理する。
 - `home/screen.nix` と `home/tmux.nix` は分離する。
@@ -57,7 +61,7 @@
 dotfiles doctor
 dotfiles flake check
 dotfiles flake update
-dotfiles flake switch [--skip-doom-sync] [profile]
+dotfiles flake switch [--skip-doom-sync] [current|dist|user]
 dotfiles flake doctor
 dotfiles configure gnome
 dotfiles configure doom install [--check]

@@ -4,7 +4,7 @@ Usage:
   dotfiles doctor
   dotfiles flake check
   dotfiles flake update
-  dotfiles flake switch [--skip-doom-sync] [profile]
+  dotfiles flake switch [--skip-doom-sync] [current|dist|user]
   dotfiles flake doctor
   dotfiles configure gnome
   dotfiles configure doom install [--check]
