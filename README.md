@@ -13,10 +13,10 @@ NixOS の system 側は stable を使い、このリポジトリの Home Manager
 ├── home/                 Home Manager の module と、その module が使う設定ファイル
 │   ├── *.nix             shell、git、tmux、screen、Emacs などの Home Manager 設定
 │   └── config/           Home Manager で配置する手書き設定の生成元
-├── pkgs/dotfiles/        `dotfiles` CLI と `dist/` 生成 package の生成元
+├── pkgs/dotfiles/        `dotfiles` CLI の生成元
 │   ├── scripts/          `dotfiles-*` サブコマンドの shell script
-│   ├── templates/        `dotfiles project init ...` で使うテンプレート
-│   └── dist/             `dist/install.sh` など配布用 script の生成元
+│   └── templates/        `dotfiles project init ...` で使うテンプレート
+├── pkgs/dist/            `dotfiles-dist` package と配布用 script の生成元
 ├── notes/                Home Manager 管理対象ではない個人メモ
 ├── dist/                 Nix build で生成した配布用成果物
 ├── flake.nix             Home Manager、CLI package、dist package の入口
@@ -25,7 +25,7 @@ NixOS の system 側は stable を使い、このリポジトリの Home Manager
 └── TASKS.md              作業方針と残タスク
 ```
 
-基本的にメンテナンスするのは `home/`、`pkgs/dotfiles/`、`notes/`、`README.md`、`TASKS.md` です。
+基本的にメンテナンスするのは `home/`、`pkgs/dotfiles/`、`pkgs/dist/`、`notes/`、`README.md`、`TASKS.md` です。
 
 `dist/` は `make dist` で再生成される成果物置き場です。Nix や Home Manager が使えない環境へ持ち出すために commit しますが、手で編集する場所ではありません。`dist/` の内容を変えたい場合は、対応する生成元を編集してから `make dist` を実行します。
 
