@@ -16,7 +16,7 @@ nix run .#dotfiles -- doctor
 nix run .#dotfiles -- switch
 ```
 
-`dotfiles switch` runs `home-manager -b hm-backup --flake "$DOTFILES_HOME#nixos" switch` and then runs `doom sync`.
+`dotfiles switch` runs `home-manager -b hm-backup --flake "$DOTFILES_HOME#nixos" switch` and then runs the Doom configuration step.
 Before switching, it moves legacy links such as `~/.bashrc -> ~/.dotfiles/store/.bashrc` to `*.hm-backup`.
 
 If Doom Emacs is not installed yet:
@@ -39,9 +39,9 @@ dotfiles doctor
 dotfiles switch [--skip-doom-sync] [profile]
 dotfiles check
 dotfiles update
-dotfiles gnome configure
+dotfiles configure gnome
+dotfiles configure doom
 dotfiles doom install
-dotfiles doom sync
 dotfiles doom upgrade
 dotfiles template copy <nix|docker> [destination]
 ```

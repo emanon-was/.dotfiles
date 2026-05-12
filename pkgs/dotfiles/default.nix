@@ -38,9 +38,9 @@ writeShellApplication {
       dotfiles switch [--skip-doom-sync] [profile]
       dotfiles check
       dotfiles update
-      dotfiles gnome configure
+      dotfiles configure gnome
+      dotfiles configure doom
       dotfiles doom install
-      dotfiles doom sync
       dotfiles doom upgrade
       dotfiles template copy <nix|docker> [destination]
     USAGE
@@ -72,6 +72,14 @@ writeShellApplication {
         fail "Doom Emacs is not installed at $DOOM_HOME. Run: dotfiles doom install"
       fi
       "$DOOM_BIN" sync
+    }
+
+    gnome_configure() {
+      have gsettings || fail "gsettings is not available"
+      gsettings set org.gnome.desktop.interface gtk-key-theme "Emacs"
+      gsettings set org.gnome.desktop.interface document-font-name "Sans 11"
+      gsettings set org.gnome.desktop.interface font-name "Sans-serif 10"
+      gsettings set org.gnome.desktop.interface monospace-font-name "Monospace 11"
     }
 
     backup_legacy_link() {
@@ -174,14 +182,25 @@ writeShellApplication {
       cmd_check
     }
 
+    cmd_configure() {
+      case "''${1:-}" in
+        gnome)
+          gnome_configure
+          ;;
+        doom)
+          doom_sync
+          ;;
+        *)
+          usage
+          exit 2
+          ;;
+      esac
+    }
+
     cmd_gnome() {
       case "''${1:-}" in
         configure|apply)
-          have gsettings || fail "gsettings is not available"
-          gsettings set org.gnome.desktop.interface gtk-key-theme "Emacs"
-          gsettings set org.gnome.desktop.interface document-font-name "Sans 11"
-          gsettings set org.gnome.desktop.interface font-name "Sans-serif 10"
-          gsettings set org.gnome.desktop.interface monospace-font-name "Monospace 11"
+          gnome_configure
           ;;
         *)
           usage
@@ -200,7 +219,7 @@ writeShellApplication {
           "$DOOM_BIN" install
           doom_sync
           ;;
-        sync)
+        sync|configure)
           doom_sync
           ;;
         upgrade)
@@ -251,6 +270,10 @@ writeShellApplication {
       update)
         shift
         cmd_update "$@"
+        ;;
+      configure)
+        shift
+        cmd_configure "$@"
         ;;
       gnome)
         shift

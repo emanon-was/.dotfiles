@@ -130,7 +130,7 @@
   - `nix flake update` を実行する。
   - 実行後に `dotfiles check` を促すか、自動実行するか決める。
 
-- [x] `dotfiles gnome configure` を実装する。
+- [x] `dotfiles configure gnome` を実装する。
   - 既存の `bin/gnome-settings.sh` 相当を移す。
   - `gsettings` が存在しない環境では分かりやすく失敗する。
   - 将来的に `dconf.settings` へ移行できる余地を残す。
@@ -169,7 +169,7 @@
     - 設定ファイルは Home Manager で管理する。
     - activation では重いネットワーク処理を避ける。
 
-- [x] `dotfiles doom sync` を実装する。
+- [x] `dotfiles configure doom` を実装する。
   - `~/.config/emacs/bin/doom sync` を実行する。
   - `~/.config/emacs` が存在しない場合は `dotfiles doom install` を促す。
   - Doom コマンドが失敗した場合は exit code をそのまま返す。
@@ -180,7 +180,7 @@
   - 推奨は `dotfiles doom upgrade` 内で `doom upgrade` 後に `doom sync` を実行する。
 
 - [x] Home Manager 更新後に Doom sync を実行する導線を作る。
-  - `dotfiles switch` の中で `home-manager switch` 成功後に `dotfiles doom sync` を呼ぶ。
+  - `dotfiles switch` の中で `home-manager switch` 成功後に `dotfiles configure doom` 相当を呼ぶ。
   - または `--skip-doom-sync` のようなオプションを用意し、通常は sync する。
   - 完了条件:
     - Doom 設定変更後に `dotfiles switch` だけで `doom sync` まで完了する。
@@ -219,7 +219,7 @@
     ```
 
   - Home Manager または `dotfiles` CLI に移せたら削除または互換ラッパー化する。
-  - Doom 関連は `dotfiles doom install`, `dotfiles doom sync`, `dotfiles doom upgrade` に統合する。
+  - Doom 関連は `dotfiles doom install`, `dotfiles configure doom`, `dotfiles doom upgrade` に統合する。
 
 - [x] README を更新する。
   - 新しいセットアップ手順を書く。
@@ -228,7 +228,7 @@
     ```sh
     home-manager switch --flake .#<profile>
     dotfiles doctor
-    dotfiles gnome configure
+    dotfiles configure gnome
     ```
 
   - 旧 `make init` ベースの説明は削除または deprecated と明記する。
@@ -241,9 +241,9 @@
 - [x] `dotfiles doctor` を実行し、期待したチェック結果になることを確認する。
 - [ ] bash/zsh の起動確認をする。
 - [ ] tmux の keybind と status line を確認する。
-- [ ] GNOME 環境がある場合のみ `dotfiles gnome configure` を確認する。
+- [ ] GNOME 環境がある場合のみ `dotfiles configure gnome` を確認する。
 - [ ] `dotfiles doom install` を確認する。
-- [ ] `dotfiles doom sync` を確認する。
+- [ ] `dotfiles configure doom` を確認する。
 - [ ] `dotfiles switch` 後に Doom sync が実行されることを確認する。
 
 ## 注意点
