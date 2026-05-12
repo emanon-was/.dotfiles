@@ -15,10 +15,32 @@
 
 let
   common = ./scripts/common.sh;
+  scriptPath = name: ./scripts/${name}.sh;
+
+  commandNames = [
+    "dotfiles"
+    "dotfiles-configure"
+    "dotfiles-doctor"
+    "dotfiles-flake"
+    "dotfiles-project"
+  ];
 
   templates = runCommand "dotfiles-templates" { } ''
     mkdir -p "$out/share/dotfiles/templates"
     cp -R ${./templates}/. "$out/share/dotfiles/templates"/
+  '';
+
+  portableCommands = runCommand "dotfiles-portable-commands" { } ''
+    mkdir -p "$out/share/dotfiles/portable-bin"
+    ${builtins.concatStringsSep "\n" (map (name: ''
+      {
+        printf '%s\n' '#!/usr/bin/env bash'
+        cat ${common}
+        printf '\n'
+        cat ${scriptPath name}
+      } > "$out/share/dotfiles/portable-bin/${name}"
+      chmod +x "$out/share/dotfiles/portable-bin/${name}"
+    '') commandNames)}
   '';
 
   mkDotfilesCommand = name: runtimeInputs: script: extraText:
@@ -58,7 +80,7 @@ let
 in
 symlinkJoin {
   name = "dotfiles";
-  paths = [ dispatcher templates ] ++ subcommands;
+  paths = [ dispatcher templates portableCommands ] ++ subcommands;
 
   meta = {
     description = "Dotfiles management helper";

@@ -1,32 +1,11 @@
 { runCommand
 , coreutils
+, dotfilesPackage
 , homeFiles
 , homeSessionVars
 , username
 }:
 
-let
-  scripts = [
-    "dotfiles"
-    "dotfiles-configure"
-    "dotfiles-doctor"
-    "dotfiles-flake"
-    "dotfiles-project"
-  ];
-
-  common = ../dotfiles/scripts/common.sh;
-  scriptPath = name: ../dotfiles/scripts/${name}.sh;
-
-  installScript = name: ''
-    {
-      printf '%s\n' '#!/usr/bin/env bash'
-      cat ${common}
-      printf '\n'
-      cat ${scriptPath name}
-    } > "$out/home-files/.local/bin/${name}"
-    chmod +x "$out/home-files/.local/bin/${name}"
-  '';
-in
 runCommand "dotfiles-dist"
 {
   nativeBuildInputs = [
@@ -39,11 +18,11 @@ runCommand "dotfiles-dist"
   chmod -R u+w "$out/home-files"
   rm -f "$out/home-files/.local/bin"/dotfiles*
   mkdir -p "$out/home-files/.local/bin"
-  ${builtins.concatStringsSep "\n" (map installScript scripts)}
+  cp -RL ${dotfilesPackage}/share/dotfiles/portable-bin/. "$out/home-files/.local/bin"/
 
   rm -rf "$out/home-files/.local/share/dotfiles/templates"
   mkdir -p "$out/home-files/.local/share/dotfiles/templates"
-  cp -R ${../dotfiles/templates}/. "$out/home-files/.local/share/dotfiles/templates"/
+  cp -RL ${dotfilesPackage}/share/dotfiles/templates/. "$out/home-files/.local/share/dotfiles/templates"/
   chmod -R u+w "$out/home-files"
   cp ${./install.sh} "$out/install.sh"
   cp ${./uninstall.sh} "$out/uninstall.sh"
