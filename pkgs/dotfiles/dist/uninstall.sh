@@ -11,7 +11,7 @@ Environment:
 
 Default:
   prefix            $HOME
-  DOTFILES_BIN_DIR  $HOME/.bin
+  DOTFILES_BIN_DIR  $HOME/.local/bin
 USAGE
 }
 
@@ -22,8 +22,9 @@ case "${1:-}" in
     ;;
 esac
 
+dist_root="$(cd "$(dirname "$0")" && pwd -P)"
 prefix="${1:-$HOME}"
-bin_dir="${DOTFILES_BIN_DIR:-$HOME/.bin}"
+bin_dir="${DOTFILES_BIN_DIR:-$HOME/.local/bin}"
 
 case "$prefix" in
   ""|"/")
@@ -31,11 +32,6 @@ case "$prefix" in
     exit 1
     ;;
 esac
-
-command_store="$prefix/bin"
-if [ "$prefix" = "$HOME" ]; then
-  command_store="$HOME/.bin"
-fi
 
 restore_backup() {
   original_path="$1"
@@ -58,19 +54,14 @@ remove_link() {
 
   link_target="$(readlink "$link_path")"
   case "$link_target" in
-    "$command_store"/dotfiles*)
-      rm "$link_path"
-      printf 'removed command link: %s\n' "$link_path"
-      restore_backup "$link_path"
-      ;;
-    */bin/dotfiles*)
-      rm "$link_path"
-      printf 'removed command link: %s\n' "$link_path"
-      restore_backup "$link_path"
-      ;;
     "$prefix/home-files/"*)
       rm "$link_path"
       printf 'removed home link: %s\n' "$link_path"
+      restore_backup "$link_path"
+      ;;
+    "$dist_root/home-files/.local/bin/"*|*/dist/bin/dotfiles*)
+      rm "$link_path"
+      printf 'removed legacy command link: %s\n' "$link_path"
       restore_backup "$link_path"
       ;;
     *)
@@ -99,8 +90,9 @@ if [ -d "$bin_dir" ]; then
   done
 fi
 
-if [ -d "$command_store" ]; then
-  for link_path in "$command_store"/dotfiles*; do
+legacy_bin_dir="$HOME/.bin"
+if [ "$bin_dir" != "$legacy_bin_dir" ] && [ -d "$legacy_bin_dir" ]; then
+  for link_path in "$legacy_bin_dir"/dotfiles*; do
     remove_link "$link_path"
   done
 fi
@@ -110,7 +102,6 @@ chmod -R u+w \
 rm -rf "$prefix/home-files"
 
 if [ "$prefix" = "$HOME" ]; then
-  rmdir "$command_store" 2>/dev/null || true
   printf 'removed managed files from: %s\n' "$prefix"
 elif [ -e "$prefix" ]; then
   chmod -R u+w "$prefix" 2>/dev/null || true

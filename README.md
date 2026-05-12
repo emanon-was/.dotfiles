@@ -94,7 +94,7 @@ $HOME
 `dotfiles` コマンド群は以下へ symlink されます。
 
 ```text
-$HOME/.bin
+$HOME/.local/bin
 ```
 
 コマンドの実体は `dist/home-files/.local/bin` に生成されます。
@@ -108,7 +108,7 @@ $HOME/.bin
 `DOTFILES_BIN_DIR` を指定すると、コマンドの symlink 先を変えられます。
 
 ```sh
-DOTFILES_BIN_DIR="$HOME/bin" ./dist/install.sh
+DOTFILES_BIN_DIR="$HOME/.bin" ./dist/install.sh
 ```
 
 `dist/home-files/` には Home Manager から生成した `$HOME` 用 dotfiles が入ります。Nix なし環境で使う場合は、この内容を確認して必要なものだけ `$HOME` に配置します。

@@ -11,7 +11,7 @@ Environment:
 
 Default:
   prefix            $HOME
-  DOTFILES_BIN_DIR  $HOME/.bin
+  DOTFILES_BIN_DIR  $HOME/.local/bin
 USAGE
 }
 
@@ -24,7 +24,7 @@ esac
 
 dist_root="$(cd "$(dirname "$0")" && pwd -P)"
 prefix="${1:-$HOME}"
-bin_dir="${DOTFILES_BIN_DIR:-$HOME/.bin}"
+bin_dir="${DOTFILES_BIN_DIR:-$HOME/.local/bin}"
 
 [ -d "$dist_root/home-files" ] || {
   printf 'error: dist home-files directory not found: %s\n' "$dist_root/home-files" >&2
@@ -35,11 +35,6 @@ bin_dir="${DOTFILES_BIN_DIR:-$HOME/.bin}"
   printf 'error: dist home-files bin directory not found: %s\n' "$dist_root/home-files/.local/bin" >&2
   exit 1
 }
-
-command_store="$prefix/bin"
-if [ "$prefix" = "$HOME" ]; then
-  command_store="$HOME/.bin"
-fi
 
 backup_path() {
   original_path="$1"
@@ -61,13 +56,12 @@ move_aside() {
   printf 'moved existing path: %s -> %s\n' "$target_path" "$backup_target"
 }
 
-mkdir -p "$command_store" "$prefix/home-files" "$bin_dir"
+mkdir -p "$prefix/home-files" "$bin_dir"
 
 chmod -R u+w \
-  "$command_store" \
   "$prefix/home-files" 2>/dev/null || true
 rm -rf "$prefix/home-files"
-mkdir -p "$command_store" "$prefix/home-files"
+mkdir -p "$prefix/home-files" "$bin_dir"
 
 cp -R "$dist_root/home-files"/. "$prefix/home-files"/
 
@@ -114,9 +108,9 @@ find "$prefix/home-files" -mindepth 1 \( -type f -o -type l \) | while IFS= read
   printf 'linked home file: %s -> %s\n' "$target_path" "$source_path"
 done
 
-find "$dist_root/home-files/.local/bin" -mindepth 1 -maxdepth 1 -type f | while IFS= read -r source_path; do
+find "$prefix/home-files/.local/bin" -mindepth 1 -maxdepth 1 -type f | while IFS= read -r source_path; do
   command_name="$(basename "$source_path")"
-  command_path="$command_store/$command_name"
+  command_path="$bin_dir/$command_name"
 
   if [ -L "$command_path" ]; then
     current_target="$(readlink "$command_path")"
@@ -124,7 +118,7 @@ find "$dist_root/home-files/.local/bin" -mindepth 1 -maxdepth 1 -type f | while 
       :
     else
       case "$current_target" in
-        "$dist_root/home-files/.local/bin/"*)
+        "$prefix/home-files/.local/bin/"*|"$dist_root/home-files/.local/bin/"*)
           rm "$command_path"
           ln -s "$source_path" "$command_path"
           ;;
@@ -143,14 +137,22 @@ find "$dist_root/home-files/.local/bin" -mindepth 1 -maxdepth 1 -type f | while 
   else
     ln -s "$source_path" "$command_path"
   fi
-
-  if [ "$bin_dir/$command_name" = "$command_path" ]; then
-    continue
-  fi
-  ln -sf "$command_path" "$bin_dir/$command_name"
 done
 
+legacy_bin_dir="$HOME/.bin"
+if [ "$bin_dir" != "$legacy_bin_dir" ] && [ -d "$legacy_bin_dir" ]; then
+  for legacy_path in "$legacy_bin_dir"/dotfiles*; do
+    [ -L "$legacy_path" ] || continue
+    legacy_target="$(readlink "$legacy_path")"
+    case "$legacy_target" in
+      "$prefix/home-files/.local/bin/"*|"$dist_root/home-files/.local/bin/"*|*/dist/bin/dotfiles*)
+        rm "$legacy_path"
+        printf 'removed legacy command link: %s\n' "$legacy_path"
+        ;;
+    esac
+  done
+fi
+
 printf 'installed: %s\n' "$prefix"
-printf 'command links: %s/dotfiles*\n' "$command_store"
-printf 'linked commands: %s/dotfiles*\n' "$bin_dir"
+printf 'command links: %s/dotfiles*\n' "$bin_dir"
 printf 'ensure this directory is on PATH: %s\n' "$bin_dir"
