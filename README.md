@@ -160,7 +160,7 @@ dotfiles project init docker path/to/project
 
 ## リポジトリ開発
 
-root の `Makefile` は `dotfiles` コマンドの互換ではなく、このリポジトリを Nix で検証・ビルド・生成するためのものです。
+root の `Makefile` は、このリポジトリを Nix で検証・ビルド・生成するためのものです。
 
 ```sh
 make flake-check

@@ -1,6 +1,6 @@
 # Dotfiles Specification
 
-このリポジトリの現在仕様をまとめます。移行履歴や過去の判断は git log を参照し、このファイルには現時点で守る仕様だけを残します。
+このリポジトリの現在仕様をまとめます。
 
 ## 方針
 
@@ -8,7 +8,6 @@
 - NixOS system 側は stable を使い、Home Manager 側は `nixos-unstable` を使う。
 - Nix や Home Manager が使えない環境では、Nix build 済みの `dist/` を使う。
 - 副作用のある処理は Home Manager activation に入れず、`dotfiles` CLI の明示コマンドで実行する。
-- 旧 `store/`、`store.list`、旧 `bin/` スクリプト、旧 symlink 管理は使わない。
 
 ## ディレクトリ
 
@@ -48,7 +47,7 @@
 - `dotfiles` は Cargo 風 dispatcher。
 - `dotfiles <name>` は、同じ directory または PATH 上の `dotfiles-<name>` を実行する。
 - flake 依存コマンドは `dotfiles flake ...` 配下に置く。
-- 旧 `dotfiles check/update/switch` は使わず、`dotfiles flake check/update/switch` を使う。
+- flake 操作は `dotfiles flake check/update/switch` を使う。
 
 主要コマンド:
 
@@ -113,8 +112,7 @@ dotfiles project init <nix|docker> [destination]
 
 ## Makefile
 
-- root `Makefile` は repo 開発用。
-- `dotfiles` CLI の互換 wrapper としては使わない。
+- root `Makefile` は repo の検証、ビルド、生成用。
 
 主要 target:
 
