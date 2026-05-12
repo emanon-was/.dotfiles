@@ -6,6 +6,7 @@
 !/flake.nix
 !/flake.lock
 !/config
+!/dist
 !/home
 !/notes
 !/pkgs

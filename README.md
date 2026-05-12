@@ -57,3 +57,12 @@ dotfiles configure doom sync
 dotfiles configure doom upgrade
 dotfiles project init <nix|docker> [destination]
 ```
+
+## Dist
+
+`dist/` contains generated artifacts for environments that do not use this flake directly.
+Do not edit files under `dist/` by hand.
+
+```sh
+make dist
+```

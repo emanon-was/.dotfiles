@@ -21,10 +21,12 @@
       dotfilesPackage = pkgs.callPackage ./pkgs/dotfiles {
         inherit home-manager;
       };
+      dotfilesDist = pkgs.callPackage ./pkgs/dotfiles/dist.nix { };
     in
     {
       packages.${system} = {
         dotfiles = dotfilesPackage;
+        dotfiles-dist = dotfilesDist;
         default = dotfilesPackage;
       };
 

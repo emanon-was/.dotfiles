@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # shellcheck disable=SC2329
 set -u
 
@@ -270,3 +271,7 @@ gnome_configure() {
   gsettings set org.gnome.desktop.interface font-name "Sans-serif 10"
   gsettings set org.gnome.desktop.interface monospace-font-name "Monospace 11"
 }
+
+require_dotfiles_home
+nix flake update --flake "$DOTFILES_HOME"
+dotfiles-check
