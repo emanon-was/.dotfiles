@@ -273,6 +273,14 @@
   - `dotfiles project init nix` が legacy nix-shell 用なのか、flake/devShell 用なのかを明確にする。
   - 必要なら template 名を `nix-shell` / `nix-flake` のように分ける。
 
+- [ ] Nix build で生成した成果物を repo に commit する配布フローを設計する。
+  - Nix なしの環境でも `dotfiles` CLI や project template を展開できるようにする。
+  - 生成物の置き場を決める。候補: `dist/`, `generated/`, `release/`, `bootstrap/`。
+  - 生成物は原則手編集禁止にし、生成元と再生成コマンドを README に明記する。
+  - `nix build` 後に生成物を同期するコマンドを用意する。候補: `dotfiles build artifacts`, `dotfiles dist update`, `make dist`。
+  - commit 対象にする成果物の範囲を決める。例: `dotfiles-*` scripts, project templates, bootstrap installer。
+  - Nix store 固有パスや runtime dependency が生成物へ混入しないことを検証する。
+
 ## 注意点
 
 - ユーザーの未コミット変更を勝手に戻さない。
