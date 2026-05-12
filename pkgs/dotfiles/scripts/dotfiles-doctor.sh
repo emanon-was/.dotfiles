@@ -49,8 +49,10 @@ doctor_dotfiles_home() {
     failed=1
   fi
 
-  if [ -d "$DOTFILES_HOME/project-init" ]; then
-    for path in "$DOTFILES_HOME/project-init/nix" "$DOTFILES_HOME/project-init/docker"; do
+  project_init_dir="$DOTFILES_HOME/pkgs/dotfiles/project-init"
+
+  if [ -d "$project_init_dir" ]; then
+    for path in "$project_init_dir/nix" "$project_init_dir/docker"; do
       if [ -e "$path" ]; then
         ok "dotfiles path: $path"
       else
@@ -59,7 +61,7 @@ doctor_dotfiles_home() {
       fi
     done
   else
-    skip "project init templates: $DOTFILES_HOME/project-init"
+    skip "project init templates: $project_init_dir"
   fi
 
   return "$failed"

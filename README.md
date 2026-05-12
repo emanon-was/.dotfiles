@@ -15,8 +15,8 @@ NixOS の system 側は stable を使い、このリポジトリの Home Manager
 │   └── config/           Home Manager で配置する手書き設定の生成元
 ├── pkgs/dotfiles/        `dotfiles` CLI と `dist/` 生成 package の生成元
 │   ├── scripts/          `dotfiles-*` サブコマンドの shell script
+│   ├── project-init/     `dotfiles project init ...` で使うテンプレート
 │   └── dist/             `dist/install.sh` など配布用 script の生成元
-├── project-init/    `dotfiles project init ...` で使うプロジェクトテンプレート
 ├── notes/                Home Manager 管理対象ではない個人メモ
 ├── dist/                 Nix build で生成した配布用成果物
 ├── flake.nix             Home Manager、CLI package、dist package の入口
@@ -25,7 +25,7 @@ NixOS の system 側は stable を使い、このリポジトリの Home Manager
 └── TASKS.md              作業方針と残タスク
 ```
 
-基本的にメンテナンスするのは `home/`、`pkgs/dotfiles/`、`project-init/`、`notes/`、`README.md`、`TASKS.md` です。
+基本的にメンテナンスするのは `home/`、`pkgs/dotfiles/`、`notes/`、`README.md`、`TASKS.md` です。
 
 `dist/` は `make dist` で再生成される成果物置き場です。Nix や Home Manager が使えない環境へ持ち出すために commit しますが、手で編集する場所ではありません。`dist/` の内容を変えたい場合は、対応する生成元を編集してから `make dist` を実行します。
 
@@ -109,7 +109,7 @@ $HOME/.local/bin
 `install.sh` は `home-files` の内容をコピーせず、`$HOME/.bashrc` などから `home-files` 内のファイルへ symlink を作成します。
 既存ファイルや既存 symlink がある場合は `.backup` 付きの別名へ退避してから symlink を作成します。既存ディレクトリは残し、その配下に必要な symlink を作成します。
 `uninstall.sh` は管理対象 symlink を削除したあと、対応する `.backup` が残っていれば元の名前へ戻します。
-`dist/` は home-files の展開専用です。`project-init/` は含めません。
+`dist/` は home-files の展開専用です。project init 用テンプレートは含めません。
 
 アンインストールする場合:
 
@@ -156,7 +156,7 @@ dotfiles configure doom install --check
 
 ## project init
 
-プロジェクト用テンプレートは repo ルートの `project-init/` にあります。`dist/` には含めません。
+プロジェクト用テンプレートは `pkgs/dotfiles/project-init/` にあります。`dotfiles` CLI の実装データとして扱います。
 
 ```sh
 dotfiles project init nix
@@ -179,7 +179,7 @@ make home-build
 make dist
 ```
 
-`make dist` は `.#dotfiles-dist` をビルドし、その成果物で `dist/` を再生成します。`dist/` 配下は生成物なので、修正が必要な場合は `pkgs/dotfiles/`、`project-init/`、`home/` などの生成元を編集します。
+`make dist` は `.#dotfiles-dist` をビルドし、その成果物で `dist/` を再生成します。`dist/` 配下は生成物なので、修正が必要な場合は `pkgs/dotfiles/`、`home/` などの生成元を編集します。
 
 ## メモ
 

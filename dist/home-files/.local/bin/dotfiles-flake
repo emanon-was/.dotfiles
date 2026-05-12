@@ -12,7 +12,7 @@ if [ -z "${DOTFILES_HOME:-}" ]; then
   DOTFILES_HOME=""
   dotfiles_home_candidate=""
   while [ -n "$dotfiles_search_dir" ] && [ "$dotfiles_search_dir" != "/" ]; do
-    if [ -d "$dotfiles_search_dir/project-init" ]; then
+    if [ -d "$dotfiles_search_dir/pkgs/dotfiles/project-init" ]; then
       DOTFILES_HOME="$dotfiles_search_dir"
       break
     fi
