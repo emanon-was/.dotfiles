@@ -8,19 +8,6 @@ Usage:
 USAGE
 }
 
-DOOM_HOME="${DOOM_HOME:-$HOME/.config/emacs}"
-DOOM_BIN="$DOOM_HOME/bin/doom"
-
-doom_config_source() {
-  if [ -f "$DOTFILES_HOME/home/config/doom/config.el" ]; then
-    printf '%s\n' "$DOTFILES_HOME/home/config/doom/config.el"
-  elif [ -f "$DOTFILES_HOME/home-files/.config/doom/config.el" ]; then
-    printf '%s\n' "$DOTFILES_HOME/home-files/.config/doom/config.el"
-  else
-    printf '%s\n' "$DOTFILES_HOME/home/config/doom/config.el"
-  fi
-}
-
 directory_empty() {
   [ -d "$1" ] && [ -z "$(find "$1" -mindepth 1 -maxdepth 1 -print -quit)" ]
 }
@@ -39,10 +26,6 @@ doom_write_config_diff() {
   mkdir -p "$diff_dir"
   diff -u "$from_file" "$to_file" > "$diff_file" || true
   status "[doom] wrote config diff: $diff_file"
-}
-
-doom_installed() {
-  [ -x "$DOOM_BIN" ]
 }
 
 doom_checkout_ready() {

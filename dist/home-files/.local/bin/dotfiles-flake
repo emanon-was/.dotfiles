@@ -63,6 +63,7 @@ require_dotfiles_home() {
   [ -d "$DOTFILES_HOME" ] || fail "DOTFILES_HOME does not exist: $DOTFILES_HOME"
 }
 
+
 usage_flake() {
   cat <<'USAGE'
 Usage:

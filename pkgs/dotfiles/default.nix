@@ -36,7 +36,12 @@ let
   ];
 
   commandText = command:
-    (command.nixExtraText or "") + builtins.readFile common + "\n" + builtins.readFile command.script;
+    (command.nixExtraText or "")
+    + builtins.readFile common
+    + "\n"
+    + builtins.concatStringsSep "\n" (map builtins.readFile (command.libs or [ ]))
+    + "\n"
+    + builtins.readFile command.script;
 
   portableCommandSource = command:
     builtins.toFile "${command.name}-portable" (
@@ -44,6 +49,8 @@ let
       + "DOTFILES_PORTABLE_DIST=1\n"
       + (command.portableExtraText or "")
       + builtins.readFile common
+      + "\n"
+      + builtins.concatStringsSep "\n" (map builtins.readFile (command.libs or [ ]))
       + "\n"
       + builtins.readFile command.script
     );
@@ -59,6 +66,10 @@ let
     {
       name = "dotfiles-doctor";
       runtimeInputs = baseRuntimeInputs;
+      libs = [
+        ./scripts/lib/doom.sh
+        ./scripts/lib/templates.sh
+      ];
       script = ./scripts/dotfiles-doctor.sh;
     }
     {
@@ -69,11 +80,17 @@ let
     {
       name = "dotfiles-configure";
       runtimeInputs = baseRuntimeInputs;
+      libs = [
+        ./scripts/lib/doom.sh
+      ];
       script = ./scripts/dotfiles-configure.sh;
     }
     {
       name = "dotfiles-project";
       runtimeInputs = baseRuntimeInputs;
+      libs = [
+        ./scripts/lib/templates.sh
+      ];
       script = ./scripts/dotfiles-project.sh;
       nixExtraText = ''
         DOTFILES_BUILT_TEMPLATES="${templates}/share/dotfiles/templates"

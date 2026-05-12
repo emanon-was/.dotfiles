@@ -107,9 +107,9 @@ make dist
 ## 未完了タスク
 
 - [x] README の古い `pkgs/dotfiles/dist/` 説明を `pkgs/dist/` 構成に合わせる。
-- [ ] Doom 関連 helper の重複を `scripts/lib/doom.sh` に切り出す。
-- [ ] project templates 探索 helper の重複を `scripts/lib/templates.sh` に切り出す。
-- [ ] helper 切り出し後に `dist/` を再生成し、Nix package 版と portable dist 版の参照先を検証する。
+- [x] Doom 関連 helper の重複を `scripts/lib/doom.sh` に切り出す。
+- [x] project templates 探索 helper の重複を `scripts/lib/templates.sh` に切り出す。
+- [x] helper 切り出し後に `dist/` を再生成し、Nix package 版と portable dist 版の参照先を検証する。
 
 ## 注意点
 

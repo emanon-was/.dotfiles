@@ -1,20 +1,3 @@
-DOOM_HOME="${DOOM_HOME:-$HOME/.config/emacs}"
-DOOM_BIN="$DOOM_HOME/bin/doom"
-
-doom_config_source() {
-  if [ -f "$DOTFILES_HOME/home/config/doom/config.el" ]; then
-    printf '%s\n' "$DOTFILES_HOME/home/config/doom/config.el"
-  elif [ -f "$DOTFILES_HOME/home-files/.config/doom/config.el" ]; then
-    printf '%s\n' "$DOTFILES_HOME/home-files/.config/doom/config.el"
-  else
-    printf '%s\n' "$DOTFILES_HOME/home/config/doom/config.el"
-  fi
-}
-
-doom_installed() {
-  [ -x "$DOOM_BIN" ]
-}
-
 doctor_commands() {
   failed=0
 
@@ -66,10 +49,7 @@ doctor_dotfiles_home() {
     failed=1
   fi
 
-  templates_dir="${DOTFILES_TEMPLATES:-${DOTFILES_BUILT_TEMPLATES:-$DOTFILES_HOME/home-files/.local/share/dotfiles/templates}}"
-  if [ -z "${DOTFILES_PORTABLE_DIST:-}" ] && [ ! -d "$templates_dir" ] && [ -d "$DOTFILES_HOME/pkgs/dotfiles/templates" ]; then
-    templates_dir="$DOTFILES_HOME/pkgs/dotfiles/templates"
-  fi
+  templates_dir="$(dotfiles_templates_dir)"
 
   if [ -d "$templates_dir" ]; then
     for path in "$templates_dir/nix" "$templates_dir/docker"; do

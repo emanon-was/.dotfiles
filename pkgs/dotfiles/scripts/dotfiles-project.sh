@@ -11,16 +11,7 @@ case "${1:-}" in
     destination="${3:-.}"
     [ -n "$template" ] || fail "project template name is required"
     [ "$#" -le 3 ] || fail "unexpected argument for project init: $4"
-    templates_dir="${DOTFILES_TEMPLATES:-${DOTFILES_BUILT_TEMPLATES:-$DOTFILES_HOME/home-files/.local/share/dotfiles/templates}}"
-    if [ -z "${DOTFILES_PORTABLE_DIST:-}" ] && [ ! -d "$templates_dir" ] && [ -d "$DOTFILES_HOME/pkgs/dotfiles/templates" ]; then
-      templates_dir="$DOTFILES_HOME/pkgs/dotfiles/templates"
-    fi
-    if [ -z "${DOTFILES_PORTABLE_DIST:-}" ] && [ ! -d "$templates_dir" ] && [ -d "$(dirname "$DOTFILES_HOME")/pkgs/dotfiles/templates" ]; then
-      templates_dir="$(dirname "$DOTFILES_HOME")/pkgs/dotfiles/templates"
-    fi
-    if [ -z "${DOTFILES_PORTABLE_DIST:-}" ] && [ ! -d "$templates_dir" ] && [ -d "$HOME/.dotfiles/pkgs/dotfiles/templates" ]; then
-      templates_dir="$HOME/.dotfiles/pkgs/dotfiles/templates"
-    fi
+    templates_dir="$(dotfiles_templates_dir)"
     source="$templates_dir/$template"
     [ -d "$source" ] || fail "unknown project template: $template"
     mkdir -p "$destination"

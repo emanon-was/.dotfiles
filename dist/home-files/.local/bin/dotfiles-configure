@@ -63,16 +63,6 @@ require_dotfiles_home() {
   [ -d "$DOTFILES_HOME" ] || fail "DOTFILES_HOME does not exist: $DOTFILES_HOME"
 }
 
-usage_configure() {
-  cat <<'USAGE'
-Usage:
-  dotfiles configure gnome
-  dotfiles configure doom install [--check]
-  dotfiles configure doom sync
-  dotfiles configure doom upgrade
-USAGE
-}
-
 DOOM_HOME="${DOOM_HOME:-$HOME/.config/emacs}"
 DOOM_BIN="$DOOM_HOME/bin/doom"
 
@@ -84,6 +74,20 @@ doom_config_source() {
   else
     printf '%s\n' "$DOTFILES_HOME/home/config/doom/config.el"
   fi
+}
+
+doom_installed() {
+  [ -x "$DOOM_BIN" ]
+}
+
+usage_configure() {
+  cat <<'USAGE'
+Usage:
+  dotfiles configure gnome
+  dotfiles configure doom install [--check]
+  dotfiles configure doom sync
+  dotfiles configure doom upgrade
+USAGE
 }
 
 directory_empty() {
@@ -104,10 +108,6 @@ doom_write_config_diff() {
   mkdir -p "$diff_dir"
   diff -u "$from_file" "$to_file" > "$diff_file" || true
   status "[doom] wrote config diff: $diff_file"
-}
-
-doom_installed() {
-  [ -x "$DOOM_BIN" ]
 }
 
 doom_checkout_ready() {
