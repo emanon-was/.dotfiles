@@ -98,6 +98,7 @@ dotfiles project init <nix|docker> [destination]
 - `dist/` は home files の展開専用とする。
 - `dist/install.sh` は `dist/home-files` から `$HOME` へ直接 symlink する。
 - `$HOME/home-files` のような managed copy は作らない。
+- Home Manager 由来の `.config/systemd` は `dist` に含めない。
 - command は `dist/home-files/.local/bin` に含め、install 時は `$HOME/.local/bin` へ symlink する。
 - project init 用テンプレートは `dist/home-files/.local/share/dotfiles/templates` に含める。
 - 既存ファイルや既存 symlink は `.backup`, `.backup.1`, ... に退避してから symlink する。

@@ -34,6 +34,7 @@ runCommand "dotfiles-dist"
   # without Nix, so keep the generated dotfiles but normalize those references
   # to PATH-based hooks or remove Nix-only environment fragments.
   rm -rf "$out/home-files/.config/environment.d"
+  rm -rf "$out/home-files/.config/systemd"
   rm -f "$out/home-files/.zshenv"
   sed -i \
     -e '/BASH_COMPLETION_VERSINFO/,/^fi$/d' \
