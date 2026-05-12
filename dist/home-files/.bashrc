@@ -1,22 +1,32 @@
+
+
+# Commands that should be applied only for interactive shells.
+[[ $- == *i* ]] || return
+
+HISTFILESIZE=100000
+HISTSIZE=10000
+
+shopt -s histappend
+shopt -s extglob
+shopt -s globstar
+shopt -s checkjobs
+
+alias -- df='df -h'
+alias -- du='du -h'
+alias -- egrep='egrep --color=auto'
+alias -- emacs='emacs -nw'
+alias -- fgrep='fgrep --color=auto'
+alias -- grep='grep --color=auto'
+alias -- la='ls -a'
+alias -- ll='ls -la'
+alias -- nano='nano -Suwik'
+alias -- netstat='netstat -antup'
+alias -- ps='ps ux'
+alias -- psgrep='ps aux | grep -v grep | grep --color=auto'
+alias -- su='su -l'
+
+
 PS1="\u@\h:\w\$ "
-
-if [ -f "$HOME/.profile" ]; then
-  source "$HOME/.profile"
-fi
-
-alias la='ls -a'
-alias ll='ls -la'
-alias ps='ps ux'
-alias psgrep='ps aux | grep -v grep | grep --color=auto'
-alias grep='grep --color=auto'
-alias fgrep='fgrep --color=auto'
-alias egrep='egrep --color=auto'
-alias netstat='netstat -antup'
-alias du='du -h'
-alias df='df -h'
-alias su='su -l'
-alias nano='nano -Suwik'
-alias emacs='emacs -nw'
 
 if ls --help 2>&1 | grep -q -- --color; then
   alias ls='ls --color=auto -F'
@@ -31,3 +41,10 @@ fi
 if command -v direnv >/dev/null 2>&1; then
   eval "$(direnv hook bash)"
 fi
+
+if [ -n "${WSL_DISTRO_NAME:-}" ]; then
+  export GDK_SCALE=2
+  export GDK_DPI_SCALE=0.75
+fi
+
+

@@ -21,7 +21,9 @@
       dotfilesPackage = pkgs.callPackage ./pkgs/dotfiles {
         inherit home-manager;
       };
-      dotfilesDist = pkgs.callPackage ./pkgs/dotfiles/dist.nix { };
+      dotfilesDist = pkgs.callPackage ./pkgs/dotfiles/dist.nix {
+        homeFiles = "${self.homeConfigurations.${username}.activationPackage}/home-files";
+      };
     in
     {
       packages.${system} = {
