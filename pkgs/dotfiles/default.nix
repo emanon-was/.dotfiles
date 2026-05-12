@@ -218,29 +218,6 @@ writeShellApplication {
       gsettings set org.gnome.desktop.interface monospace-font-name "Monospace 11"
     }
 
-    backup_legacy_link() {
-      relative_path="$1"
-      target_path="$HOME/$relative_path"
-      legacy_path="$DOTFILES_HOME/store/$relative_path"
-      backup_path="$target_path.hm-backup"
-
-      if [ -L "$target_path" ] && [ "$(readlink "$target_path")" = "$legacy_path" ]; then
-        if [ -e "$backup_path" ] || [ -L "$backup_path" ]; then
-          fail "backup already exists: $backup_path"
-        fi
-        mv "$target_path" "$backup_path"
-        status "[backup] $target_path -> $backup_path"
-      fi
-    }
-
-    backup_legacy_links() {
-      backup_legacy_link ".bashrc"
-      backup_legacy_link ".profile"
-      backup_legacy_link ".zshrc"
-      backup_legacy_link ".screenrc"
-      backup_legacy_link ".tmux.conf"
-    }
-
     cmd_doctor() {
       failed=0
 
@@ -297,7 +274,6 @@ writeShellApplication {
         shift
       done
 
-      backup_legacy_links
       home-manager -b hm-backup --flake "$DOTFILES_HOME#$profile" switch
 
       if [ "$skip_doom_sync" -eq 0 ]; then

@@ -17,7 +17,6 @@ nix run .#dotfiles -- switch
 ```
 
 `dotfiles switch` runs `home-manager -b hm-backup --flake "$DOTFILES_HOME#nixos" switch` and then runs the Doom configuration step.
-Before switching, it moves legacy links such as `~/.bashrc -> ~/.dotfiles/store/.bashrc` to `*.hm-backup`.
 
 If Doom Emacs is not installed yet:
 

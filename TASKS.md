@@ -4,14 +4,13 @@
 
 ## 現状メモ
 
-- `store/` に `$HOME` へ配置したい dotfiles がある。
+- 旧 `store/` は廃止済み。
 - 旧 `store.list` ベースの symlink 管理は廃止済み。
 - `Makefile` は新しい `dotfiles` CLI を呼ぶ。
 - 旧 `bin/` スクリプトは廃止済み。
 - `config/doom/config.el` に Home Manager 管理の Doom Emacs 設定がある。
 - Doom の `init.el` と `packages.el` は Doom 側の更新対象として扱い、この repo では管理しない。
 - `template/` にはプロジェクト用テンプレートがある。
-- `store/.profile.d/export.sh` に未コミット変更があるため、編集時は既存変更を壊さないこと。
 
 ## 方針
 
@@ -20,7 +19,7 @@
 - `gsettings`、Doom Emacs install、テンプレートコピーなどは `dotfiles` CLI の明示サブコマンドにする。
 - Emacs 本体と Doom Emacs の設定ファイルは Home Manager で管理する。
 - Doom Emacs の更新・設定変更後には `doom sync` を実行できる導線を用意する。
-- 既存の `store/` は `tmux`/`screen` などの移行元ファイル置き場として残す。
+- tmux/screen などの手書き設定は `config/` 配下に置く。
 - Nix の構成は flake ベースにする。
 
 ## Phase 1: Home Manager の入口を作る
@@ -51,17 +50,7 @@
 ## Phase 2: 既存 dotfiles を Home Manager へ移す
 
 - [x] shell 設定を移行する。
-  - 対象:
-
-    ```text
-    store/.profile
-    store/.bashrc
-    store/.zshrc
-    store/.profile.d/alias.sh
-    store/.profile.d/export.sh
-    ```
-
-  - 移行先候補:
+  - 移行先:
 
     ```nix
     programs.bash
@@ -73,15 +62,15 @@
 
   - 完了条件:
     - bash/zsh 起動時に既存の alias、PATH、direnv hook が再現される。
-    - `store/.profile.d/export.sh` の未コミット変更を失わない。
+    - 旧 shell 設定の内容が Home Manager module に反映される。
 
 - [x] tmux 設定を移行する。
-  - `store/.tmux.conf` を `programs.tmux.extraConfig` へ移す。
+  - `config/tmux/tmux.conf` を `programs.tmux.extraConfig` で読む。
   - 完了条件:
     - prefix、status line、copy mode、pane keybind が再現される。
 
 - [x] screen 設定を移行する。
-  - まずは `home.file.".screenrc".source` で管理する。
+  - `config/screen/screenrc` を `home.file.".screenrc".source` で管理する。
   - 利用頻度が低ければ無理に module 化しない。
 
 - [x] git 設定を移行する。
@@ -122,7 +111,6 @@
 - [x] `dotfiles switch` を実装する。
   - `home-manager -b hm-backup --flake "$DOTFILES_HOME#<profile>" switch` を呼ぶ。
   - profile 指定方法は引数または環境変数で決める。
-  - 旧 `store/` への symlink は switch 前に `*.hm-backup` へ退避する。
 
 - [x] `dotfiles check` を実装する。
   - `nix flake check` を実行する。
@@ -275,7 +263,5 @@
 ## 注意点
 
 - ユーザーの未コミット変更を勝手に戻さない。
-- 特に `store/.profile.d/export.sh` は既に変更済みなので、編集前に差分を確認する。
 - `gsettings` や `doom install` のような副作用コマンドを Home Manager activation に入れない。
 - `doom sync` は `dotfiles switch` から明示的に呼び出す。Home Manager module の評価や activation に重いネットワーク処理を混ぜない。
-- `store/` に残っているファイルは Home Manager module から参照される設定ファイルとして扱う。

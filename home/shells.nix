@@ -18,7 +18,6 @@ in
       "${home}/.cargo/bin"
       "${home}/.config/emacs/bin"
       "${home}/.local/bin"
-      "${home}/.dotfiles/bin"
     ];
 
     shellAliases = {
