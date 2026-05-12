@@ -7,6 +7,7 @@
 - 旧 `store/` は廃止済み。
 - 旧 `store.list` ベースの symlink 管理は廃止済み。
 - `Makefile` は新しい `dotfiles` CLI を呼ぶ。
+- `dotfiles` CLI は Cargo 風に `dotfiles-<subcommand>` executable へ dispatch する。
 - 旧 `bin/` スクリプトは廃止済み。
 - `config/doom/config.el` に Home Manager 管理の Doom Emacs 設定がある。
 - Doom の `init.el` と `packages.el` は Doom 側の更新対象として扱い、この repo では管理しない。
@@ -95,6 +96,7 @@
 - [x] Nix で `dotfiles` コマンドを提供する。
   - `writeShellApplication` などを使う。
   - `home.packages` に追加して利用可能にする。
+  - `dotfiles` 本体は dispatcher にし、`dotfiles-<subcommand>` を PATH から実行する。
 
 - [x] `dotfiles doctor` を実装する。
   - 確認項目:

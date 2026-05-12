@@ -43,6 +43,9 @@ nix run .#dotfiles -- switch --skip-doom-sync
 
 ## Commands
 
+`dotfiles` dispatches subcommands by looking for `dotfiles-<command>` on `PATH`, similar to Cargo subcommands.
+For example, `dotfiles doctor` runs `dotfiles-doctor`.
+
 ```sh
 dotfiles doctor
 dotfiles switch [--skip-doom-sync] [profile]

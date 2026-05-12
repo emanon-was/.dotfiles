@@ -1,0 +1,263 @@
+# shellcheck disable=SC2329
+set -u
+
+DOTFILES_HOME="${DOTFILES_HOME:-$HOME/.dotfiles}"
+DOTFILES_PROFILE="${DOTFILES_PROFILE:-nixos}"
+DOOM_HOME="${DOOM_HOME:-$HOME/.config/emacs}"
+DOOM_BIN="$DOOM_HOME/bin/doom"
+
+status() {
+  printf '%s\n' "$*"
+}
+
+ok() {
+  status "[ok] $*"
+}
+
+warn() {
+  status "[warn] $*"
+}
+
+missing() {
+  status "[missing] $*"
+}
+
+skip() {
+  status "[skip] $*"
+}
+
+fail() {
+  printf 'error: %s\n' "$*" >&2
+  exit 1
+}
+
+have() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+require_dotfiles_home() {
+  [ -d "$DOTFILES_HOME" ] || fail "DOTFILES_HOME does not exist: $DOTFILES_HOME"
+}
+
+directory_empty() {
+  [ -d "$1" ] && [ -z "$(find "$1" -mindepth 1 -maxdepth 1 -print -quit)" ]
+}
+
+doom_installed() {
+  [ -x "$DOOM_BIN" ]
+}
+
+doom_checkout_ready() {
+  [ -d "$DOOM_HOME/.git" ] && doom_installed
+}
+
+doom_config_ready() {
+  [ -f "$HOME/.config/doom/init.el" ] && [ -f "$HOME/.config/doom/packages.el" ]
+}
+
+doom_check_config_current() {
+  dotfiles_config="$DOTFILES_HOME/config/doom/config.el"
+  active_config="$HOME/.config/doom/config.el"
+
+  [ -f "$dotfiles_config" ] || fail "Doom config source does not exist: $dotfiles_config"
+
+  if [ ! -e "$active_config" ]; then
+    status "[doom] config.el is not installed yet: $active_config"
+    fail "Run: dotfiles switch"
+  fi
+
+  if cmp -s "$dotfiles_config" "$active_config"; then
+    if [ -L "$active_config" ]; then
+      status "[doom] config.el is current: $active_config -> $(readlink "$active_config")"
+    else
+      status "[doom] config.el is current: $active_config"
+    fi
+    return 0
+  fi
+
+  status "[doom] config.el differs from dotfiles source"
+  diff -u "$active_config" "$dotfiles_config" || true
+  fail "Run: dotfiles switch"
+}
+
+doom_unlink_managed_config() {
+  DOOM_CONFIG_WAS_LINK=0
+  DOOM_CONFIG_LINK_TARGET=""
+  active_config="$HOME/.config/doom/config.el"
+
+  if [ -L "$active_config" ]; then
+    DOOM_CONFIG_WAS_LINK=1
+    DOOM_CONFIG_LINK_TARGET="$(readlink "$active_config")"
+    status "[doom] temporarily removing managed config.el symlink"
+    rm "$active_config"
+  elif [ -e "$active_config" ]; then
+    status "[doom] config.el is not a symlink; leaving it in place"
+  else
+    status "[doom] config.el is absent before Doom command"
+  fi
+}
+
+doom_compare_generated_config_and_restore() {
+  dotfiles_config="$DOTFILES_HOME/config/doom/config.el"
+  active_config="$HOME/.config/doom/config.el"
+  diff_status=0
+
+  [ -f "$dotfiles_config" ] || fail "Doom config source does not exist: $dotfiles_config"
+
+  if [ -f "$active_config" ] && [ ! -L "$active_config" ]; then
+    if cmp -s "$active_config" "$dotfiles_config"; then
+      status "[doom] generated config.el matches dotfiles source"
+    else
+      status "[doom] generated config.el differs from dotfiles source"
+      diff -u "$active_config" "$dotfiles_config" || true
+      diff_status=1
+    fi
+  else
+    status "[doom] no generated config.el to compare"
+  fi
+
+  if [ "$DOOM_CONFIG_WAS_LINK" -eq 1 ]; then
+    if [ -e "$active_config" ] || [ -L "$active_config" ]; then
+      rm "$active_config"
+    fi
+    ln -s "$DOOM_CONFIG_LINK_TARGET" "$active_config"
+    status "[doom] restored managed config.el symlink"
+  fi
+
+  if [ "$diff_status" -ne 0 ]; then
+    fail "Review generated config.el diff before continuing"
+  fi
+}
+
+doom_run_with_generated_config_check() {
+  doom_unlink_managed_config
+  set +e
+  "$@"
+  command_status="$?"
+  set -e
+  doom_compare_generated_config_and_restore
+  return "$command_status"
+}
+
+doom_refresh_recipe_repositories() {
+  recipes_dir="$DOOM_HOME/.local/straight/repos"
+  [ -d "$recipes_dir" ] || return 0
+
+  status "[doom] refreshing straight recipe repositories"
+  for repo in org-elpa melpa nongnu-elpa gnu-elpa-mirror el-get emacsmirror-mirror; do
+    repo_path="$recipes_dir/$repo"
+    if [ -d "$repo_path/.git" ]; then
+      status "[doom] updating recipe repository: $repo"
+      branch="$(git -C "$repo_path" branch --show-current)"
+      if [ -z "$branch" ]; then
+        status "[doom] recipe repository is detached, skipping: $repo"
+      else
+        git -C "$repo_path" fetch origin "$branch"
+        git -C "$repo_path" merge --ff-only "origin/$branch"
+      fi
+    else
+      status "[doom] recipe repository not present: $repo"
+    fi
+  done
+}
+
+doom_clone() {
+  if [ ! -e "$DOOM_HOME" ]; then
+    status "[doom] cloning Doom Emacs into $DOOM_HOME"
+    git clone --depth 1 https://github.com/doomemacs/doomemacs "$DOOM_HOME"
+  elif directory_empty "$DOOM_HOME"; then
+    status "[doom] cloning Doom Emacs into empty directory $DOOM_HOME"
+    git clone --depth 1 https://github.com/doomemacs/doomemacs "$DOOM_HOME"
+  elif doom_checkout_ready; then
+    status "[doom] checkout already exists: $DOOM_HOME"
+  else
+    fail "$DOOM_HOME exists but is not a usable Doom Emacs checkout"
+  fi
+}
+
+doom_sync() {
+  if ! doom_installed; then
+    fail "Doom Emacs is not installed at $DOOM_HOME. Run: dotfiles configure doom install"
+  fi
+  doom_check_config_current
+  status "[doom] syncing Doom profile"
+  "$DOOM_BIN" sync
+}
+
+doom_install_check() {
+  require_dotfiles_home
+
+  original_home="$HOME"
+  original_doom_home="$DOOM_HOME"
+  original_doom_bin="$DOOM_BIN"
+  check_root="$(mktemp -d)"
+
+  # shellcheck disable=SC2329
+  cleanup_doom_install_check() {
+    HOME="$original_home"
+    DOOM_HOME="$original_doom_home"
+    DOOM_BIN="$original_doom_bin"
+    rm -rf "$check_root"
+  }
+  trap cleanup_doom_install_check RETURN
+
+  HOME="$check_root/home"
+  DOOM_HOME="$HOME/.config/emacs"
+  DOOM_BIN="$DOOM_HOME/bin/doom"
+  export DOTFILES_HOME
+
+  status "[doom-check] using temporary HOME: $HOME"
+  mkdir -p "$DOOM_HOME/.git" "$DOOM_HOME/bin" "$HOME/.config/doom"
+
+  cat > "$DOOM_BIN" <<'FAKE_DOOM'
+#!/usr/bin/env bash
+set -euo pipefail
+
+case "${1:-}" in
+  install)
+    mkdir -p "$HOME/.config/doom"
+    cp "$DOTFILES_HOME/config/doom/config.el" "$HOME/.config/doom/config.el"
+    touch "$HOME/.config/doom/init.el" "$HOME/.config/doom/packages.el"
+    ;;
+  sync)
+    ;;
+  *)
+    printf 'unexpected fake doom command: %s\n' "${1:-}" >&2
+    exit 2
+    ;;
+esac
+FAKE_DOOM
+  chmod +x "$DOOM_BIN"
+
+  ln -s "$DOTFILES_HOME/config/doom/config.el" "$HOME/.config/doom/config.el"
+
+  status "[doom-check] verifying isolated Doom checkout detection"
+  doom_checkout_ready || fail "temporary Doom checkout was not detected as ready"
+
+  status "[doom-check] verifying generated config comparison and symlink restore"
+  doom_run_with_generated_config_check "$DOOM_BIN" install
+
+  active_config="$HOME/.config/doom/config.el"
+  if [ ! -L "$active_config" ]; then
+    fail "managed config.el symlink was not restored"
+  fi
+  if [ "$(readlink "$active_config")" != "$DOTFILES_HOME/config/doom/config.el" ]; then
+    fail "managed config.el symlink points to an unexpected target"
+  fi
+
+  status "[doom-check] verifying bootstrap config detection"
+  doom_config_ready || fail "temporary Doom bootstrap files were not created"
+
+  status "[doom-check] verifying sync preflight check"
+  doom_sync
+
+  status "[doom-check] install check passed"
+}
+
+gnome_configure() {
+  have gsettings || fail "gsettings is not available"
+  gsettings set org.gnome.desktop.interface gtk-key-theme "Emacs"
+  gsettings set org.gnome.desktop.interface document-font-name "Sans 11"
+  gsettings set org.gnome.desktop.interface font-name "Sans-serif 10"
+  gsettings set org.gnome.desktop.interface monospace-font-name "Monospace 11"
+}
