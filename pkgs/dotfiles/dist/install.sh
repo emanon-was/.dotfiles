@@ -31,16 +31,6 @@ bin_dir="${DOTFILES_BIN_DIR:-$HOME/.bin}"
   exit 1
 }
 
-[ -d "$dist_root/project-templates" ] || {
-  printf 'error: dist project-templates directory not found: %s\n' "$dist_root/project-templates" >&2
-  exit 1
-}
-
-[ -d "$dist_root/home" ] || {
-  printf 'error: dist home directory not found: %s\n' "$dist_root/home" >&2
-  exit 1
-}
-
 [ -d "$dist_root/home-files" ] || {
   printf 'error: dist home-files directory not found: %s\n' "$dist_root/home-files" >&2
   exit 1
@@ -51,25 +41,16 @@ if [ "$prefix" = "$HOME" ]; then
   command_store="$HOME/.bin"
 fi
 
-mkdir -p "$command_store" "$prefix/project-templates" "$prefix/home" "$prefix/home-files" "$bin_dir"
+mkdir -p "$command_store" "$prefix/home-files" "$bin_dir"
 
 chmod -R u+w \
   "$command_store" \
-  "$prefix/project-templates/nix" \
-  "$prefix/project-templates/docker" \
-  "$prefix/home/config" \
   "$prefix/home-files" 2>/dev/null || true
 rm -f "$command_store"/dotfiles*
-rm -rf \
-  "$prefix/project-templates/nix" \
-  "$prefix/project-templates/docker" \
-  "$prefix/home/config" \
-  "$prefix/home-files"
-mkdir -p "$command_store" "$prefix/project-templates" "$prefix/home" "$prefix/home-files"
+rm -rf "$prefix/home-files"
+mkdir -p "$command_store" "$prefix/home-files"
 
 cp -R "$dist_root/bin"/. "$command_store"/
-cp -R "$dist_root/project-templates"/. "$prefix/project-templates"/
-cp -R "$dist_root/home"/. "$prefix/home"/
 cp -R "$dist_root/home-files"/. "$prefix/home-files"/
 chmod +x "$command_store"/dotfiles*
 

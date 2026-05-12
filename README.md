@@ -62,7 +62,7 @@ Nix を使わない環境では `dist/` を使います。`dist/` は Nix build 
 ./dist/install.sh
 ```
 
-デフォルトでは以下にインストールされます。
+デフォルトでは以下に `home-files` が配置されます。
 
 ```text
 $HOME
@@ -88,6 +88,7 @@ DOTFILES_BIN_DIR="$HOME/bin" ./dist/install.sh
 
 `dist/home-files/` には Home Manager から生成した `$HOME` 用 dotfiles が入ります。Nix なし環境で使う場合は、この内容を確認して必要なものだけ `$HOME` に配置します。
 `install.sh` は `home-files` の内容をコピーせず、`$HOME/.bashrc` などから `home-files` 内のファイルへ symlink を作成します。
+`project-templates/` と `home/config/` は `dist/` には含まれますが、`install.sh` では展開しません。
 
 アンインストールする場合:
 

@@ -73,18 +73,11 @@ fi
 rm -f "$command_store"/dotfiles*
 
 chmod -R u+w \
-  "$prefix/project-templates/nix" \
-  "$prefix/project-templates/docker" \
-  "$prefix/home/config" \
   "$prefix/home-files" 2>/dev/null || true
-rm -rf \
-  "$prefix/project-templates/nix" \
-  "$prefix/project-templates/docker" \
-  "$prefix/home/config" \
-  "$prefix/home-files"
+rm -rf "$prefix/home-files"
 
 if [ "$prefix" = "$HOME" ]; then
-  rmdir "$prefix/project-templates" "$prefix/home" "$command_store" 2>/dev/null || true
+  rmdir "$command_store" 2>/dev/null || true
   printf 'removed managed files from: %s\n' "$prefix"
 elif [ -e "$prefix" ]; then
   chmod -R u+w "$prefix" 2>/dev/null || true
