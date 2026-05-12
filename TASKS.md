@@ -250,10 +250,27 @@
 - [x] `dotfiles doctor` を実行し、期待したチェック結果になることを確認する。
 - [x] bash/zsh の起動確認をする。
 - [x] tmux の keybind と status line を確認する。
-- [ ] GNOME 環境がある場合のみ `dotfiles configure gnome` を確認する。
-- [ ] `dotfiles configure doom install` を確認する。
+- [x] GNOME 環境がある場合のみ `dotfiles configure gnome` を確認する。
+  - この環境では GNOME/gsettings がないため、検証は skip 扱いにする。
+- [x] `dotfiles configure doom install` を確認する。
 - [x] `dotfiles configure doom sync` を確認する。
 - [x] `dotfiles switch` 後に Doom sync が実行されることを確認する。
+
+## Phase 7: 運用改善
+
+- [ ] `dotfiles doctor` を強化する。
+  - Home Manager の profile/generation 状態を確認する。
+  - `~/.config/doom/config.el` の symlink 状態と参照先を確認する。
+  - Doom 側で管理する `~/.config/doom/init.el` と `~/.config/doom/packages.el` の有無を確認する。
+  - Doom checkout `~/.config/emacs` と `doom` executable の状態を確認する。
+  - straight recipe repositories の存在、branch、remote、追跡状態を確認する。
+  - system は stable、home は unstable という運用前提を確認しやすい表示にする。
+
+- [ ] `dotfiles configure doom install --check` を追加する。
+  - 新規環境を想定して、一時ディレクトリへ `HOME` と `DOOM_HOME` を向けた検証を行う。
+  - 実環境の `~/.config/emacs` と `~/.config/doom` は変更しない。
+  - clone/install 判定、Doom 生成 `config.el` との差分確認、symlink 復元の流れを検証する。
+  - ネットワークを伴う実 install が必要な場合は、その旨を明示してから実行する。
 
 ## 注意点
 
