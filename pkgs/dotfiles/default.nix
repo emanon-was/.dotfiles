@@ -174,7 +174,13 @@ writeShellApplication {
         repo_path="$recipes_dir/$repo"
         if [ -d "$repo_path/.git" ]; then
           status "[doom] updating recipe repository: $repo"
-          git -C "$repo_path" pull --ff-only
+          branch="$(git -C "$repo_path" branch --show-current)"
+          if [ -z "$branch" ]; then
+            status "[doom] recipe repository is detached, skipping: $repo"
+          else
+            git -C "$repo_path" fetch origin "$branch"
+            git -C "$repo_path" merge --ff-only "origin/$branch"
+          fi
         else
           status "[doom] recipe repository not present: $repo"
         fi
