@@ -39,9 +39,9 @@ writeShellApplication {
       dotfiles check
       dotfiles update
       dotfiles configure gnome
-      dotfiles configure doom
-      dotfiles doom install
-      dotfiles doom upgrade
+      dotfiles configure doom install
+      dotfiles configure doom sync
+      dotfiles configure doom upgrade
       dotfiles template copy <nix|docker> [destination]
     USAGE
     }
@@ -69,7 +69,7 @@ writeShellApplication {
 
     doom_sync() {
       if ! doom_installed; then
-        fail "Doom Emacs is not installed at $DOOM_HOME. Run: dotfiles doom install"
+        fail "Doom Emacs is not installed at $DOOM_HOME. Run: dotfiles configure doom install"
       fi
       "$DOOM_BIN" sync
     }
@@ -185,10 +185,16 @@ writeShellApplication {
     cmd_configure() {
       case "''${1:-}" in
         gnome)
+          shift
+          if [ "$#" -gt 0 ]; then
+            usage
+            exit 2
+          fi
           gnome_configure
           ;;
         doom)
-          doom_sync
+          shift
+          cmd_doom "$@"
           ;;
         *)
           usage
@@ -224,7 +230,7 @@ writeShellApplication {
           ;;
         upgrade)
           if ! doom_installed; then
-            fail "Doom Emacs is not installed at $DOOM_HOME. Run: dotfiles doom install"
+            fail "Doom Emacs is not installed at $DOOM_HOME. Run: dotfiles configure doom install"
           fi
           "$DOOM_BIN" upgrade
           doom_sync

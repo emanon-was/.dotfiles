@@ -22,7 +22,7 @@ configure-gnome:
 	@$(DOTFILES) configure gnome
 
 configure-doom:
-	@$(DOTFILES) configure doom
+	@$(DOTFILES) configure doom sync
 
 gnome-configure:
 	@$(DOTFILES) configure gnome
@@ -31,13 +31,13 @@ gnome-apply:
 	@$(DOTFILES) configure gnome
 
 doom-install:
-	@$(DOTFILES) doom install
+	@$(DOTFILES) configure doom install
 
 doom-sync:
-	@$(DOTFILES) configure doom
+	@$(DOTFILES) configure doom sync
 
 doom-upgrade:
-	@$(DOTFILES) doom upgrade
+	@$(DOTFILES) configure doom upgrade
 
 plan:
 	@bin/.dotfiles-plan.sh $(STORE) $(STORE_LIST)

@@ -22,7 +22,7 @@ Before switching, it moves legacy links such as `~/.bashrc -> ~/.dotfiles/store/
 If Doom Emacs is not installed yet:
 
 ```sh
-nix run .#dotfiles -- doom install
+nix run .#dotfiles -- configure doom install
 nix run .#dotfiles -- switch
 ```
 
@@ -40,9 +40,9 @@ dotfiles switch [--skip-doom-sync] [profile]
 dotfiles check
 dotfiles update
 dotfiles configure gnome
-dotfiles configure doom
-dotfiles doom install
-dotfiles doom upgrade
+dotfiles configure doom install
+dotfiles configure doom sync
+dotfiles configure doom upgrade
 dotfiles template copy <nix|docker> [destination]
 ```
 

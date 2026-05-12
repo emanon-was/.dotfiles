@@ -135,7 +135,7 @@
   - `gsettings` が存在しない環境では分かりやすく失敗する。
   - 将来的に `dconf.settings` へ移行できる余地を残す。
 
-- [x] `dotfiles doom install` を実装する。
+- [x] `dotfiles configure doom install` を実装する。
   - 既存の `bin/doomemacs-init.sh` 相当を移す。
   - 既に `~/.config/emacs` が存在する場合の挙動を明示する。
   - clone と install を分けるか検討する。
@@ -163,24 +163,24 @@
 
 - [x] Doom Emacs 本体の checkout を管理する。
   - 既存の `~/.config/emacs` を Doom Emacs の checkout 先として使う。
-  - Home Manager で git clone を直接 activation に埋め込むか、`dotfiles doom install` に限定するかを決める。
+  - Home Manager で git clone を直接 activation に埋め込むか、`dotfiles configure doom install` に限定するかを決める。
   - 推奨:
-    - 初回 clone は `dotfiles doom install` で明示実行する。
+    - 初回 clone は `dotfiles configure doom install` で明示実行する。
     - 設定ファイルは Home Manager で管理する。
     - activation では重いネットワーク処理を避ける。
 
-- [x] `dotfiles configure doom` を実装する。
+- [x] `dotfiles configure doom sync` を実装する。
   - `~/.config/emacs/bin/doom sync` を実行する。
-  - `~/.config/emacs` が存在しない場合は `dotfiles doom install` を促す。
+  - `~/.config/emacs` が存在しない場合は `dotfiles configure doom install` を促す。
   - Doom コマンドが失敗した場合は exit code をそのまま返す。
 
-- [x] `dotfiles doom upgrade` を実装する。
+- [x] `dotfiles configure doom upgrade` を実装する。
   - `~/.config/emacs/bin/doom upgrade` を実行する。
   - upgrade 後に `doom sync` を実行するか、明示的に案内するか決める。
-  - 推奨は `dotfiles doom upgrade` 内で `doom upgrade` 後に `doom sync` を実行する。
+  - 推奨は `dotfiles configure doom upgrade` 内で `doom upgrade` 後に `doom sync` を実行する。
 
 - [x] Home Manager 更新後に Doom sync を実行する導線を作る。
-  - `dotfiles switch` の中で `home-manager switch` 成功後に `dotfiles configure doom` 相当を呼ぶ。
+  - `dotfiles switch` の中で `home-manager switch` 成功後に `dotfiles configure doom sync` 相当を呼ぶ。
   - または `--skip-doom-sync` のようなオプションを用意し、通常は sync する。
   - 完了条件:
     - Doom 設定変更後に `dotfiles switch` だけで `doom sync` まで完了する。
@@ -219,7 +219,7 @@
     ```
 
   - Home Manager または `dotfiles` CLI に移せたら削除または互換ラッパー化する。
-  - Doom 関連は `dotfiles doom install`, `dotfiles configure doom`, `dotfiles doom upgrade` に統合する。
+  - Doom 関連は `dotfiles configure doom install`, `dotfiles configure doom sync`, `dotfiles configure doom upgrade` に統合する。
 
 - [x] README を更新する。
   - 新しいセットアップ手順を書く。
@@ -242,8 +242,8 @@
 - [ ] bash/zsh の起動確認をする。
 - [ ] tmux の keybind と status line を確認する。
 - [ ] GNOME 環境がある場合のみ `dotfiles configure gnome` を確認する。
-- [ ] `dotfiles doom install` を確認する。
-- [ ] `dotfiles configure doom` を確認する。
+- [ ] `dotfiles configure doom install` を確認する。
+- [ ] `dotfiles configure doom sync` を確認する。
 - [ ] `dotfiles switch` 後に Doom sync が実行されることを確認する。
 
 ## 注意点
