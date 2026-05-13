@@ -144,9 +144,25 @@ doom_sync() {
   doom_sync_raw
 }
 
+doom_workdir() {
+  if [ -d "${HOME:-}" ]; then
+    printf '%s\n' "$HOME"
+  else
+    printf '%s\n' /tmp
+  fi
+}
+
+doom_run() {
+  workdir="$(doom_workdir)"
+  (
+    cd "$workdir"
+    "$DOOM_BIN" "$@"
+  )
+}
+
 doom_sync_raw() {
   status "[doom] syncing Doom profile"
-  "$DOOM_BIN" sync
+  doom_run sync
 }
 
 doom_save_initial_config() {
@@ -183,7 +199,11 @@ doom_save_initial_config() {
     done
 
     status "[doom] generating Doom initial config in isolated local state"
-    HOME="$HOME" DOOMLOCALDIR="$temp_doomlocaldir" "$DOOM_BIN" --doomdir "$real_doomdir" install --force --no-env --no-install --no-hooks
+    workdir="$(doom_workdir)"
+    (
+      cd "$workdir"
+      HOME="$HOME" DOOMLOCALDIR="$temp_doomlocaldir" "$DOOM_BIN" --doomdir "$real_doomdir" install --force --no-env --no-install --no-hooks
+    )
 
     if ! find "$real_doomdir" -mindepth 1 -print -quit | grep -q .; then
       fail "Doom install did not generate config files in: $real_doomdir"
@@ -309,7 +329,7 @@ FAKE_DOOM
   fi
 
   status "[doom-check] verifying install flow"
-  "$DOOM_BIN" install --force
+  doom_run install --force
   doom_sync_raw
 
   status "[doom-check] verifying sync preflight check"
@@ -354,7 +374,7 @@ cmd_doom() {
       doom_save_initial_config
       doom_link_dotfiles_config
       status "[doom] running Doom install"
-      "$DOOM_BIN" install --force
+      doom_run install --force
       doom_sync
       ;;
     sync)
@@ -366,7 +386,7 @@ cmd_doom() {
       fi
       doom_refresh_recipe_repositories
       status "[doom] upgrading Doom Emacs"
-      "$DOOM_BIN" upgrade --force
+      doom_run upgrade --force
       doom_save_initial_config
       doom_link_dotfiles_config
       doom_sync
