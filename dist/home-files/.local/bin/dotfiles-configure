@@ -430,6 +430,9 @@ done
 
 case "$command" in
   install)
+    # This fake Doom command is used only by `dotfiles configure doom install --check`.
+    # It simulates the bootstrap files Doom creates during install without touching
+    # the real Doom checkout or network.
     mkdir -p "$doomdir"
     if [ ! -e "$doomdir/config.el" ]; then
       cp "$DOTFILES_DOOM_CONFIG_SOURCE" "$doomdir/config.el"
