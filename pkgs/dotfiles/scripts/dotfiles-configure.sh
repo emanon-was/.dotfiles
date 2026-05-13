@@ -1,3 +1,10 @@
+# This script is composed by pkgs/dotfiles/default.nix.
+# Prepended dependencies:
+# - scripts/lib/common.sh
+# - scripts/lib/doom.sh
+# Injected Nix variables:
+# - DOTFILES_BUILT_HOME_FILES
+
 usage_configure() {
   cat <<'USAGE'
 Usage:

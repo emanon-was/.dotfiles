@@ -1,3 +1,8 @@
+# This script is composed by pkgs/dotfiles/default.nix.
+# Prepended dependencies:
+# - scripts/lib/common.sh
+# Runtime inputs such as nix and home-manager are declared in default.nix.
+
 usage_flake() {
   cat <<'USAGE'
 Usage:

@@ -1,3 +1,11 @@
+# This script is composed by pkgs/dotfiles/default.nix.
+# Prepended dependencies:
+# - scripts/lib/common.sh
+# - scripts/lib/templates.sh
+# Injected Nix variables:
+# - DOTFILES_BUILT_HOME_FILES
+# - DOTFILES_BUILT_TEMPLATES
+
 usage_project() {
   cat <<'USAGE'
 Usage:

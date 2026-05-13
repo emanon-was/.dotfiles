@@ -1,3 +1,8 @@
+# This script is composed by pkgs/dotfiles/default.nix.
+# Prepended dependencies:
+# - scripts/lib/common.sh
+# Subcommands are provided as dotfiles-* executables on PATH.
+
 usage() {
   cat <<'USAGE'
 Usage:

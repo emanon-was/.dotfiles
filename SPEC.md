@@ -79,6 +79,8 @@ dotfiles project init <nix|docker> [destination]
 - `pkgs/dotfiles/default.nix` は Nix package 版 command と dist 用 portable command を同じ command 定義から生成する。
 - Nix package 版 command は `writeShellApplication` で生成する。
 - dist 用 portable command は `share/dotfiles/portable-bin` に生成する。
+- `pkgs/dotfiles/scripts/dotfiles-*.sh` は単体では実行せず、`default.nix` が `scripts/lib/common.sh` と必要な lib を前置して command 化する。
+- 各 `dotfiles-*.sh` の冒頭には、前置される lib と注入される変数をコメントで明記する。
 - project templates は `share/dotfiles/templates` に生成する。
 - Nix package 版の `dotfiles-project` は package 内の `share/dotfiles/templates` を参照する。
 - dist 用 portable command には `DOTFILES_PORTABLE_DIST=1` を埋め込み、`dist/home-files/.local/share/dotfiles/templates` を参照する。
