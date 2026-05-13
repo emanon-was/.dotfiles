@@ -5,6 +5,7 @@ DOTFILES_USERNAME ?= $(shell id -un)
 DOTFILES_HOME_DIRECTORY ?= $(HOME)
 DOTFILES_STATE_DIR ?= $(HOME)/.local/state/dotfiles
 DOTFILES_INIT_MODE_FILE ?= $(DOTFILES_STATE_DIR)/init-mode
+DOTFILES_HM_BACKUPS_FILE ?= $(DOTFILES_STATE_DIR)/hm-backups.tsv
 
 # flake が使える環境では init.flake、使えない環境では init.dist を実行する。
 init:
@@ -17,8 +18,20 @@ init:
 # Home Manager / flake 環境の初期化を実行する。
 init.flake:
 	nix run .#dotfiles -- flake doctor
-	nix run .#dotfiles -- flake switch
-	nix run .#dotfiles -- configure doctor
+	@set -e; \
+	mkdir -p "$(DOTFILES_STATE_DIR)"; \
+	before="$(DOTFILES_HM_BACKUPS_FILE).before"; \
+	after="$(DOTFILES_HM_BACKUPS_FILE).after"; \
+	cleanup() { rm -f "$$before" "$$after"; }; \
+	trap cleanup EXIT; \
+	find "$(HOME)" -xdev -name '*.hm-backup' -print | sort > "$$before"; \
+	switch_status=0; \
+	nix run .#dotfiles -- flake switch || switch_status="$$?"; \
+	find "$(HOME)" -xdev -name '*.hm-backup' -print | sort > "$$after"; \
+	comm -13 "$$before" "$$after" > "$(DOTFILES_HM_BACKUPS_FILE)"; \
+	if [ "$$switch_status" -ne 0 ]; then \
+		exit "$$switch_status"; \
+	fi
 	@mkdir -p "$(DOTFILES_STATE_DIR)"
 	@printf '%s\n' flake > "$(DOTFILES_INIT_MODE_FILE)"
 
@@ -39,17 +52,27 @@ clean.flake:
 	$(MAKE) restore.flake
 	@rm -f "$(DOTFILES_INIT_MODE_FILE)"
 
-# 退避された *.hm-backup を上書きなしで戻す。
+# init.flake の switch で新規作成された *.hm-backup だけを上書きなしで戻す。
 restore.flake:
-	@find "$(HOME)" -xdev -name '*.hm-backup' -print | while IFS= read -r backup_path; do \
+	@if [ ! -f "$(DOTFILES_HM_BACKUPS_FILE)" ]; then \
+		printf 'hm-backup manifest not found: %s\n' "$(DOTFILES_HM_BACKUPS_FILE)"; \
+		exit 0; \
+	fi; \
+	while IFS= read -r backup_path; do \
+		[ -n "$$backup_path" ] || continue; \
 		target_path="$${backup_path%.hm-backup}"; \
+		if [ ! -e "$$backup_path" ] && [ ! -L "$$backup_path" ]; then \
+			printf 'skipped hm-backup restore, backup missing: %s\n' "$$backup_path"; \
+			continue; \
+		fi; \
 		if [ -e "$$target_path" ] || [ -L "$$target_path" ]; then \
 			printf 'skipped hm-backup restore, path exists: %s\n' "$$target_path"; \
 		else \
 			mv "$$backup_path" "$$target_path"; \
 			printf 'restored hm-backup: %s -> %s\n' "$$backup_path" "$$target_path"; \
 		fi; \
-	done
+	done < "$(DOTFILES_HM_BACKUPS_FILE)"; \
+	rm -f "$(DOTFILES_HM_BACKUPS_FILE)"
 
 # dist/install.sh で展開した symlink と backup を戻す。
 clean.dist:

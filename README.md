@@ -78,11 +78,11 @@ make clean.flake
 
 `clean.flake` は Home Manager が管理している symlink や profile を外します。`home-manager uninstall` が成功した場合だけ `restore.flake` を実行します。
 
-`restore.flake` は `$HOME` 配下の `*.hm-backup` を探し、復元先が存在しない場合だけ自動で戻します。復元先が既にある場合は上書きせず skip します。
+`init.flake` は `dotfiles flake switch` 前後の差分から、その switch で新規作成された `.hm-backup` だけを `$HOME/.local/state/dotfiles/hm-backups.tsv` に記録します。`restore.flake` はその記録にある backup だけを対象にし、復元先が存在しない場合だけ自動で戻します。復元先が既にある場合は上書きせず skip します。
 
 ### 修復
 
-Home Manager でファイル衝突が起きた場合、`dotfiles flake switch` は `home-manager -b hm-backup` を使うため、既存ファイルは `.hm-backup` 付きで退避されます。`clean.flake` 以外のタイミングで戻す場合は、退避ファイルの内容を確認してから手で戻します。
+Home Manager でファイル衝突が起きた場合、`dotfiles flake switch` は `home-manager -b hm-backup` を使うため、既存ファイルは `.hm-backup` 付きで退避されます。`hm-backups.tsv` に記録されていない退避ファイルを戻す場合は、内容を確認してから手で戻します。
 
 Doom Emacs の管理設定で起動できなくなった場合:
 
