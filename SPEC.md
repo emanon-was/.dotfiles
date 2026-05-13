@@ -47,7 +47,7 @@
   - `$HOME/.local/bin`
   - `$HOME/.local/share/dotfiles/templates`
 - Doom Emacs の設定は `home/config/doom/` を生成元にして Home Manager で配置する。
-- 現在は `config.el` のみを管理する。今後 `home/config/doom/` 配下に追加したファイルも同じ規則で扱う。
+- `home/config/doom/` 配下のファイルを管理対象として扱う。
 - Emacs package は terminal 用の `emacs-nox` を使う。
 - shell の `emacs` alias は起動時に判定し、`emacs-nox` の場合は alias しない。それ以外の Emacs では `emacs -nw` にする。
 
@@ -61,16 +61,18 @@
 主要コマンド:
 
 ```sh
-dotfiles doctor
 dotfiles flake check
 dotfiles flake update
 dotfiles flake switch [current|dist|user]
 dotfiles flake doctor
+dotfiles configure doctor
 dotfiles configure gnome
+dotfiles configure gnome doctor
 dotfiles configure doom install [--check]
 dotfiles configure doom sync
 dotfiles configure doom upgrade
 dotfiles configure doom repair
+dotfiles configure doom doctor
 dotfiles project init <nix|docker> [destination]
 ```
 
@@ -81,6 +83,7 @@ dotfiles project init <nix|docker> [destination]
 - dist 用 portable command は `share/dotfiles/portable-bin` に生成する。
 - `pkgs/dotfiles/scripts/dotfiles-*.sh` は単体では実行せず、`default.nix` が `scripts/lib/common.sh` と必要な lib を前置して command 化する。
 - 各 `dotfiles-*.sh` の冒頭には、前置される lib と注入される変数をコメントで明記する。
+- 汎用の `dotfiles doctor` は置かず、flake 診断は `dotfiles flake doctor`、configure 診断は `dotfiles configure doctor` に分ける。
 - project templates は `share/dotfiles/templates` に生成する。
 - Nix package 版の `dotfiles-project` は package 内の `share/dotfiles/templates` を参照する。
 - dist 用 portable command には `DOTFILES_PORTABLE_DIST=1` を埋め込み、`dist/home-files/.local/share/dotfiles/templates` を参照する。
@@ -102,6 +105,9 @@ dotfiles project init <nix|docker> [destination]
 - Home Manager が同じ内容の Nix store symlink を既に配置している場合は置き換えない。
 - straight recipe repository の事前更新は best-effort とし、失敗しても warning で継続する。
 - `dotfiles configure doom install --check` は一時 directory で install flow を検証し、実環境を変更しない。
+- `dotfiles configure doom doctor` は Doom checkout、Doom executable、管理対象 `.config/doom`、straight recipe repository を診断する。
+- `dotfiles configure gnome doctor` は `gsettings` と GNOME interface schema/key を診断する。`gsettings` がない環境は正常に skip する。
+- `dotfiles configure doctor` は configure 系の総合診断として GNOME と Doom の診断を実行する。
 
 ## dist
 

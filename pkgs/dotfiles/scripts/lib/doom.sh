@@ -1,8 +1,8 @@
-# Doom Emacs helpers for dotfiles configure/doctor commands.
+# Doom Emacs helpers for dotfiles configure commands.
 #
 # Composition:
 # - Loaded after scripts/lib/common.sh by pkgs/dotfiles/default.nix.
-# - Used by dotfiles-configure.sh and dotfiles-doctor.sh.
+# - Used by dotfiles-configure.sh.
 #
 # Depends on common.sh:
 # - dotfiles_home_dir_source

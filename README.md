@@ -2,63 +2,29 @@
 
 自分用の dotfiles 管理リポジトリです。
 
-基本方針は、普段使う環境では Home Manager で宣言的に管理し、Nix や Home Manager を使えない環境では `dist/` に生成した成果物を展開して使う、という分け方です。
+普段使う環境では Home Manager と flake でユーザー環境を宣言的に管理し、Nix や Home Manager を使えない環境では `dist/` に生成した成果物を展開して使います。
 
-NixOS の system 側は stable を使い、このリポジトリの Home Manager 側は `nixos-unstable` を使います。system 側の `configuration.nix` には極力寄せず、ユーザー環境の設定は Home Manager と `dotfiles` コマンドへ寄せます。
+NixOS の system 側は stable、このリポジトリの Home Manager 側は `nixos-unstable` を使います。system 側の `configuration.nix` には極力寄せず、ユーザー環境の設定は Home Manager と `dotfiles` コマンドへ寄せます。
 
-詳細な現在仕様は [SPEC.md](./SPEC.md) にまとめています。
+## Home Manager / flake
 
-## ディレクトリ構成
-
-```text
-.
-├── home/                 Home Manager の module と、その module が使う設定ファイル
-│   ├── *.nix             shell、git、tmux、screen、Emacs などの Home Manager 設定
-│   └── config/           Home Manager で配置する手書き設定の生成元
-├── pkgs/dotfiles/        `dotfiles` CLI の生成元
-│   ├── scripts/          `dotfiles-*` サブコマンドの shell script
-│   └── templates/        `dotfiles project init ...` で使うテンプレート
-├── pkgs/dist/            `dotfiles-dist` package と配布用 script の生成元
-│   └── scripts/          `dist/install.sh` などに入る配布用 script
-├── notes/                Home Manager 管理対象ではない個人メモ
-├── dist/                 Nix build で生成した配布用成果物
-├── flake.nix             Home Manager、CLI package、dist package の入口
-├── flake.lock            flake input の lock file
-├── Makefile              repo 開発用の build/check/dist 操作
-├── SPEC.md               現在仕様
-└── TASKS.md              作業方針と残タスク
-```
-
-基本的にメンテナンスするのは `home/`、`pkgs/dotfiles/`、`pkgs/dist/`、`notes/`、`README.md`、`TASKS.md` です。
-
-`dist/` は `make dist` で再生成される成果物置き場です。Nix や Home Manager が使えない環境へ持ち出すために commit しますが、手で編集する場所ではありません。`dist/` の内容を変えたい場合は、対応する生成元を編集してから `make dist` を実行します。
-
-## 使い分け
-
-### Home Manager 版
-
-メインの利用方法です。Nix と Home Manager が使える自分の環境ではこちらを使います。
-
-- shell、tmux、screen、git、Emacs などのユーザー設定を Home Manager で管理する
-- `~/.config/doom` は Home Manager 経由で管理する
-- Doom Emacs の install、sync、upgrade は `dotfiles configure doom ...` で明示的に実行する
-- GNOME 設定のような副作用のある処理は Home Manager activation には入れず、`dotfiles configure gnome` として分ける
-
-初回セットアップ:
+### セットアップ
 
 ```sh
 git clone https://github.com/emanon-was/.dotfiles.git "$HOME/.dotfiles"
 cd "$HOME/.dotfiles"
-nix run .#dotfiles -- doctor
+nix run .#dotfiles -- flake doctor
+nix run .#dotfiles -- configure doctor
 nix run .#dotfiles -- flake switch
 ```
 
-Doom Emacs が未セットアップの場合:
+Doom Emacs が未セットアップの場合は、Home Manager 反映後に Doom 本体を用意します。
 
 ```sh
-nix run .#dotfiles -- flake switch
 nix run .#dotfiles -- configure doom install
 ```
+
+### 使い方
 
 通常の更新:
 
@@ -67,104 +33,101 @@ dotfiles flake update
 dotfiles flake switch
 ```
 
-`dotfiles flake switch` は内部で次のような処理を行います。
+診断:
 
 ```sh
-DOTFILES_USERNAME="$USER" DOTFILES_HOME_DIRECTORY="$HOME" \
-  home-manager -b hm-backup --flake "$DOTFILES_HOME#current" --impure switch
+dotfiles flake doctor
+dotfiles configure doctor
+dotfiles configure doom doctor
+dotfiles configure gnome doctor
 ```
 
-### Nix なし / Home Manager なしの環境
+Doom Emacs:
 
-Nix を使わない環境では `dist/` を使います。`dist/` は Nix build で生成した成果物で、直接編集しません。
+```sh
+dotfiles configure doom install
+dotfiles configure doom sync
+dotfiles configure doom upgrade
+dotfiles configure doom repair
+```
+
+GNOME:
+
+```sh
+dotfiles configure gnome
+```
+
+プロジェクトテンプレート:
+
+```sh
+dotfiles project init nix [destination]
+dotfiles project init docker [destination]
+```
+
+### リストア
+
+Home Manager でファイル衝突が起きた場合、`dotfiles flake switch` は `home-manager -b hm-backup` を使うため、既存ファイルは `.hm-backup` 付きで退避されます。必要に応じて退避ファイルを確認して戻します。
+
+Doom Emacs の管理設定で起動できなくなった場合:
+
+```sh
+dotfiles configure doom repair
+```
+
+## dist / 非 Nix
+
+### セットアップ
 
 ```sh
 ./dist/install.sh
 ```
 
-`dist/install.sh` は `dist/home-files/` の内容を `$HOME` へ直接 symlink します。`$HOME/home-files` のような管理用 copy は作りません。
-`dotfiles` コマンド群も通常の home file として以下へ symlink されます。
+`dist/` は Nix build 済みの成果物です。Nix / Home Manager を使えない環境では、この内容を `$HOME` へ symlink して使います。
 
-```text
-$HOME/.local/bin
+### 使い方
+
+`dist/install.sh` 後は `$HOME/.local/bin` に `dotfiles` コマンド群が入ります。
+
+```sh
+dotfiles configure doctor
+dotfiles configure doom doctor
+dotfiles configure gnome doctor
+dotfiles configure doom sync
+dotfiles project init nix [destination]
+dotfiles project init docker [destination]
 ```
 
-コマンドの実体は `dist/home-files/.local/bin` に生成されます。
+flake / Home Manager に依存する操作は dist 前提では使いません。
 
-`dist/home-files/` には Home Manager から生成した `$HOME` 用 dotfiles が入ります。Nix なし環境で使う場合は、この内容を確認して必要なものだけ `$HOME` に配置します。
-既存ファイルや既存 symlink がある場合は `.backup` 付きの別名へ退避してから symlink を作成します。既存ディレクトリは残し、その配下に必要な symlink を作成します。
-`uninstall.sh` は管理対象 symlink を削除したあと、対応する `.backup` が残っていれば元の名前へ戻します。
-`dist/` は home-files の展開専用です。project init 用テンプレートは `home-files/.local/share/dotfiles/templates/` に含まれます。
+```sh
+dotfiles flake update
+dotfiles flake switch
+```
 
-アンインストールする場合:
+これらが必要な環境では Home Manager / flake 版を使います。
+
+### リストア
+
+`dist/install.sh` で展開した内容を戻す場合:
 
 ```sh
 ./dist/uninstall.sh
 ```
 
-## dotfiles コマンド
+`dist` の install/uninstall は `$HOME/.local/state/dotfiles/install-manifest.tsv` を使って、作成した symlink と退避した backup を管理します。
 
-`dotfiles` は Cargo 風の dispatcher です。`dotfiles doctor` を実行すると、PATH 上の `dotfiles-doctor` が実行されます。
+## ドキュメント
 
-```sh
-dotfiles doctor
-dotfiles flake check
-dotfiles flake update
-dotfiles flake switch [current|dist|user]
-dotfiles flake doctor
-dotfiles configure gnome
-dotfiles configure doom install [--check]
-dotfiles configure doom sync
-dotfiles configure doom upgrade
-dotfiles configure doom repair
-dotfiles project init <nix|docker> [destination]
-```
+- [SPEC.md](./SPEC.md): 現在仕様
+- [TASKS.md](./TASKS.md): 未完了タスクと作業時の注意
+- [home/README.md](./home/README.md): Home Manager module と配置する設定ファイル
+- [pkgs/README.md](./pkgs/README.md): Nix package 生成元
+- [pkgs/dotfiles/README.md](./pkgs/dotfiles/README.md): `dotfiles` CLI
+- [pkgs/dist/README.md](./pkgs/dist/README.md): `dist/` 生成
+- [tests/README.md](./tests/README.md): テスト
+- [notes/README.md](./notes/README.md): 管理対象外メモ
 
-## Doom Emacs
-
-Doom Emacs 本体は `~/.config/emacs` に置きます。Doom 設定は `~/.config/doom` に配置します。
-
-現在このリポジトリで管理する Doom 設定は `home/config/doom/` 配下です。今後このディレクトリ配下にファイルを追加した場合も、同じ仕組みで `~/.config/doom/` へリンクされます。
-
-```text
-home/config/doom/
-```
-
-`dotfiles configure doom install` と `dotfiles configure doom upgrade` は、既存の Doom 設定を一時退避したうえで Doom が生成する初期 `.config/doom` 全体を `$HOME/.local/state/dotfiles/doom-initial/` に保存します。
-
-その後、dotfiles 側の `.config/doom` 配下にあるファイルを `~/.config/doom/` へリンクします。Home Manager が同じ内容の Nix store symlink を既に配置している場合は、そのリンクをそのまま使います。
-
-Doom の install と upgrade は `--force` 付きで実行し、Doom 側の確認 prompt は自動承認します。
-
-Doom の更新後に管理中の設定で起動できない場合は、保存済みの初期状態へ戻して修復できます。
-
-```sh
-dotfiles configure doom repair
-```
-
-初回 install の流れだけを検証したい場合:
-
-```sh
-dotfiles configure doom install --check
-```
-
-## templates
-
-プロジェクト用テンプレートの生成元は `pkgs/dotfiles/templates/` です。
-Nix package では `share/dotfiles/templates/` に入り、Home Manager と dist では `~/.local/share/dotfiles/templates/` に配置されます。
-
-```sh
-dotfiles project init nix
-dotfiles project init docker
-dotfiles project init nix path/to/project
-dotfiles project init docker path/to/project
-```
-
-`destination` を省略すると現在のディレクトリに展開します。
-
-## リポジトリ開発
-
-root の `Makefile` は、このリポジトリを Nix で検証・ビルド・生成するためのものです。
+## 開発
 
 ```sh
 make check
@@ -175,10 +138,4 @@ make home-build
 make dist
 ```
 
-`make check` は `nix flake check` を実行し、Nix sandbox 内で `dotfiles` CLI と dist install/uninstall の非破壊テストも走らせます。dist install/uninstall は一時 HOME だけを使います。
-
-`make dist` は `.#dotfiles-dist` をビルドし、その成果物で `dist/` を再生成します。`dist/` 配下は生成物なので、修正が必要な場合は `pkgs/dist/`、`pkgs/dotfiles/`、`home/` などの生成元を編集します。
-
-## メモ
-
-Home Manager 管理対象ではない Emacs Lisp のメモは `notes/emacs/` に置きます。
+`dist/` は `make dist` で再生成される成果物です。直接編集せず、生成元を変更してから再生成します。

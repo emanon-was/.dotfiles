@@ -5,7 +5,6 @@
 , writeShellApplication
 , bash
 , coreutils
-, diffutils
 , git
 , gnugrep
 , gnused
@@ -29,7 +28,6 @@ let
   baseRuntimeInputs = [
     bash
     coreutils
-    diffutils
     git
     gnugrep
     gnused
@@ -68,18 +66,6 @@ let
     };
 
   commandDefinitions = [
-    {
-      name = "dotfiles-doctor";
-      runtimeInputs = baseRuntimeInputs;
-      libs = [
-        ./scripts/lib/doom.sh
-        ./scripts/lib/templates.sh
-      ];
-      nixExtraText = ''
-        DOTFILES_BUILT_HOME_FILES="${homeFiles}/share/dotfiles/home-files"
-      '';
-      script = ./scripts/dotfiles-doctor.sh;
-    }
     {
       name = "dotfiles-flake";
       runtimeInputs = flakeRuntimeInputs;

@@ -8,11 +8,14 @@
 usage_configure() {
   cat <<'USAGE'
 Usage:
+  dotfiles configure doctor
   dotfiles configure gnome
+  dotfiles configure gnome doctor
   dotfiles configure doom install [--check]
   dotfiles configure doom sync
   dotfiles configure doom upgrade
   dotfiles configure doom repair
+  dotfiles configure doom doctor
 USAGE
 }
 
@@ -344,6 +347,194 @@ FAKE_DOOM
   status "[doom-check] install check passed"
 }
 
+configure_doctor_commands() {
+  failed=0
+
+  for cmd in git cp mkdir; do
+    if have "$cmd"; then
+      ok "$cmd: $(command -v "$cmd")"
+    else
+      missing "$cmd"
+      failed=1
+    fi
+  done
+
+  return "$failed"
+}
+
+configure_doctor_home() {
+  if [ -d "$DOTFILES_HOME" ]; then
+    ok "DOTFILES_HOME: $DOTFILES_HOME"
+  else
+    missing "DOTFILES_HOME: $DOTFILES_HOME"
+    return 1
+  fi
+}
+
+doom_doctor_checkout() {
+  failed=0
+
+  if [ -d "$DOOM_HOME" ]; then
+    ok "Doom checkout path: $DOOM_HOME"
+  else
+    skip "Doom checkout path: $DOOM_HOME"
+    return 0
+  fi
+
+  if [ -d "$DOOM_HOME/.git" ]; then
+    branch="$(git -C "$DOOM_HOME" branch --show-current 2>/dev/null || true)"
+    head="$(git -C "$DOOM_HOME" rev-parse --short HEAD 2>/dev/null || true)"
+    if [ -n "$branch" ]; then
+      ok "Doom checkout git: $branch ${head:-unknown}"
+    else
+      warn "Doom checkout git is detached: ${head:-unknown}"
+    fi
+  else
+    warn "Doom checkout git metadata is missing: $DOOM_HOME/.git"
+  fi
+
+  if doom_installed; then
+    ok "Doom executable: $DOOM_BIN"
+  else
+    missing "Doom executable: $DOOM_BIN"
+    failed=1
+  fi
+
+  return "$failed"
+}
+
+doom_doctor_config() {
+  failed=0
+  dotfiles_config_dir="$(doom_managed_config_dir_source 2>/dev/null || true)"
+  active_config_dir="$HOME/.config/doom"
+
+  if [ -n "$dotfiles_config_dir" ] && [ -d "$dotfiles_config_dir" ]; then
+    ok "Doom config source: $dotfiles_config_dir"
+  else
+    missing "Doom config source directory"
+    return 1
+  fi
+
+  if [ ! -d "$active_config_dir" ]; then
+    skip "Doom config directory: $active_config_dir"
+    return 0
+  fi
+
+  find "$dotfiles_config_dir" -mindepth 1 -type d | while IFS= read -r source_path; do
+    relative_path="${source_path#"$dotfiles_config_dir/"}"
+    target_path="$active_config_dir/$relative_path"
+    if [ -d "$target_path" ]; then
+      ok "Doom config directory exists: $target_path"
+    else
+      missing "Doom config directory missing: $target_path"
+      exit 1
+    fi
+  done || failed=1
+
+  find "$dotfiles_config_dir" -mindepth 1 \( -type f -o -type l \) | while IFS= read -r source_path; do
+    relative_path="${source_path#"$dotfiles_config_dir/"}"
+    target_path="$active_config_dir/$relative_path"
+
+    if [ -L "$target_path" ]; then
+      ok "Doom config symlink: $target_path -> $(readlink "$target_path")"
+    elif [ -e "$target_path" ]; then
+      warn "Doom config file is not a symlink: $target_path"
+    else
+      missing "Doom config file missing: $target_path"
+      exit 1
+    fi
+
+    if cmp -s "$source_path" "$target_path"; then
+      ok "Doom config matches dotfiles source: $relative_path"
+    else
+      missing "Doom config differs from dotfiles source: $relative_path"
+      exit 1
+    fi
+  done || failed=1
+
+  entry_count="$(find "$active_config_dir" -mindepth 1 -maxdepth 1 | wc -l)"
+  ok "Doom config directory entries: $entry_count"
+
+  return "$failed"
+}
+
+doom_doctor_straight_repositories() {
+  recipes_dir="$DOOM_HOME/.local/straight/repos"
+  [ -d "$recipes_dir" ] || {
+    skip "straight recipe repositories: $recipes_dir"
+    return 0
+  }
+
+  for repo in org-elpa melpa nongnu-elpa gnu-elpa-mirror el-get emacsmirror-mirror; do
+    repo_path="$recipes_dir/$repo"
+    if [ ! -d "$repo_path/.git" ]; then
+      skip "straight recipe repository not present: $repo"
+      continue
+    fi
+
+    branch="$(git -C "$repo_path" branch --show-current 2>/dev/null || true)"
+    remote="$(git -C "$repo_path" remote get-url origin 2>/dev/null || true)"
+    upstream="$(git -C "$repo_path" rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null || true)"
+
+    if [ -z "$branch" ]; then
+      warn "straight recipe repository detached: $repo"
+    elif [ -z "$upstream" ]; then
+      warn "straight recipe repository has no upstream: $repo branch=$branch remote=${remote:-none}"
+    else
+      ok "straight recipe repository: $repo branch=$branch upstream=$upstream"
+    fi
+  done
+}
+
+doom_doctor() {
+  failed=0
+
+  configure_doctor_commands || failed=1
+  configure_doctor_home || failed=1
+  doom_doctor_checkout || failed=1
+  doom_doctor_config || failed=1
+  doom_doctor_straight_repositories || true
+
+  return "$failed"
+}
+
+gnome_doctor() {
+  if ! have gsettings; then
+    skip "gsettings: not available"
+    return 0
+  fi
+
+  ok "gsettings: $(command -v gsettings)"
+
+  if ! gsettings list-schemas | grep -qx "org.gnome.desktop.interface"; then
+    warn "GNOME schema is not available: org.gnome.desktop.interface"
+    return 0
+  fi
+
+  ok "GNOME schema: org.gnome.desktop.interface"
+
+  for key in gtk-key-theme document-font-name font-name monospace-font-name; do
+    if gsettings list-keys org.gnome.desktop.interface | grep -qx "$key"; then
+      ok "GNOME key: org.gnome.desktop.interface $key"
+    else
+      warn "GNOME key is not available: org.gnome.desktop.interface $key"
+    fi
+  done
+}
+
+configure_doctor() {
+  failed=0
+
+  configure_doctor_commands || failed=1
+  configure_doctor_home || failed=1
+  gnome_doctor || true
+  doom_doctor_checkout || failed=1
+  doom_doctor_config || failed=1
+  doom_doctor_straight_repositories || true
+
+  return "$failed"
+}
+
 gnome_configure() {
   have gsettings || fail "gsettings is not available"
   gsettings set org.gnome.desktop.interface gtk-key-theme "Emacs"
@@ -394,6 +585,11 @@ cmd_doom() {
     repair)
       doom_repair_config
       ;;
+    doctor)
+      shift
+      [ "$#" -eq 0 ] || fail "unexpected argument for doom doctor: $1"
+      doom_doctor
+      ;;
     *)
       usage_configure
       exit 2
@@ -402,13 +598,27 @@ cmd_doom() {
 }
 
 case "${1:-}" in
+  doctor)
+    shift
+    [ "$#" -eq 0 ] || fail "unexpected argument for configure doctor: $1"
+    configure_doctor
+    ;;
   gnome)
     shift
-    if [ "$#" -gt 0 ]; then
-      usage_configure
-      exit 2
-    fi
-    gnome_configure
+    case "${1:-}" in
+      doctor)
+        shift
+        [ "$#" -eq 0 ] || fail "unexpected argument for gnome doctor: $1"
+        gnome_doctor
+        ;;
+      "")
+        gnome_configure
+        ;;
+      *)
+        usage_configure
+        exit 2
+        ;;
+    esac
     ;;
   doom)
     shift

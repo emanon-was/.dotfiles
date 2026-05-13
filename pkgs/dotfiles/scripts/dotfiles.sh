@@ -6,16 +6,18 @@
 usage() {
   cat <<'USAGE'
 Usage:
-  dotfiles doctor
   dotfiles flake check
   dotfiles flake update
   dotfiles flake switch [current|dist|user]
   dotfiles flake doctor
+  dotfiles configure doctor
   dotfiles configure gnome
+  dotfiles configure gnome doctor
   dotfiles configure doom install [--check]
   dotfiles configure doom sync
   dotfiles configure doom upgrade
   dotfiles configure doom repair
+  dotfiles configure doom doctor
   dotfiles project init <nix|docker> [destination]
 USAGE
 }

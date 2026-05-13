@@ -21,6 +21,24 @@ run_dotfiles_project() {
     ' _ "$repo_root" "$@"
 }
 
+run_dotfiles_configure() {
+  home_dir="$1"
+  built_home_files="$2"
+  shift 2
+
+  HOME="$home_dir" \
+    DOTFILES_HOME="$repo_root" \
+    DOTFILES_BUILT_HOME_FILES="$built_home_files" \
+    bash -c '
+      set -euo pipefail
+      repo_root="$1"
+      shift
+      . "$repo_root/pkgs/dotfiles/scripts/lib/common.sh"
+      . "$repo_root/pkgs/dotfiles/scripts/lib/doom.sh"
+      . "$repo_root/pkgs/dotfiles/scripts/dotfiles-configure.sh"
+    ' _ "$repo_root" "$@"
+}
+
 assert_fails() {
   name="$1"
   shift
@@ -224,9 +242,27 @@ test_doom_config_dir_source() {
   printf '[ok] doom config dir source\n'
 }
 
+test_configure_doctor() {
+  home_dir="$test_root/configure-home"
+  built_dir="$test_root/configure-built"
+  mkdir -p "$home_dir" "$built_dir/.config/doom"
+  printf 'doom config\n' > "$built_dir/.config/doom/config.el"
+
+  run_dotfiles_configure "$home_dir" "$built_dir" doctor >/dev/null
+  run_dotfiles_configure "$home_dir" "$built_dir" doom doctor >/dev/null
+  run_dotfiles_configure "$home_dir" "$built_dir" gnome doctor >/dev/null
+
+  assert_fails configure-doctor-extra run_dotfiles_configure "$home_dir" "$built_dir" doctor extra
+  assert_fails doom-doctor-extra run_dotfiles_configure "$home_dir" "$built_dir" doom doctor extra
+  assert_fails gnome-doctor-extra run_dotfiles_configure "$home_dir" "$built_dir" gnome doctor extra
+
+  printf '[ok] configure doctor\n'
+}
+
 test_dispatcher
 test_project_init
 test_home_file_source
 test_doom_config_dir_source
+test_configure_doctor
 
 printf 'dotfiles command behavior checks passed\n'

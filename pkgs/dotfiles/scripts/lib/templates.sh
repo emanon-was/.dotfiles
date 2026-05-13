@@ -1,8 +1,8 @@
-# Project template helpers for dotfiles project/doctor commands.
+# Project template helpers for dotfiles project commands.
 #
 # Composition:
 # - Loaded after scripts/lib/common.sh by pkgs/dotfiles/default.nix.
-# - Used by dotfiles-project.sh and dotfiles-doctor.sh.
+# - Used by dotfiles-project.sh.
 #
 # Depends on common.sh:
 # - DOTFILES_HOME initialization
