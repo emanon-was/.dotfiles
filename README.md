@@ -134,7 +134,7 @@ make clean.dist
 
 `make init` / `make init.dist` は `$HOME/.local/state/dotfiles/init-mode` に `dist` を記録します。`make clean` はその記録を見て `make clean.dist` を実行します。
 
-`dist` の install/uninstall は `$HOME/.local/state/dotfiles/install-manifest.tsv` を使って、作成した symlink と退避した backup を管理します。
+`dist` の install/uninstall は `$HOME/.local/state/dotfiles/init-manifest.tsv` を使って、作成した symlink と退避した backup を管理します。
 
 ## ドキュメント
 

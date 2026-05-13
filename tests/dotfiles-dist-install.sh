@@ -24,9 +24,9 @@ printf 'preexisting backup\n' > "$home/.bashrc.backup"
 
 HOME="$home" bash "$dist_root/install.sh" >/dev/null
 
-manifest="$home/.local/state/dotfiles/install-manifest.tsv"
+manifest="$home/.local/state/dotfiles/init-manifest.tsv"
 [ -f "$manifest" ] || {
-  printf 'error: install manifest was not created: %s\n' "$manifest" >&2
+  printf 'error: init manifest was not created: %s\n' "$manifest" >&2
   exit 1
 }
 
@@ -46,7 +46,7 @@ grep -F -x 'preexisting backup' "$home/.bashrc.backup" >/dev/null
 HOME="$home" bash "$dist_root/uninstall.sh" >/dev/null
 
 [ ! -e "$manifest" ] || {
-  printf 'error: install manifest was not removed\n' >&2
+  printf 'error: init manifest was not removed\n' >&2
   exit 1
 }
 

@@ -24,7 +24,7 @@ esac
 dist_root="$(cd "$(dirname "$0")" && pwd -P)"
 source_root="$dist_root/home-files"
 state_dir="$HOME/.local/state/dotfiles"
-manifest="$state_dir/install-manifest.tsv"
+manifest="$state_dir/init-manifest.tsv"
 manifest_tmp="$(mktemp)"
 
 cleanup() {
@@ -123,6 +123,6 @@ mkdir -p "$state_dir"
 cp "$manifest_tmp" "$manifest"
 
 printf 'installed from: %s\n' "$source_root"
-printf 'install manifest: %s\n' "$manifest"
+printf 'init manifest: %s\n' "$manifest"
 printf 'command links: %s/.local/bin/dotfiles*\n' "$HOME"
 printf 'ensure this directory is on PATH: %s/.local/bin\n' "$HOME"

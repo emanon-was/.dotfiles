@@ -42,12 +42,12 @@ make clean.dist
 - `$HOME/home-files` のような managed copy は作りません。
 - 既存ファイルや既存 symlink は `.backup`, `.backup.1`, ... に退避します。
 - 既存ディレクトリは残し、配下の対象ファイルを個別に symlink します。
-- install manifest は `$HOME/.local/state/dotfiles/install-manifest.tsv` に保存します。
+- init manifest は `$HOME/.local/state/dotfiles/init-manifest.tsv` に保存します。
 - init 方式は `$HOME/.local/state/dotfiles/init-mode` に保存します。
 
 ## uninstall
 
-`dist/uninstall.sh` は install manifest を参照します。
+`dist/uninstall.sh` は init manifest を参照します。
 
 - 管理対象 symlink を削除します。
 - install 時に退避した backup があれば元の名前へ戻します。

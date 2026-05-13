@@ -24,7 +24,7 @@ esac
 dist_root="$(cd "$(dirname "$0")" && pwd -P)"
 source_root="$dist_root/home-files"
 state_dir="$HOME/.local/state/dotfiles"
-manifest="$state_dir/install-manifest.tsv"
+manifest="$state_dir/init-manifest.tsv"
 
 [ -d "$source_root" ] || {
   printf 'error: dist home-files directory not found: %s\n' "$source_root" >&2
@@ -59,7 +59,7 @@ remove_link() {
 }
 
 [ -f "$manifest" ] || {
-  printf 'install manifest not found: %s\n' "$manifest"
+  printf 'init manifest not found: %s\n' "$manifest"
   printf 'nothing to uninstall\n'
   exit 0
 }
