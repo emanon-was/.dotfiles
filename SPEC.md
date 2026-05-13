@@ -90,9 +90,9 @@ dotfiles project init <nix|docker> [destination]
 - `dotfiles configure doom upgrade` は upgrade 後に sync する。
 - `dotfiles flake switch` 成功後は通常 `doom sync` も実行する。
 - `dotfiles flake switch --skip-doom-sync` で Doom sync を飛ばせる。
-- install/upgrade 時は Home Manager 管理の `config.el` symlink を一時的に外す。
-- Doom が生成した `config.el` と `home/config/doom/config.el` の差分を確認してから symlink を戻す。
-- Doom config の差分が出た場合は `var/doom-config-diffs/*.patch` に保存する。
+- install/upgrade 時は Home Manager または dist 管理の `config.el` symlink を一時的に外す。
+- Doom install/upgrade と `doom sync` は symlink を外した状態で実行し、その後 Doom が生成した `config.el` と `home/config/doom/config.el` の差分を確認してから symlink を戻す。
+- Doom config の差分が出た場合は `$HOME/.local/state/dotfiles/*.patch` に保存する。
 - `dotfiles configure doom install --check` は一時 directory で install flow を検証し、実環境を変更しない。
 
 ## dist

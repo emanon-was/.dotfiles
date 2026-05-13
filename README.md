@@ -137,7 +137,7 @@ Doom Emacs 本体は `~/.config/emacs` に置きます。Doom の `init.el` や 
 home/config/doom/config.el
 ```
 
-`dotfiles configure doom install` と `dotfiles configure doom upgrade` では、Doom が生成・更新する `config.el` と `home/config/doom/config.el` の差分を確認してから、Home Manager 管理の symlink を戻します。差分が出た場合は `var/doom-config-diffs/*.patch` にも保存します。
+`dotfiles configure doom install` と `dotfiles configure doom upgrade` では、管理中の `config.el` symlink を一時的に外し、Doom が生成・更新する `config.el` で `doom sync` まで実行します。その後 `home/config/doom/config.el` との差分を確認し、差分が出た場合は `$HOME/.local/state/dotfiles/*.patch` に保存してから symlink を戻します。
 
 初回 install の流れだけを検証したい場合:
 

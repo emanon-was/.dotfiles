@@ -20,7 +20,7 @@ doom_write_config_diff() {
   diff_name="$1"
   from_file="$2"
   to_file="$3"
-  diff_dir="$DOTFILES_HOME/var/doom-config-diffs"
+  diff_dir="$HOME/.local/state/dotfiles"
   diff_file="$diff_dir/$(timestamp)-$diff_name.patch"
 
   mkdir -p "$diff_dir"
@@ -65,13 +65,21 @@ doom_check_config_current() {
 doom_unlink_managed_config() {
   DOOM_CONFIG_WAS_LINK=0
   DOOM_CONFIG_LINK_TARGET=""
+  DOOM_CONFIG_REMOVED_FOR_COMMAND=0
+  dotfiles_config="$(doom_config_source)"
   active_config="$HOME/.config/doom/config.el"
 
   if [ -L "$active_config" ]; then
-    DOOM_CONFIG_WAS_LINK=1
-    DOOM_CONFIG_LINK_TARGET="$(readlink "$active_config")"
-    status "[doom] temporarily removing managed config.el symlink"
-    rm "$active_config"
+    link_target="$(readlink "$active_config")"
+    if [ "$link_target" = "$dotfiles_config" ] || { [ -f "$link_target" ] && cmp -s "$link_target" "$dotfiles_config"; }; then
+      DOOM_CONFIG_WAS_LINK=1
+      DOOM_CONFIG_LINK_TARGET="$link_target"
+      DOOM_CONFIG_REMOVED_FOR_COMMAND=1
+      status "[doom] temporarily removing managed config.el symlink"
+      rm "$active_config"
+    else
+      status "[doom] config.el symlink is not managed by dotfiles; leaving it in place"
+    fi
   elif [ -e "$active_config" ]; then
     status "[doom] config.el is not a symlink; leaving it in place"
   else
@@ -82,18 +90,15 @@ doom_unlink_managed_config() {
 doom_compare_generated_config_and_restore() {
   dotfiles_config="$(doom_config_source)"
   active_config="$HOME/.config/doom/config.el"
-  diff_status=0
 
   [ -f "$dotfiles_config" ] || fail "Doom config source does not exist: $dotfiles_config"
 
-  if [ -f "$active_config" ] && [ ! -L "$active_config" ]; then
+  if [ "$DOOM_CONFIG_REMOVED_FOR_COMMAND" -eq 1 ] && [ -f "$active_config" ] && [ ! -L "$active_config" ]; then
     if cmp -s "$active_config" "$dotfiles_config"; then
       status "[doom] generated config.el matches dotfiles source"
     else
       status "[doom] generated config.el differs from dotfiles source"
       doom_write_config_diff "generated-vs-dotfiles-config.el" "$active_config" "$dotfiles_config"
-      diff -u "$active_config" "$dotfiles_config" || true
-      diff_status=1
     fi
   else
     status "[doom] no generated config.el to compare"
@@ -106,20 +111,22 @@ doom_compare_generated_config_and_restore() {
     ln -s "$DOOM_CONFIG_LINK_TARGET" "$active_config"
     status "[doom] restored managed config.el symlink"
   fi
-
-  if [ "$diff_status" -ne 0 ]; then
-    fail "Review generated config.el diff before continuing"
-  fi
 }
 
-doom_run_with_generated_config_check() {
+doom_begin_generated_config_check() {
   doom_unlink_managed_config
+}
+
+doom_run_unchecked() {
   set +e
   "$@"
   command_status="$?"
   set -e
-  doom_compare_generated_config_and_restore
   return "$command_status"
+}
+
+doom_finish_generated_config_check() {
+  doom_compare_generated_config_and_restore
 }
 
 doom_refresh_recipe_repositories() {
@@ -163,6 +170,10 @@ doom_sync() {
     fail "Doom Emacs is not installed at $DOOM_HOME. Run: dotfiles configure doom install"
   fi
   doom_check_config_current
+  doom_sync_raw
+}
+
+doom_sync_raw() {
   status "[doom] syncing Doom profile"
   "$DOOM_BIN" sync
 }
@@ -220,7 +231,10 @@ FAKE_DOOM
   doom_checkout_ready || fail "temporary Doom checkout was not detected as ready"
 
   status "[doom-check] verifying generated config comparison and symlink restore"
-  doom_run_with_generated_config_check "$DOOM_BIN" install
+  doom_begin_generated_config_check
+  doom_run_unchecked "$DOOM_BIN" install
+  doom_sync_raw
+  doom_finish_generated_config_check
 
   active_config="$HOME/.config/doom/config.el"
   if [ ! -L "$active_config" ]; then
@@ -266,13 +280,21 @@ cmd_doom() {
       esac
       status "[doom] ensuring Doom Emacs checkout"
       doom_clone
+      doom_begin_generated_config_check
+      command_status=0
       if doom_config_ready; then
         status "[doom] config bootstrap files already exist"
       else
         status "[doom] running Doom install"
-        doom_run_with_generated_config_check "$DOOM_BIN" install
+        doom_run_unchecked "$DOOM_BIN" install || command_status="$?"
       fi
-      doom_sync
+      sync_status=0
+      if [ "$command_status" -eq 0 ]; then
+        doom_sync_raw || sync_status="$?"
+      fi
+      doom_finish_generated_config_check
+      [ "$command_status" -eq 0 ] || return "$command_status"
+      [ "$sync_status" -eq 0 ] || return "$sync_status"
       ;;
     sync)
       doom_sync
@@ -283,8 +305,16 @@ cmd_doom() {
       fi
       doom_refresh_recipe_repositories
       status "[doom] upgrading Doom Emacs"
-      doom_run_with_generated_config_check "$DOOM_BIN" upgrade
-      doom_sync
+      doom_begin_generated_config_check
+      command_status=0
+      sync_status=0
+      doom_run_unchecked "$DOOM_BIN" upgrade || command_status="$?"
+      if [ "$command_status" -eq 0 ]; then
+        doom_sync_raw || sync_status="$?"
+      fi
+      doom_finish_generated_config_check
+      [ "$command_status" -eq 0 ] || return "$command_status"
+      [ "$sync_status" -eq 0 ] || return "$sync_status"
       ;;
     *)
       usage_configure
