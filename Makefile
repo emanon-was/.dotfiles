@@ -17,8 +17,8 @@ init:
 # Home Manager / flake 環境の初期化を実行する。
 init.flake:
 	nix run .#dotfiles -- flake doctor
-	nix run .#dotfiles -- configure doctor
 	nix run .#dotfiles -- flake switch
+	nix run .#dotfiles -- configure doctor
 	@mkdir -p "$(DOTFILES_STATE_DIR)"
 	@printf '%s\n' flake > "$(DOTFILES_INIT_MODE_FILE)"
 

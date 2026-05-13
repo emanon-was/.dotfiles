@@ -58,6 +58,7 @@
 - flake 依存コマンドは `dotfiles flake ...` 配下に置く。
 - flake 操作は `dotfiles flake check/update/switch` を使う。
 - `make init.flake` と `make init.dist` は `$HOME/.local/state/dotfiles/init-mode` に初期化方式を記録する。
+- `make init.flake` は `dotfiles flake doctor`、`dotfiles flake switch`、`dotfiles configure doctor` の順で実行する。Home Manager が配置する設定を前提にした診断は switch 後に行う。
 - `make clean` は init-mode を参照し、`make clean.flake` または `make clean.dist` を実行する。
 - Home Manager 管理をやめる場合は `home-manager uninstall` を使う。Makefile では `make clean.flake` として用意する。
 - `make clean.flake` は `home-manager uninstall` 成功後に `make restore.flake` を実行する。uninstall が失敗した場合は復元に進まない。
