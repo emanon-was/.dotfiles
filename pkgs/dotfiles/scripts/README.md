@@ -2,21 +2,23 @@
 
 `dotfiles` CLI の shell script 生成元です。
 
-## Home Manager / flake
+## 役割
 
-### 仕様
+`dotfiles` CLI の shell script 生成元です。
+
+## Nix package 版 command
 
 Nix package 版 command は `writeShellApplication` で生成されます。runtimeInputs は `pkgs/dotfiles/default.nix` に宣言します。
 
 Home Manager 版では、生成された command が `$HOME/.local/bin` へ配置されます。
 
-## dist / 非 Nix
-
-### 仕様
+## portable command
 
 portable command は同じ script 生成元から作られます。
 
 portable command には `DOTFILES_PORTABLE_DIST=1` が埋め込まれ、`dist/home-files` 由来のファイルを参照します。
+
+`dist/home-files/.local/bin` に出る command は成果物です。直接編集せず、この directory の script を変更して `make dist` で再生成します。
 
 ## 構成
 

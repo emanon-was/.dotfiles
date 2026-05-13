@@ -2,15 +2,15 @@
 
 `dotfiles` CLI package の生成元です。
 
-## Home Manager / flake
+## 役割
 
-### 仕様
+`dotfiles` CLI package の生成元です。Nix package 版 command と dist 用 portable command を同じ command 定義から生成します。
+
+## Nix package 版
 
 Nix package 版の `dotfiles` CLI を生成し、Home Manager が `$HOME/.local/bin` に配置します。
 
 この場合、CLI は Nix store 内の成果物と `$HOME` に配置済みの file/link を参照します。
-
-### 使い方
 
 ```sh
 dotfiles flake check
@@ -19,15 +19,11 @@ dotfiles flake switch
 dotfiles flake doctor
 ```
 
-## dist / 非 Nix
-
-### 仕様
+## portable 版
 
 portable command が `dist/home-files/.local/bin` に生成され、`dist/install.sh` により `$HOME/.local/bin` へ symlink されます。
 
 この場合、CLI は dist 由来の配置済みファイルを参照します。flake / Home Manager に依存する操作は前提にしません。
-
-### 使い方
 
 ```sh
 dotfiles configure doctor
@@ -87,6 +83,7 @@ dotfiles project init <nix|docker> [destination]
 - Nix package 版は package 内の成果物を参照します。
 - Home Manager 版は `$HOME` に配置済みの file/link を参照します。
 - dist 版は `dist/home-files` 由来の配置済みファイルを参照します。
+- `dist/home-files/.local/bin` は生成物です。直接編集せず、`scripts/` または `default.nix` を変更して `make dist` で再生成します。
 
 ## テンプレート
 

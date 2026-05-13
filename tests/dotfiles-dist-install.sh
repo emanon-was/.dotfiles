@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if [ -z "${NIX_BUILD_TOP:-}" ]; then
+  printf 'error: tests must be run through nix flake check\n' >&2
+  exit 1
+fi
+
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 dist_root="${DOTFILES_TEST_DIST_ROOT:-$repo_root/dist}"
 test_root="$(mktemp -d)"

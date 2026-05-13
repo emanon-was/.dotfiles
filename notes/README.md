@@ -2,9 +2,11 @@
 
 Home Manager 管理対象ではない個人メモ置き場です。
 
-## Home Manager / flake
+## 役割
 
-### 仕様
+Home Manager 管理対象ではない個人メモ置き場です。
+
+## 管理対象との関係
 
 ここに置いたファイルは `dotfiles flake switch` では `$HOME` に配置されません。
 
@@ -12,10 +14,6 @@ Home Manager 管理対象ではない個人メモ置き場です。
 
 - Doom Emacs: `home/config/doom/`
 - Home Manager module: `home/*.nix`
-
-## dist / 非 Nix
-
-### 仕様
 
 ここに置いたファイルは `dist/install.sh` でも `$HOME` に配置されません。
 

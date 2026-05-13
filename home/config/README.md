@@ -2,9 +2,7 @@
 
 Home Manager で `$HOME` 配下へ配置する手書き設定の生成元です。
 
-## Home Manager / flake
-
-### 仕様
+## 役割
 
 Home Manager がこの directory の内容を `$HOME` 配下へ配置します。
 
@@ -12,27 +10,27 @@ Home Manager がこの directory の内容を `$HOME` 配下へ配置します�
 - `tmux/tmux.conf` -> `~/.config/tmux/tmux.conf`
 - `screen/screenrc` -> `~/.screenrc`
 
-### 使い方
+## 反映
 
 反映:
 
 ```sh
 dotfiles flake switch
+# or
+make setup-flake
 ```
 
-## dist / 非 Nix
-
-### 仕様
+## dist への反映
 
 非 Nix 環境では、この directory を直接参照しません。
 
 `make dist` により Home Manager の build 成果物から `dist/home-files/` が作られ、`dist/install.sh` がそこから `$HOME` へ symlink します。
 
-### 使い方
+`dist/` は出力成果物なので直接編集しません。設定ファイルを変える場合はこの directory の生成元を編集してから `make dist` を実行します。
 
 ```sh
 make dist
-./dist/install.sh
+make setup-dist
 ```
 
 ## 方針

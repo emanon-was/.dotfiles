@@ -57,6 +57,7 @@
 - `dotfiles <name>` は、同じ directory または PATH 上の `dotfiles-<name>` を実行する。
 - flake 依存コマンドは `dotfiles flake ...` 配下に置く。
 - flake 操作は `dotfiles flake check/update/switch` を使う。
+- Home Manager 管理をやめる場合は `home-manager uninstall` を使う。Makefile では `make home-manager-uninstall` として用意する。
 
 主要コマンド:
 
@@ -149,6 +150,11 @@ make dotfiles-build
 make dist-build
 make home-build
 make dist
+make setup-flake
+make setup-dist
+make setup-doom
+make home-manager-uninstall
+make dist-uninstall
 ```
 
 ## 運用ルール
@@ -161,3 +167,4 @@ make dist
 - `dotfiles flake switch` の対象解決は `make switch-check` で検査する。任意ユーザー、`root`、`dist`、旧 `DOTFILES_PROFILE=<user>`、不正引数を条件に含める。
 - `dotfiles` CLI の主要 subcommand は `make command-check` で検査する。dispatcher と project init を対象にする。
 - dist install/uninstall の復元処理は `make dist-install-check` で検査する。
+- tests は Nix 環境でのみ build / 実行する。非 Nix 環境に持ち出した `dist/` 上で実行する前提にはしない。

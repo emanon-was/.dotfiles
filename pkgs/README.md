@@ -2,30 +2,25 @@
 
 Nix package の生成元です。
 
-## Home Manager / flake
-
-### 仕様
+## 役割
 
 `pkgs/dotfiles/` は Home Manager から参照され、`~/.local/bin` と `~/.local/share/dotfiles/templates` に配置される `dotfiles` CLI を生成します。
 
-### 使い方
+`pkgs/dist/` は非 Nix 環境へ持ち出す `dist/` を生成します。生成された `dist/` は成果物なので直接編集しません。
+
+## CLI package build
 
 ```sh
 make dotfiles-build
-dotfiles flake switch
+make setup-flake
 ```
 
-## dist / 非 Nix
-
-### 仕様
-
-`pkgs/dist/` は非 Nix 環境へ持ち出す `dist/` を生成します。生成された `dist/` は成果物なので直接編集しません。
-
-### 使い方
+## dist 生成
 
 ```sh
 make dist-build
 make dist
+make setup-dist
 ```
 
 ## 構成
