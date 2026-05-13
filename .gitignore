@@ -5,12 +5,8 @@
 !/Makefile
 !/flake.nix
 !/flake.lock
-!/config
 !/dist
 !/home
 !/notes
 !/pkgs
 !/tests
-!/store
-!/project-templates
-!/scrap
