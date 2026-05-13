@@ -55,6 +55,27 @@
         default = dotfilesPackage;
       };
 
+      checks.${system} = {
+        dotfiles-tests = pkgs.runCommand "dotfiles-tests"
+          {
+            nativeBuildInputs = with pkgs; [
+              bash
+              coreutils
+              diffutils
+              findutils
+              gawk
+              gnugrep
+              gnused
+            ];
+          }
+          ''
+            bash ${self.outPath}/tests/dotfiles-flake-switch.sh
+            bash ${self.outPath}/tests/dotfiles-commands.sh
+            DOTFILES_TEST_DIST_ROOT=${dotfilesDist} bash ${self.outPath}/tests/dotfiles-dist-install.sh
+            touch "$out"
+          '';
+      };
+
       apps.${system} = {
         dotfiles = {
           type = "app";

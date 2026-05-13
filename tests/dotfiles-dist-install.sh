@@ -2,6 +2,7 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+dist_root="${DOTFILES_TEST_DIST_ROOT:-$repo_root/dist}"
 test_root="$(mktemp -d)"
 
 cleanup() {
@@ -16,7 +17,7 @@ ln -s "$test_root/config-original" "$home/.config"
 printf 'existing bashrc\n' > "$home/.bashrc"
 printf 'preexisting backup\n' > "$home/.bashrc.backup"
 
-HOME="$home" "$repo_root/dist/install.sh" >/dev/null
+HOME="$home" bash "$dist_root/install.sh" >/dev/null
 
 manifest="$home/.local/state/dotfiles/install-manifest.tsv"
 [ -f "$manifest" ] || {
@@ -29,7 +30,7 @@ manifest="$home/.local/state/dotfiles/install-manifest.tsv"
   exit 1
 }
 
-grep -F -x "link	$home/.bashrc	$repo_root/dist/home-files/.bashrc" "$manifest" >/dev/null
+grep -F -x "link	$home/.bashrc	$dist_root/home-files/.bashrc" "$manifest" >/dev/null
 grep -F -x "backup	$home/.bashrc	$home/.bashrc.backup.1" "$manifest" >/dev/null
 grep -F -x "backup	$home/.config	$home/.config.backup" "$manifest" >/dev/null
 grep -F -x "dir	$home/.config" "$manifest" >/dev/null
@@ -37,7 +38,7 @@ grep -F -x "dir	$home/.config" "$manifest" >/dev/null
 grep -F -x 'existing bashrc' "$home/.bashrc.backup.1" >/dev/null
 grep -F -x 'preexisting backup' "$home/.bashrc.backup" >/dev/null
 
-HOME="$home" "$repo_root/dist/uninstall.sh" >/dev/null
+HOME="$home" bash "$dist_root/uninstall.sh" >/dev/null
 
 [ ! -e "$manifest" ] || {
   printf 'error: install manifest was not removed\n' >&2

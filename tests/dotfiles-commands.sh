@@ -54,10 +54,13 @@ test_dispatcher() {
   } > "$bin_dir/dotfiles"
   chmod +x "$bin_dir/dotfiles"
 
-  cat > "$bin_dir/dotfiles-sample" <<'SH'
-#!/usr/bin/env bash
+  sample_bash="$(command -v bash)"
+  {
+    printf '#!%s\n' "$sample_bash"
+    cat <<'SH'
 printf 'sample:%s\n' "$*"
 SH
+  } > "$bin_dir/dotfiles-sample"
   chmod +x "$bin_dir/dotfiles-sample"
 
   output="$("$bin_dir/dotfiles" sample one two)"

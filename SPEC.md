@@ -124,10 +124,12 @@ dotfiles project init <nix|docker> [destination]
 ## Makefile
 
 - root `Makefile` は repo の検証、ビルド、生成用。
+- `nix flake check` は `checks.x86_64-linux.dotfiles-tests` を実行し、Nix sandbox 内で dotfiles CLI と dist install/uninstall の非破壊テストを行う。
 
 主要 target:
 
 ```sh
+make check
 make flake-check
 make dotfiles-build
 make dist-build
@@ -141,7 +143,7 @@ make dist
 - `gsettings` や `doom install` のような副作用コマンドを Home Manager activation に入れない。
 - `doom sync` は `dotfiles flake switch` から明示的に呼び出す。
 - Home Manager module の評価や activation に重いネットワーク処理を混ぜない。
-- 変更後は影響範囲に応じて `make flake-check`、`make dist-build`、`make dist`、dist install/uninstall の一時 HOME テストを実行する。
+- 変更後は影響範囲に応じて `make check`、`make dist-build`、`make dist` を実行する。
 - `dotfiles flake switch` の対象解決は `make switch-check` で検査する。任意ユーザー、`root`、`dist`、旧 `DOTFILES_PROFILE=<user>`、不正引数を条件に含める。
 - `dotfiles` CLI の主要 subcommand は `make command-check` で検査する。dispatcher と project init を対象にする。
 - dist install/uninstall の復元処理は `make dist-install-check` で検査する。

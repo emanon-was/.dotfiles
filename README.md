@@ -164,12 +164,15 @@ dotfiles project init docker path/to/project
 root の `Makefile` は、このリポジトリを Nix で検証・ビルド・生成するためのものです。
 
 ```sh
+make check
 make flake-check
 make dotfiles-build
 make dist-build
 make home-build
 make dist
 ```
+
+`make check` は `nix flake check` を実行し、Nix sandbox 内で `dotfiles` CLI と dist install/uninstall の非破壊テストも走らせます。dist install/uninstall は一時 HOME だけを使います。
 
 `make dist` は `.#dotfiles-dist` をビルドし、その成果物で `dist/` を再生成します。`dist/` 配下は生成物なので、修正が必要な場合は `pkgs/dist/`、`pkgs/dotfiles/`、`home/` などの生成元を編集します。
 
