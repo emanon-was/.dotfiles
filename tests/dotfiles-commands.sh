@@ -84,6 +84,11 @@ test_project_init() {
   assert_fails project-missing-template run_dotfiles_project init
   assert_fails project-unknown-template run_dotfiles_project init unknown "$test_root/unknown"
   assert_fails project-extra-argument run_dotfiles_project init nix "$test_root/extra" extra
+
+  conflict_dest="$test_root/conflict-project"
+  mkdir -p "$conflict_dest"
+  cp "$repo_root/pkgs/dotfiles/templates/nix/flake.nix" "$conflict_dest/flake.nix"
+  assert_fails project-existing-file run_dotfiles_project init nix "$conflict_dest"
   printf '[ok] project init\n'
 }
 

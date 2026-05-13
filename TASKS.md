@@ -5,8 +5,9 @@
 
 ## 未完了タスク
 
-- [ ] `dotfiles project init` が既存ファイルを黙って上書きしないようにする。既存ファイルがある場合は失敗させ、必要なら将来 `--force` を追加する。
-- [ ] [home/gnome.nix](./home/gnome.nix) のコメントを現行コマンド `dotfiles configure gnome` に合わせる。
+現時点では未完了タスクなし。
+
+新しい作業を始める場合は、この section に `- [ ] ...` として追加します。
 
 ## 注意点
 
