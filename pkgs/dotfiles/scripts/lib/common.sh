@@ -91,3 +91,29 @@ have() {
 require_dotfiles_home() {
   [ -d "$DOTFILES_HOME" ] || fail "DOTFILES_HOME does not exist: $DOTFILES_HOME"
 }
+
+dotfiles_home_file_source() {
+  relative_path="${1#/}"
+
+  if [ -n "${DOTFILES_PORTABLE_DIST:-}" ] && [ -e "$DOTFILES_HOME/home-files/$relative_path" ]; then
+    printf '%s\n' "$DOTFILES_HOME/home-files/$relative_path"
+    return 0
+  fi
+
+  if [ -e "$HOME/$relative_path" ] || [ -L "$HOME/$relative_path" ]; then
+    printf '%s\n' "$HOME/$relative_path"
+    return 0
+  fi
+
+  if [ -n "${DOTFILES_BUILT_HOME_FILES:-}" ] && [ -e "$DOTFILES_BUILT_HOME_FILES/$relative_path" ]; then
+    printf '%s\n' "$DOTFILES_BUILT_HOME_FILES/$relative_path"
+    return 0
+  fi
+
+  if [ -e "$DOTFILES_HOME/home-files/$relative_path" ]; then
+    printf '%s\n' "$DOTFILES_HOME/home-files/$relative_path"
+    return 0
+  fi
+
+  return 1
+}

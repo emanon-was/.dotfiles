@@ -21,6 +21,11 @@ let
     cp -R ${./templates}/. "$out/share/dotfiles/templates"/
   '';
 
+  homeFiles = runCommand "dotfiles-home-files" { } ''
+    mkdir -p "$out/share/dotfiles/home-files/.config/doom"
+    cp -R ${../../home/config/doom}/. "$out/share/dotfiles/home-files/.config/doom"/
+  '';
+
   baseRuntimeInputs = [
     bash
     coreutils
@@ -70,6 +75,9 @@ let
         ./scripts/lib/doom.sh
         ./scripts/lib/templates.sh
       ];
+      nixExtraText = ''
+        DOTFILES_BUILT_HOME_FILES="${homeFiles}/share/dotfiles/home-files"
+      '';
       script = ./scripts/dotfiles-doctor.sh;
     }
     {
@@ -83,6 +91,9 @@ let
       libs = [
         ./scripts/lib/doom.sh
       ];
+      nixExtraText = ''
+        DOTFILES_BUILT_HOME_FILES="${homeFiles}/share/dotfiles/home-files"
+      '';
       script = ./scripts/dotfiles-configure.sh;
     }
     {
@@ -93,6 +104,7 @@ let
       ];
       script = ./scripts/dotfiles-project.sh;
       nixExtraText = ''
+        DOTFILES_BUILT_HOME_FILES="${homeFiles}/share/dotfiles/home-files"
         DOTFILES_BUILT_TEMPLATES="${templates}/share/dotfiles/templates"
       '';
     }
@@ -117,7 +129,7 @@ let
 in
 symlinkJoin {
   name = "dotfiles";
-  paths = [ dispatcher templates portableCommands ] ++ subcommands;
+  paths = [ dispatcher templates homeFiles portableCommands ] ++ subcommands;
 
   meta = {
     description = "Dotfiles management helper";

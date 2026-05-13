@@ -70,6 +70,7 @@ dotfiles configure gnome
 dotfiles configure doom install [--check]
 dotfiles configure doom sync
 dotfiles configure doom upgrade
+dotfiles configure doom restore-defaults
 dotfiles project init <nix|docker> [destination]
 ```
 
@@ -81,6 +82,8 @@ dotfiles project init <nix|docker> [destination]
 - project templates は `share/dotfiles/templates` に生成する。
 - Nix package 版の `dotfiles-project` は package 内の `share/dotfiles/templates` を参照する。
 - dist 用 portable command には `DOTFILES_PORTABLE_DIST=1` を埋め込み、`dist/home-files/.local/share/dotfiles/templates` を参照する。
+- 実行時の設定ファイル参照は、作業ツリーの生成元ではなく配置済みまたはビルド済み成果物を優先する。
+- dist 版は `dist/home-files`、Home Manager 版は `$HOME` に配置済みの file/link、Nix package 版は package 内の `share/dotfiles/home-files` を参照する。
 
 ## Doom Emacs
 
@@ -88,9 +91,11 @@ dotfiles project init <nix|docker> [destination]
 - Doom 初回 clone/install は `dotfiles configure doom install` で明示実行する。
 - `dotfiles configure doom sync` は `$HOME/.config/emacs/bin/doom sync` を実行する。
 - `dotfiles configure doom upgrade` は upgrade 後に sync する。
+- `dotfiles configure doom restore-defaults` は保存済みの Doom default config を `~/.config/doom/` に復元する。
 - `dotfiles flake switch` 成功後は通常 `doom sync` も実行する。
 - `dotfiles flake switch --skip-doom-sync` で Doom sync を飛ばせる。
-- Doom install/upgrade 時は一時 HOME で Doom の初期 `config.el`、`init.el`、`packages.el` を生成し、`$HOME/.local/state/dotfiles/doom-defaults/` に保存する。
+- Doom install/upgrade 時は既存の `~/.config/doom/config.el`、`init.el`、`packages.el` を一時退避し、Doom の初期 default を生成して `$HOME/.local/state/dotfiles/doom-defaults/` に保存してから復元する。
+- `doom-defaults` は現在の Doom default のみを保持し、timestamp 履歴は持たない。
 - Doom install/upgrade 時は dotfiles 側に同名ファイルがある場合だけ `~/.config/doom/` へリンクする。
 - Home Manager が同じ内容の Nix store symlink を既に配置している場合は置き換えない。
 - `dotfiles configure doom install --check` は一時 directory で install flow を検証し、実環境を変更しない。
