@@ -159,7 +159,7 @@ Usage:
   dotfiles configure doom install [--check]
   dotfiles configure doom sync
   dotfiles configure doom upgrade
-  dotfiles configure doom reset
+  dotfiles configure doom repair
   dotfiles project init <nix|docker> [destination]
 USAGE
 }

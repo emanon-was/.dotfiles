@@ -124,7 +124,7 @@ dotfiles configure gnome
 dotfiles configure doom install [--check]
 dotfiles configure doom sync
 dotfiles configure doom upgrade
-dotfiles configure doom reset
+dotfiles configure doom repair
 dotfiles project init <nix|docker> [destination]
 ```
 
@@ -142,10 +142,10 @@ home/config/doom/config.el
 
 その後、dotfiles 側の `.config/doom` 配下にあるファイルを `~/.config/doom/` へリンクします。Home Manager が同じ内容の Nix store symlink を既に配置している場合は、そのリンクをそのまま使います。
 
-Doom の更新後に管理中の設定で起動できない場合は、保存済みの初期状態に戻せます。
+Doom の更新後に管理中の設定で起動できない場合は、保存済みの初期状態へ戻して修復できます。
 
 ```sh
-dotfiles configure doom reset
+dotfiles configure doom repair
 ```
 
 初回 install の流れだけを検証したい場合:

@@ -5,7 +5,7 @@ Usage:
   dotfiles configure doom install [--check]
   dotfiles configure doom sync
   dotfiles configure doom upgrade
-  dotfiles configure doom reset
+  dotfiles configure doom repair
 USAGE
 }
 
@@ -191,7 +191,7 @@ doom_save_initial_config() {
   )
 }
 
-doom_reset_config() {
+doom_repair_config() {
   initial_dir="$(dotfiles_state_dir)/doom-initial"
   [ -d "$initial_dir" ] || fail "Doom initial config is not saved yet: $initial_dir"
 
@@ -205,7 +205,7 @@ doom_reset_config() {
   done
 
   cp -R "$initial_dir"/. "$target_dir"/
-  status "[doom] reset Doom config from initial config: $target_dir"
+  status "[doom] repaired Doom config from initial config: $target_dir"
 }
 
 doom_install_check() {
@@ -304,10 +304,10 @@ FAKE_DOOM
   status "[doom-check] verifying sync preflight check"
   doom_sync
 
-  status "[doom-check] verifying config reset"
-  doom_reset_config
+  status "[doom-check] verifying config repair"
+  doom_repair_config
   if find "$HOME/.config/doom" -mindepth 1 -type l -print -quit | grep -q .; then
-    fail "Doom reset should replace config links with files"
+    fail "Doom repair should replace config links with files"
   fi
 
   status "[doom-check] install check passed"
@@ -360,8 +360,8 @@ cmd_doom() {
       doom_link_dotfiles_config
       doom_sync
       ;;
-    reset)
-      doom_reset_config
+    repair)
+      doom_repair_config
       ;;
     *)
       usage_configure
