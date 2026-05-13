@@ -51,12 +51,12 @@ unset RPROMPT RPS1
 
 __dotfiles_prompt_precmd() {
   exit_code="$?"
-  status=""
+  prompt_status=""
   if [ "$exit_code" -ne 0 ]; then
-    status=" [exit:$exit_code]"
+    prompt_status=" [exit:$exit_code]"
   fi
 
-  PROMPT="%F{green}%n@%m%f %F{blue}%~%f%F{yellow}$(__dotfiles_prompt_git)%f%F{red}$status%f"$'\n'"%# "
+  PROMPT="%F{green}%n@%m%f %F{blue}%~%f%F{yellow}$(__dotfiles_prompt_git)%f%F{red}$prompt_status%f"$'\n'"%# "
 }
 if [[ " ${precmd_functions[*]} " != *" __dotfiles_prompt_precmd "* ]]; then
   precmd_functions+=(__dotfiles_prompt_precmd)

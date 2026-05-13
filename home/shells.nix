@@ -63,12 +63,12 @@ in
 
       __dotfiles_prompt_command() {
         exit_code="$?"
-        status=""
+        prompt_status=""
         if [ "$exit_code" -ne 0 ]; then
-          status=" [exit:$exit_code]"
+          prompt_status=" [exit:$exit_code]"
         fi
 
-        PS1="\[\e[32m\]\u@\h\[\e[0m\] \[\e[34m\]\w\[\e[0m\]\[\e[33m\]$(__dotfiles_prompt_git)\[\e[0m\]\[\e[31m\]$status\[\e[0m\]\n\\$ "
+        PS1="\[\e[32m\]\u@\h\[\e[0m\] \[\e[34m\]\w\[\e[0m\]\[\e[33m\]$(__dotfiles_prompt_git)\[\e[0m\]\[\e[31m\]$prompt_status\[\e[0m\]\n\\$ "
       }
       PROMPT_COMMAND=__dotfiles_prompt_command
 
@@ -113,12 +113,12 @@ in
 
       __dotfiles_prompt_precmd() {
         exit_code="$?"
-        status=""
+        prompt_status=""
         if [ "$exit_code" -ne 0 ]; then
-          status=" [exit:$exit_code]"
+          prompt_status=" [exit:$exit_code]"
         fi
 
-        PROMPT="%F{green}%n@%m%f %F{blue}%~%f%F{yellow}$(__dotfiles_prompt_git)%f%F{red}$status%f"$'\n'"%# "
+        PROMPT="%F{green}%n@%m%f %F{blue}%~%f%F{yellow}$(__dotfiles_prompt_git)%f%F{red}$prompt_status%f"$'\n'"%# "
       }
       if [[ " ''${precmd_functions[*]} " != *" __dotfiles_prompt_precmd "* ]]; then
         precmd_functions+=(__dotfiles_prompt_precmd)
