@@ -434,7 +434,8 @@ case "$command" in
     if [ ! -e "$doomdir/config.el" ]; then
       cp "$DOTFILES_DOOM_CONFIG_SOURCE" "$doomdir/config.el"
     fi
-    touch "$doomdir/init.el" "$doomdir/packages.el"
+    [ -e "$doomdir/init.el" ] || touch "$doomdir/init.el"
+    [ -e "$doomdir/packages.el" ] || touch "$doomdir/packages.el"
     ;;
   sync)
     ;;

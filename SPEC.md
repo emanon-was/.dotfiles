@@ -64,7 +64,7 @@
 dotfiles doctor
 dotfiles flake check
 dotfiles flake update
-dotfiles flake switch [--skip-doom-sync] [current|dist|user]
+dotfiles flake switch [current|dist|user]
 dotfiles flake doctor
 dotfiles configure gnome
 dotfiles configure doom install [--check]
@@ -94,8 +94,7 @@ dotfiles project init <nix|docker> [destination]
 - `dotfiles configure doom sync` は `$HOME/.config/emacs/bin/doom sync` を実行する。
 - `dotfiles configure doom upgrade` は upgrade 後に sync する。
 - `dotfiles configure doom repair` は保存済みの Doom 初期 config を `~/.config/doom/` に復元して修復する。
-- `dotfiles flake switch` 成功後は通常 `doom sync` も実行する。
-- `dotfiles flake switch --skip-doom-sync` で Doom sync を飛ばせる。
+- `dotfiles flake switch` は Doom sync を実行しない。Doom 操作は `dotfiles configure doom ...` で明示実行する。
 - Doom install/upgrade 時は既存の `~/.config/doom` 配下を一時退避し、Doom の初期 config を生成して `$HOME/.local/state/dotfiles/doom-initial/` に保存してから復元する。
 - `doom-initial` は現在の Doom 初期 config のみを保持し、timestamp 履歴は持たない。
 - Doom install/upgrade 時は dotfiles 側の `.config/doom` 配下にあるファイルを `~/.config/doom/` へリンクする。
@@ -148,7 +147,7 @@ make dist
 
 - `dist/` は直接編集しない。
 - `gsettings` や `doom install` のような副作用コマンドを Home Manager activation に入れない。
-- `doom sync` は `dotfiles flake switch` から明示的に呼び出す。
+- `doom sync` は `dotfiles flake switch` から呼び出さない。
 - Home Manager module の評価や activation に重いネットワーク処理を混ぜない。
 - 変更後は影響範囲に応じて `make check`、`make dist-build`、`make dist` を実行する。
 - `dotfiles flake switch` の対象解決は `make switch-check` で検査する。任意ユーザー、`root`、`dist`、旧 `DOTFILES_PROFILE=<user>`、不正引数を条件に含める。

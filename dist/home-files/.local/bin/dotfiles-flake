@@ -157,7 +157,7 @@ usage_flake() {
 Usage:
   dotfiles flake check
   dotfiles flake update
-  dotfiles flake switch [--skip-doom-sync] [current|dist|user]
+  dotfiles flake switch [current|dist|user]
   dotfiles flake doctor
 USAGE
 }
@@ -180,33 +180,15 @@ flake_switch() {
 
   # shellcheck disable=SC2086
   home-manager -b hm-backup --flake "$DOTFILES_HOME#$DOTFILES_SWITCH_PROFILE" $DOTFILES_SWITCH_HOME_MANAGER_ARGS switch
-
-  if [ "$DOTFILES_SWITCH_SKIP_DOOM_SYNC" -eq 0 ]; then
-    dotfiles_path="$0"
-    if command -v readlink >/dev/null 2>&1; then
-      dotfiles_path="$(readlink -f "$dotfiles_path" 2>/dev/null || printf '%s\n' "$dotfiles_path")"
-    fi
-    configure_command="$(dirname "$dotfiles_path")/dotfiles-configure"
-    if [ ! -x "$configure_command" ]; then
-      configure_command="dotfiles-configure"
-    fi
-    "$configure_command" doom sync
-  else
-    status "[skip] doom sync"
-  fi
 }
 
 flake_switch_resolve() {
-  DOTFILES_SWITCH_SKIP_DOOM_SYNC=0
   normalize_home_manager_profile
   profile="$DOTFILES_PROFILE"
   switch_target_seen=0
 
   while [ "$#" -gt 0 ]; do
     case "$1" in
-      --skip-doom-sync)
-        DOTFILES_SWITCH_SKIP_DOOM_SYNC=1
-        ;;
       -*)
         fail "unknown option for flake switch: $1"
         ;;
@@ -245,7 +227,7 @@ flake_switch_resolve() {
   fi
 
   DOTFILES_SWITCH_PROFILE="$profile"
-  export DOTFILES_SWITCH_PROFILE DOTFILES_SWITCH_HOME_MANAGER_ARGS DOTFILES_SWITCH_SKIP_DOOM_SYNC
+  export DOTFILES_SWITCH_PROFILE DOTFILES_SWITCH_HOME_MANAGER_ARGS
 }
 
 flake_doctor_commands() {
