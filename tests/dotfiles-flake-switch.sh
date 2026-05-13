@@ -52,15 +52,15 @@ run_switch_case \
   --skip-doom-sync
 
 run_switch_case \
-  alice \
+  dotuser \
   current \
   current \
   --impure \
   1 \
-  alice \
-  /home/alice \
+  dotuser \
+  /home/dotuser \
   --skip-doom-sync \
-  alice
+  dotuser
 
 run_switch_case \
   root \
@@ -125,6 +125,6 @@ assert_switch_fails() {
 }
 
 assert_switch_fails unknown-option --unknown
-assert_switch_fails duplicate-target alice bob
+assert_switch_fails duplicate-target dotuser bob
 
 printf 'dotfiles flake switch behavior checks passed\n'
