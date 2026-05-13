@@ -22,7 +22,28 @@ flake_update() {
 flake_switch() {
   require_dotfiles_home
 
-  skip_doom_sync=0
+  flake_switch_resolve "$@"
+
+  # shellcheck disable=SC2086
+  home-manager -b hm-backup --flake "$DOTFILES_HOME#$DOTFILES_SWITCH_PROFILE" $DOTFILES_SWITCH_HOME_MANAGER_ARGS switch
+
+  if [ "$DOTFILES_SWITCH_SKIP_DOOM_SYNC" -eq 0 ]; then
+    dotfiles_path="$0"
+    if command -v readlink >/dev/null 2>&1; then
+      dotfiles_path="$(readlink -f "$dotfiles_path" 2>/dev/null || printf '%s\n' "$dotfiles_path")"
+    fi
+    configure_command="$(dirname "$dotfiles_path")/dotfiles-configure"
+    if [ ! -x "$configure_command" ]; then
+      configure_command="dotfiles-configure"
+    fi
+    "$configure_command" doom sync
+  else
+    status "[skip] doom sync"
+  fi
+}
+
+flake_switch_resolve() {
+  DOTFILES_SWITCH_SKIP_DOOM_SYNC=0
   normalize_home_manager_profile
   profile="$DOTFILES_PROFILE"
   switch_target_seen=0
@@ -30,7 +51,7 @@ flake_switch() {
   while [ "$#" -gt 0 ]; do
     case "$1" in
       --skip-doom-sync)
-        skip_doom_sync=1
+        DOTFILES_SWITCH_SKIP_DOOM_SYNC=1
         ;;
       -*)
         fail "unknown option for flake switch: $1"
@@ -64,27 +85,13 @@ flake_switch() {
     shift
   done
 
-  home_manager_args=""
+  DOTFILES_SWITCH_HOME_MANAGER_ARGS=""
   if [ "$profile" = "current" ]; then
-    home_manager_args="--impure"
+    DOTFILES_SWITCH_HOME_MANAGER_ARGS="--impure"
   fi
 
-  # shellcheck disable=SC2086
-  home-manager -b hm-backup --flake "$DOTFILES_HOME#$profile" $home_manager_args switch
-
-  if [ "$skip_doom_sync" -eq 0 ]; then
-    dotfiles_path="$0"
-    if command -v readlink >/dev/null 2>&1; then
-      dotfiles_path="$(readlink -f "$dotfiles_path" 2>/dev/null || printf '%s\n' "$dotfiles_path")"
-    fi
-    configure_command="$(dirname "$dotfiles_path")/dotfiles-configure"
-    if [ ! -x "$configure_command" ]; then
-      configure_command="dotfiles-configure"
-    fi
-    "$configure_command" doom sync
-  else
-    status "[skip] doom sync"
-  fi
+  DOTFILES_SWITCH_PROFILE="$profile"
+  export DOTFILES_SWITCH_PROFILE DOTFILES_SWITCH_HOME_MANAGER_ARGS DOTFILES_SWITCH_SKIP_DOOM_SYNC
 }
 
 flake_doctor_commands() {
@@ -179,6 +186,10 @@ flake_doctor() {
 
   return "$failed"
 }
+
+if [ "${DOTFILES_TEST_SOURCE_ONLY:-0}" -eq 1 ]; then
+  return 0 2>/dev/null || exit 0
+fi
 
 case "${1:-}" in
   check)

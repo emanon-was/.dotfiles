@@ -58,7 +58,7 @@ let
   mkDotfilesCommand = command:
     writeShellApplication {
       inherit (command) name runtimeInputs;
-      excludeShellChecks = [ "SC2329" ];
+      excludeShellChecks = [ "SC2317" "SC2329" ];
       text = commandText command;
     };
 
