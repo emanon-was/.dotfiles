@@ -24,8 +24,8 @@ make dist
 生成された repository root の `dist/` を非 Nix 環境へ持ち出して使います。
 
 ```sh
-make setup-dist
-make dist-uninstall
+make init.dist
+make clean.dist
 ```
 
 ## ファイル

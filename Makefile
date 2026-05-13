@@ -1,30 +1,38 @@
-.PHONY: setup-flake setup-dist setup-doom home-manager-uninstall dist-uninstall flake-check dotfiles-build dist-build home-build switch-check command-check dist-install-check check dist
+.PHONY: init init.flake init.dist init.doom clean.flake clean.dist flake-check dotfiles-build dist-build home-build switch-check command-check dist-install-check check dist
 
 PROFILE ?= current
 DOTFILES_USERNAME ?= $(shell id -un)
 DOTFILES_HOME_DIRECTORY ?= $(HOME)
 
-# Home Manager / flake 環境の初回セットアップを実行する。
-setup-flake:
+# flake が使える環境では init.flake、使えない環境では init.dist を実行する。
+init:
+	@if command -v nix >/dev/null 2>&1 && nix flake metadata . >/dev/null 2>&1; then \
+		$(MAKE) init.flake; \
+	else \
+		$(MAKE) init.dist; \
+	fi
+
+# Home Manager / flake 環境の初期化を実行する。
+init.flake:
 	nix run .#dotfiles -- flake doctor
 	nix run .#dotfiles -- configure doctor
 	nix run .#dotfiles -- flake switch
 
-# dist を使う非 Nix 環境向けのセットアップを実行する。
-setup-dist:
+# dist を使う非 Nix 環境向けの初期化を実行する。
+init.dist:
 	./dist/install.sh
 
 # Doom Emacs の初回セットアップを実行する。
-setup-doom:
+init.doom:
 	nix run .#dotfiles -- configure doom install
 
 # Home Manager の管理をやめる。
 # 退避された *.hm-backup の復元が必要な場合は内容を確認して手で戻す。
-home-manager-uninstall:
+clean.flake:
 	home-manager uninstall
 
 # dist/install.sh で展開した symlink と backup を戻す。
-dist-uninstall:
+clean.dist:
 	./dist/uninstall.sh
 
 # flake 全体の評価と checks を確認する。

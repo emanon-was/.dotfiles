@@ -13,13 +13,15 @@ NixOS の system 側は stable、このリポジトリの Home Manager 側は `n
 ```sh
 git clone https://github.com/emanon-was/.dotfiles.git "$HOME/.dotfiles"
 cd "$HOME/.dotfiles"
-make setup-flake
+make init
+# or explicitly:
+make init.flake
 ```
 
 Doom Emacs が未セットアップの場合は、Home Manager 反映後に Doom 本体を用意します。
 
 ```sh
-make setup-doom
+make init.doom
 ```
 
 ### 使い方
@@ -69,7 +71,7 @@ Home Manager でファイル衝突が起きた場合、`dotfiles flake switch` �
 Home Manager の管理をやめる場合:
 
 ```sh
-make home-manager-uninstall
+make clean.flake
 ```
 
 この操作は Home Manager が管理している symlink や profile を外します。`.hm-backup` へ退避されたファイルを戻す必要がある場合は、内容を確認してから手で戻します。
@@ -85,7 +87,9 @@ dotfiles configure doom repair
 ### セットアップ
 
 ```sh
-make setup-dist
+make init
+# or explicitly:
+make init.dist
 ```
 
 `dist/` は Nix build 済みの成果物です。Nix / Home Manager を使えない環境では、この内容を `$HOME` へ symlink して使います。
@@ -117,7 +121,7 @@ dotfiles flake switch
 `dist/install.sh` で展開した内容を戻す場合:
 
 ```sh
-make dist-uninstall
+make clean.dist
 ```
 
 `dist` の install/uninstall は `$HOME/.local/state/dotfiles/install-manifest.tsv` を使って、作成した symlink と退避した backup を管理します。
@@ -142,11 +146,12 @@ make dotfiles-build
 make dist-build
 make home-build
 make dist
-make setup-flake
-make setup-dist
-make setup-doom
-make home-manager-uninstall
-make dist-uninstall
+make init
+make init.flake
+make init.dist
+make init.doom
+make clean.flake
+make clean.dist
 ```
 
 `dist/` は `make dist` で再生成される成果物です。直接編集せず、生成元を変更してから再生成します。

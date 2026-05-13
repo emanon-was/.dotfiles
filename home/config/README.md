@@ -17,7 +17,7 @@ Home Manager がこの directory の内容を `$HOME` 配下へ配置します�
 ```sh
 dotfiles flake switch
 # or
-make setup-flake
+make init.flake
 ```
 
 ## dist への反映
@@ -30,7 +30,7 @@ make setup-flake
 
 ```sh
 make dist
-make setup-dist
+make init.dist
 ```
 
 ## 方針

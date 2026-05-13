@@ -57,7 +57,7 @@
 - `dotfiles <name>` は、同じ directory または PATH 上の `dotfiles-<name>` を実行する。
 - flake 依存コマンドは `dotfiles flake ...` 配下に置く。
 - flake 操作は `dotfiles flake check/update/switch` を使う。
-- Home Manager 管理をやめる場合は `home-manager uninstall` を使う。Makefile では `make home-manager-uninstall` として用意する。
+- Home Manager 管理をやめる場合は `home-manager uninstall` を使う。Makefile では `make clean.flake` として用意する。
 
 主要コマンド:
 
@@ -150,11 +150,12 @@ make dotfiles-build
 make dist-build
 make home-build
 make dist
-make setup-flake
-make setup-dist
-make setup-doom
-make home-manager-uninstall
-make dist-uninstall
+make init
+make init.flake
+make init.dist
+make init.doom
+make clean.flake
+make clean.dist
 ```
 
 ## 運用ルール

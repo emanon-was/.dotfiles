@@ -16,7 +16,7 @@ Home Manager module と、Home Manager で配置する設定ファイルの生�
 ```sh
 dotfiles flake switch
 # or
-make setup-flake
+make init.flake
 ```
 
 Home Manager profile の build:
@@ -59,5 +59,5 @@ Doom Emacs の設定は `config/doom/` 配下全体を管理対象として扱�
 
 ```sh
 make dist
-make setup-dist
+make init.dist
 ```

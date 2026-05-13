@@ -12,7 +12,7 @@ Nix package の生成元です。
 
 ```sh
 make dotfiles-build
-make setup-flake
+make init.flake
 ```
 
 ## dist 生成
@@ -20,7 +20,7 @@ make setup-flake
 ```sh
 make dist-build
 make dist
-make setup-dist
+make init.dist
 ```
 
 ## 構成
