@@ -124,7 +124,6 @@ dotfiles configure gnome
 dotfiles configure doom install [--check]
 dotfiles configure doom sync
 dotfiles configure doom upgrade
-dotfiles configure doom config-diff
 dotfiles project init <nix|docker> [destination]
 ```
 
@@ -138,15 +137,9 @@ Doom Emacs 本体は `~/.config/emacs` に置きます。Doom の `init.el` や 
 home/config/doom/config.el
 ```
 
-`dotfiles configure doom install` と `dotfiles configure doom upgrade` は、管理中の `config.el` symlink を変更せずに Doom の install、upgrade、sync を実行します。
+`dotfiles configure doom install` と `dotfiles configure doom upgrade` は、Doom が生成する初期 `config.el`、`init.el`、`packages.el` を `$HOME/.local/state/dotfiles/doom-defaults/` に保存します。
 
-Doom が新規環境で生成する初期 `config.el` と、このリポジトリで管理している `home/config/doom/config.el` を比較したい場合:
-
-```sh
-dotfiles configure doom config-diff
-```
-
-差分がある場合は `$HOME/.local/state/dotfiles/*.patch` に保存されます。
+その後、dotfiles 側に同名ファイルがある場合は `~/.config/doom/` へリンクします。Home Manager が同じ内容の Nix store symlink を既に配置している場合は、そのリンクをそのまま使います。
 
 初回 install の流れだけを検証したい場合:
 
