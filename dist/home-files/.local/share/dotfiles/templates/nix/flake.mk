@@ -1,7 +1,7 @@
-.PHONY: flake-develop flake-check flake-lock flake-update direnv-allow
+.PHONY: flake-shell flake-check flake-lock flake-update direnv-allow
 
 # 開発用 shell に入る。
-flake-develop:
+flake-shell:
 	nix develop
 
 # flake の評価と定義済み checks を確認する。
