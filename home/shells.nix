@@ -21,6 +21,26 @@ let
       printf ' [git:%s%s]' "$branch" "$dirty"
     }
   '';
+  emacsAlias = ''
+    __dotfiles_configure_emacs_alias() {
+      command -v emacs >/dev/null 2>&1 || return 0
+
+      emacs_path="$(command -v emacs)"
+      if command -v readlink >/dev/null 2>&1; then
+        emacs_path="$(readlink -f "$emacs_path" 2>/dev/null || printf '%s\n' "$emacs_path")"
+      fi
+
+      case "$emacs_path" in
+        *emacs-nox*|*emacs-nox-with-packages*)
+          unalias emacs 2>/dev/null || true
+          ;;
+        *)
+          alias emacs='emacs -nw'
+          ;;
+      esac
+    }
+    __dotfiles_configure_emacs_alias
+  '';
 in
 {
   home = {
@@ -52,7 +72,6 @@ in
       df = "df -h";
       su = "su -l";
       nano = "nano -Suwik";
-      emacs = "emacs -nw";
     };
   };
 
@@ -81,6 +100,8 @@ in
       if command -v trash >/dev/null 2>&1; then
         alias rm='trash-put'
       fi
+
+      ${emacsAlias}
 
       if command -v direnv >/dev/null 2>&1; then
         eval "$(direnv hook bash)"
@@ -135,6 +156,8 @@ in
       if command -v trash >/dev/null 2>&1; then
         alias rm='trash-put'
       fi
+
+      ${emacsAlias}
 
       if command -v direnv >/dev/null 2>&1; then
         eval "$(direnv hook zsh)"

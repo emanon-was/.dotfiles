@@ -49,6 +49,7 @@
 - Doom Emacs の `config.el` は `home/config/doom/config.el` を生成元にして Home Manager で配置する。
 - Doom の `init.el` と `packages.el` は Doom 側の更新対象として扱い、この repo では管理しない。
 - Emacs package は terminal 用の `emacs-nox` を使う。
+- shell の `emacs` alias は起動時に判定し、`emacs-nox` の場合は alias しない。それ以外の Emacs では `emacs -nw` にする。
 
 ## dotfiles CLI
 
