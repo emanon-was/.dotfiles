@@ -38,6 +38,29 @@ else
 fi
 export DOTFILES_USERNAME DOTFILES_HOME_DIRECTORY DOTFILES_HOME_DIRECTORY_DEFAULTED
 
+normalize_home_manager_profile() {
+  case "$DOTFILES_PROFILE" in
+    current|dist)
+      ;;
+    root)
+      DOTFILES_PROFILE="current"
+      DOTFILES_USERNAME="root"
+      if [ "${DOTFILES_HOME_DIRECTORY_DEFAULTED:-0}" -eq 1 ]; then
+        DOTFILES_HOME_DIRECTORY="/root"
+      fi
+      ;;
+    *)
+      DOTFILES_USERNAME="$DOTFILES_PROFILE"
+      DOTFILES_PROFILE="current"
+      if [ "${DOTFILES_HOME_DIRECTORY_DEFAULTED:-0}" -eq 1 ]; then
+        DOTFILES_HOME_DIRECTORY="/home/$DOTFILES_USERNAME"
+      fi
+      ;;
+  esac
+
+  export DOTFILES_PROFILE DOTFILES_USERNAME DOTFILES_HOME_DIRECTORY
+}
+
 status() {
   printf '%s\n' "$*"
 }
@@ -97,6 +120,7 @@ flake_switch() {
   require_dotfiles_home
 
   skip_doom_sync=0
+  normalize_home_manager_profile
   profile="$DOTFILES_PROFILE"
   switch_target_seen=0
 
@@ -192,6 +216,8 @@ flake_doctor_home() {
 }
 
 flake_doctor_home_manager() {
+  normalize_home_manager_profile
+
   if ! have home-manager; then
     missing "Home Manager command is unavailable"
     return 1

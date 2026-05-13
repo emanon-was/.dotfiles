@@ -36,6 +36,29 @@ else
 fi
 export DOTFILES_USERNAME DOTFILES_HOME_DIRECTORY DOTFILES_HOME_DIRECTORY_DEFAULTED
 
+normalize_home_manager_profile() {
+  case "$DOTFILES_PROFILE" in
+    current|dist)
+      ;;
+    root)
+      DOTFILES_PROFILE="current"
+      DOTFILES_USERNAME="root"
+      if [ "${DOTFILES_HOME_DIRECTORY_DEFAULTED:-0}" -eq 1 ]; then
+        DOTFILES_HOME_DIRECTORY="/root"
+      fi
+      ;;
+    *)
+      DOTFILES_USERNAME="$DOTFILES_PROFILE"
+      DOTFILES_PROFILE="current"
+      if [ "${DOTFILES_HOME_DIRECTORY_DEFAULTED:-0}" -eq 1 ]; then
+        DOTFILES_HOME_DIRECTORY="/home/$DOTFILES_USERNAME"
+      fi
+      ;;
+  esac
+
+  export DOTFILES_PROFILE DOTFILES_USERNAME DOTFILES_HOME_DIRECTORY
+}
+
 status() {
   printf '%s\n' "$*"
 }

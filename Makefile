@@ -17,9 +17,20 @@ dist-build:
 	nix build .#dotfiles-dist --no-link
 
 # Home Manager activation package を build する。
+# PROFILE に current/dist 以外を指定した場合は任意ユーザー名として扱い、
+# flake profile は current のまま DOTFILES_USERNAME に渡す。
 home-build:
-	DOTFILES_USERNAME="$(DOTFILES_USERNAME)" DOTFILES_HOME_DIRECTORY="$(DOTFILES_HOME_DIRECTORY)" \
-		nix build .#homeConfigurations.$(PROFILE).activationPackage --impure --no-link
+	@set -e; \
+	profile="$(PROFILE)"; \
+	username="$(DOTFILES_USERNAME)"; \
+	home_directory="$(DOTFILES_HOME_DIRECTORY)"; \
+	case "$$profile" in \
+		current|dist) ;; \
+		root) profile="current"; username="root"; home_directory="/root" ;; \
+		*) username="$$profile"; profile="current"; home_directory="/home/$$username" ;; \
+	esac; \
+	DOTFILES_USERNAME="$$username" DOTFILES_HOME_DIRECTORY="$$home_directory" \
+		nix build ".#homeConfigurations.$$profile.activationPackage" --impure --no-link
 
 # dist/ を Nix build の成果物で再生成する。
 dist:

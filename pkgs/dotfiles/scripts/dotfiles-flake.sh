@@ -23,6 +23,7 @@ flake_switch() {
   require_dotfiles_home
 
   skip_doom_sync=0
+  normalize_home_manager_profile
   profile="$DOTFILES_PROFILE"
   switch_target_seen=0
 
@@ -118,6 +119,8 @@ flake_doctor_home() {
 }
 
 flake_doctor_home_manager() {
+  normalize_home_manager_profile
+
   if ! have home-manager; then
     missing "Home Manager command is unavailable"
     return 1
