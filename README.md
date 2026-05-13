@@ -134,6 +134,8 @@ home/config/doom/config.el
 
 その後、dotfiles 側の `.config/doom` 配下にあるファイルを `~/.config/doom/` へリンクします。Home Manager が同じ内容の Nix store symlink を既に配置している場合は、そのリンクをそのまま使います。
 
+Doom の install と upgrade は `--force` 付きで実行し、Doom 側の確認 prompt は自動承認します。
+
 Doom の更新後に管理中の設定で起動できない場合は、保存済みの初期状態へ戻して修復できます。
 
 ```sh

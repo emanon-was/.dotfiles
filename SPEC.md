@@ -93,6 +93,7 @@ dotfiles project init <nix|docker> [destination]
 - Doom 初回 clone/install は `dotfiles configure doom install` で明示実行する。
 - `dotfiles configure doom sync` は `$HOME/.config/emacs/bin/doom sync` を実行する。
 - `dotfiles configure doom upgrade` は upgrade 後に sync する。
+- Doom install/upgrade は `--force` を付けて実行し、Doom 側の確認 prompt を自動承認する。
 - `dotfiles configure doom repair` は保存済みの Doom 初期 config を `~/.config/doom/` に復元して修復する。
 - `dotfiles flake switch` は Doom sync を実行しない。Doom 操作は `dotfiles configure doom ...` で明示実行する。
 - Doom install/upgrade 時は既存の `~/.config/doom` 配下を一時退避し、Doom の初期 config を生成して `$HOME/.local/state/dotfiles/doom-initial/` に保存してから復元する。

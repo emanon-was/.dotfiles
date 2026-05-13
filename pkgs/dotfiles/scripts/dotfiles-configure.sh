@@ -306,7 +306,7 @@ FAKE_DOOM
   fi
 
   status "[doom-check] verifying install flow"
-  "$DOOM_BIN" install
+  "$DOOM_BIN" install --force
   doom_sync_raw
 
   status "[doom-check] verifying sync preflight check"
@@ -351,7 +351,7 @@ cmd_doom() {
       doom_save_initial_config
       doom_link_dotfiles_config
       status "[doom] running Doom install"
-      "$DOOM_BIN" install
+      "$DOOM_BIN" install --force
       doom_sync
       ;;
     sync)
@@ -363,7 +363,7 @@ cmd_doom() {
       fi
       doom_refresh_recipe_repositories
       status "[doom] upgrading Doom Emacs"
-      "$DOOM_BIN" upgrade
+      "$DOOM_BIN" upgrade --force
       doom_save_initial_config
       doom_link_dotfiles_config
       doom_sync
