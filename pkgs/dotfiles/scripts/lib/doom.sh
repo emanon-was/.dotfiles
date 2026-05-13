@@ -5,6 +5,10 @@ doom_config_source() {
   dotfiles_home_file_source ".config/doom/config.el" || printf '%s\n' "$HOME/.config/doom/config.el"
 }
 
+doom_managed_config_source() {
+  dotfiles_managed_home_file_source ".config/doom/config.el"
+}
+
 doom_installed() {
   [ -x "$DOOM_BIN" ]
 }

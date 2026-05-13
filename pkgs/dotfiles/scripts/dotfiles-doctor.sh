@@ -109,13 +109,13 @@ doctor_doom_checkout() {
 
 doctor_doom_config() {
   failed=0
-  dotfiles_config="$(doom_config_source)"
+  dotfiles_config="$(doom_managed_config_source 2>/dev/null || true)"
   active_config="$HOME/.config/doom/config.el"
 
-  if [ -f "$dotfiles_config" ]; then
+  if [ -n "$dotfiles_config" ] && [ -f "$dotfiles_config" ]; then
     ok "Doom config source: $dotfiles_config"
   else
-    missing "Doom config source: $dotfiles_config"
+    missing "Doom config source"
     return 1
   fi
 

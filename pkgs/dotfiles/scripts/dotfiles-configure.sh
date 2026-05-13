@@ -49,7 +49,7 @@ doom_backup_path() {
 
 doom_link_dotfiles_config() {
   require_dotfiles_home
-  source_dir="$(dotfiles_home_dir_source ".config/doom" 2>/dev/null || true)"
+  source_dir="$(dotfiles_managed_home_dir_source ".config/doom" 2>/dev/null || true)"
   target_dir="$HOME/.config/doom"
 
   if [ -z "$source_dir" ]; then
@@ -114,8 +114,14 @@ doom_refresh_recipe_repositories() {
       if [ -z "$branch" ]; then
         status "[doom] recipe repository is detached, skipping: $repo"
       else
-        git -C "$repo_path" fetch origin "$branch"
-        git -C "$repo_path" merge --ff-only "origin/$branch"
+        if ! git -C "$repo_path" fetch origin "$branch"; then
+          warn "[doom] failed to fetch recipe repository, skipping: $repo"
+          continue
+        fi
+        if ! git -C "$repo_path" merge --ff-only "origin/$branch"; then
+          warn "[doom] failed to fast-forward recipe repository, skipping: $repo"
+          continue
+        fi
       fi
     else
       status "[doom] recipe repository not present: $repo"
@@ -178,40 +184,30 @@ doom_save_initial_config() {
   (
     set -e
 
-    real_doomdir="$HOME/.config/doom"
-    temp_backup="$check_root/backup"
+    temp_doomdir="$check_root/doomdir"
     temp_doomlocaldir="$check_root/doom-local"
 
     cleanup_initial_capture() {
-      find "$real_doomdir" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
-      find "$temp_backup" -mindepth 1 -maxdepth 1 | while IFS= read -r backup_path; do
-        mv "$backup_path" "$real_doomdir/$(basename "$backup_path")"
-      done
       rm -rf "$check_root"
     }
     trap cleanup_initial_capture EXIT
 
-    mkdir -p "$temp_backup" "$temp_doomlocaldir" "$real_doomdir"
-
-    find "$real_doomdir" -mindepth 1 -maxdepth 1 | while IFS= read -r config_path; do
-      mv "$config_path" "$temp_backup/$(basename "$config_path")"
-      status "[doom] temporarily moved existing config: $config_path"
-    done
+    mkdir -p "$temp_doomdir" "$temp_doomlocaldir"
 
     status "[doom] generating Doom initial config in isolated local state"
     workdir="$(doom_workdir)"
     (
       cd "$workdir"
-      HOME="$HOME" DOOMLOCALDIR="$temp_doomlocaldir" "$DOOM_BIN" --doomdir "$real_doomdir" install --force --no-env --no-install --no-hooks
+      HOME="$HOME" DOOMLOCALDIR="$temp_doomlocaldir" "$DOOM_BIN" --doomdir "$temp_doomdir" install --force --no-env --no-install --no-hooks
     )
 
-    if ! find "$real_doomdir" -mindepth 1 -print -quit | grep -q .; then
-      fail "Doom install did not generate config files in: $real_doomdir"
+    if ! find "$temp_doomdir" -mindepth 1 -print -quit | grep -q .; then
+      fail "Doom install did not generate config files in: $temp_doomdir"
     fi
 
     rm -rf "$initial_dir.tmp"
     mkdir -p "$initial_dir.tmp"
-    cp -R "$real_doomdir"/. "$initial_dir.tmp"/
+    cp -R "$temp_doomdir"/. "$initial_dir.tmp"/
     rm -rf "$initial_dir"
     mv "$initial_dir.tmp" "$initial_dir"
     status "[doom] saved Doom initial config: $initial_dir"
@@ -339,6 +335,12 @@ FAKE_DOOM
   doom_repair_config
   if find "$HOME/.config/doom" -mindepth 1 -type l -print -quit | grep -q .; then
     fail "Doom repair should replace config links with files"
+  fi
+
+  status "[doom-check] verifying relink after repair"
+  doom_link_dotfiles_config
+  if ! find "$HOME/.config/doom" -mindepth 1 -type l -print -quit | grep -q .; then
+    fail "Doom config was not relinked after repair"
   fi
 
   status "[doom-check] install check passed"

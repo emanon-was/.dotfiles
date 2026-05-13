@@ -159,6 +159,23 @@ test_home_file_source() {
     exit 1
   }
 
+  printf 'manual\n' > "$home_dir/.config/doom/config.el"
+  output="$(
+    HOME="$home_dir" \
+    DOTFILES_HOME="$dotfiles_dir" \
+    DOTFILES_BUILT_HOME_FILES="$built_dir" \
+    bash -c '
+      set -euo pipefail
+      repo_root="$1"
+      . "$repo_root/pkgs/dotfiles/scripts/lib/common.sh"
+      dotfiles_managed_home_file_source ".config/doom/config.el"
+    ' _ "$repo_root"
+  )"
+  [ "$output" = "$built_dir/.config/doom/config.el" ] || {
+    printf 'error: managed source should not use deployed HOME file: %s\n' "$output" >&2
+    exit 1
+  }
+
   printf '[ok] home file source\n'
 }
 

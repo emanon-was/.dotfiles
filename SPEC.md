@@ -96,10 +96,11 @@ dotfiles project init <nix|docker> [destination]
 - Doom install/upgrade は `--force` を付けて実行し、Doom 側の確認 prompt を自動承認する。
 - `dotfiles configure doom repair` は保存済みの Doom 初期 config を `~/.config/doom/` に復元して修復する。
 - `dotfiles flake switch` は Doom sync を実行しない。Doom 操作は `dotfiles configure doom ...` で明示実行する。
-- Doom install/upgrade 時は既存の `~/.config/doom` 配下を一時退避し、Doom の初期 config を生成して `$HOME/.local/state/dotfiles/doom-initial/` に保存してから復元する。
+- Doom install/upgrade 時は一時 `--doomdir` で Doom の初期 config を生成し、実際の `~/.config/doom` に触れずに `$HOME/.local/state/dotfiles/doom-initial/` へ保存する。
 - `doom-initial` は現在の Doom 初期 config のみを保持し、timestamp 履歴は持たない。
-- Doom install/upgrade 時は dotfiles 側の `.config/doom` 配下にあるファイルを `~/.config/doom/` へリンクする。
+- Doom install/upgrade 時は managed source 側の `.config/doom` 配下にあるファイルを `~/.config/doom/` へリンクする。
 - Home Manager が同じ内容の Nix store symlink を既に配置している場合は置き換えない。
+- straight recipe repository の事前更新は best-effort とし、失敗しても warning で継続する。
 - `dotfiles configure doom install --check` は一時 directory で install flow を検証し、実環境を変更しない。
 
 ## dist

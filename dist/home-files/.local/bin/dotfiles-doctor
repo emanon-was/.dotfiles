@@ -120,6 +120,27 @@ dotfiles_home_file_source() {
   return 1
 }
 
+dotfiles_managed_home_file_source() {
+  relative_path="${1#/}"
+
+  if [ -n "${DOTFILES_PORTABLE_DIST:-}" ] && [ -e "$DOTFILES_HOME/home-files/$relative_path" ]; then
+    printf '%s\n' "$DOTFILES_HOME/home-files/$relative_path"
+    return 0
+  fi
+
+  if [ -n "${DOTFILES_BUILT_HOME_FILES:-}" ] && [ -e "$DOTFILES_BUILT_HOME_FILES/$relative_path" ]; then
+    printf '%s\n' "$DOTFILES_BUILT_HOME_FILES/$relative_path"
+    return 0
+  fi
+
+  if [ -e "$DOTFILES_HOME/home-files/$relative_path" ]; then
+    printf '%s\n' "$DOTFILES_HOME/home-files/$relative_path"
+    return 0
+  fi
+
+  return 1
+}
+
 dotfiles_home_dir_source() {
   relative_path="${1#/}"
 
@@ -146,11 +167,36 @@ dotfiles_home_dir_source() {
   return 1
 }
 
+dotfiles_managed_home_dir_source() {
+  relative_path="${1#/}"
+
+  if [ -n "${DOTFILES_PORTABLE_DIST:-}" ] && [ -d "$DOTFILES_HOME/home-files/$relative_path" ]; then
+    printf '%s\n' "$DOTFILES_HOME/home-files/$relative_path"
+    return 0
+  fi
+
+  if [ -n "${DOTFILES_BUILT_HOME_FILES:-}" ] && [ -d "$DOTFILES_BUILT_HOME_FILES/$relative_path" ]; then
+    printf '%s\n' "$DOTFILES_BUILT_HOME_FILES/$relative_path"
+    return 0
+  fi
+
+  if [ -d "$DOTFILES_HOME/home-files/$relative_path" ]; then
+    printf '%s\n' "$DOTFILES_HOME/home-files/$relative_path"
+    return 0
+  fi
+
+  return 1
+}
+
 DOOM_HOME="${DOOM_HOME:-$HOME/.config/emacs}"
 DOOM_BIN="$DOOM_HOME/bin/doom"
 
 doom_config_source() {
   dotfiles_home_file_source ".config/doom/config.el" || printf '%s\n' "$HOME/.config/doom/config.el"
+}
+
+doom_managed_config_source() {
+  dotfiles_managed_home_file_source ".config/doom/config.el"
 }
 
 doom_installed() {
@@ -284,13 +330,13 @@ doctor_doom_checkout() {
 
 doctor_doom_config() {
   failed=0
-  dotfiles_config="$(doom_config_source)"
+  dotfiles_config="$(doom_managed_config_source 2>/dev/null || true)"
   active_config="$HOME/.config/doom/config.el"
 
-  if [ -f "$dotfiles_config" ]; then
+  if [ -n "$dotfiles_config" ] && [ -f "$dotfiles_config" ]; then
     ok "Doom config source: $dotfiles_config"
   else
-    missing "Doom config source: $dotfiles_config"
+    missing "Doom config source"
     return 1
   fi
 
