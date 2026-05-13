@@ -1,5 +1,27 @@
 #!/usr/bin/env bash
 DOTFILES_PORTABLE_DIST=1
+# Shared library for dotfiles command scripts.
+#
+# Composition:
+# - pkgs/dotfiles/default.nix prepends this file to every generated dotfiles
+#   command before command-specific libraries and the command body.
+#
+# Runtime inputs expected from the composed command:
+# - POSIX shell utilities from coreutils: dirname, readlink, command, printf
+# - find and grep for home file source resolution
+#
+# Environment inputs:
+# - DOTFILES_HOME: repository or portable dist root; auto-detected when unset
+# - DOTFILES_PORTABLE_DIST: prefer dist-local home-files when set
+# - DOTFILES_BUILT_HOME_FILES: Nix-built home-files root when available
+# - DOTFILES_PROFILE, DOTFILES_USERNAME, DOTFILES_HOME_DIRECTORY: Home Manager
+#   profile selection values used by flake commands
+#
+# Provides:
+# - status helpers: status, ok, warn, missing, skip, fail
+# - command helpers: have, require_dotfiles_home
+# - source resolvers for managed/deployed files and directories
+
 # shellcheck disable=SC2329
 set -u
 
@@ -188,15 +210,37 @@ dotfiles_managed_home_dir_source() {
   return 1
 }
 
+# Doom Emacs helpers for dotfiles configure/doctor commands.
+#
+# Composition:
+# - Loaded after scripts/lib/common.sh by pkgs/dotfiles/default.nix.
+# - Used by dotfiles-configure.sh and dotfiles-doctor.sh.
+#
+# Depends on common.sh:
+# - dotfiles_home_dir_source
+# - dotfiles_managed_home_dir_source
+#
+# Environment inputs:
+# - HOME: used to derive default DOOM_HOME and active ~/.config/doom fallback
+# - DOOM_HOME: Doom Emacs checkout; defaults to $HOME/.config/emacs
+# - DOTFILES_PORTABLE_DIST, DOTFILES_BUILT_HOME_FILES, DOTFILES_HOME: consumed
+#   indirectly by common.sh source resolver functions
+#
+# Provides:
+# - DOOM_HOME, DOOM_BIN
+# - doom_config_dir_source
+# - doom_managed_config_dir_source
+# - doom_installed
+
 DOOM_HOME="${DOOM_HOME:-$HOME/.config/emacs}"
 DOOM_BIN="$DOOM_HOME/bin/doom"
 
-doom_config_source() {
-  dotfiles_home_file_source ".config/doom/config.el" || printf '%s\n' "$HOME/.config/doom/config.el"
+doom_config_dir_source() {
+  dotfiles_home_dir_source ".config/doom" || printf '%s\n' "$HOME/.config/doom"
 }
 
-doom_managed_config_source() {
-  dotfiles_managed_home_file_source ".config/doom/config.el"
+doom_managed_config_dir_source() {
+  dotfiles_managed_home_dir_source ".config/doom"
 }
 
 doom_installed() {
@@ -456,9 +500,11 @@ doom_install_check() {
   HOME="$check_root/home"
   DOOM_HOME="$HOME/.config/emacs"
   DOOM_BIN="$DOOM_HOME/bin/doom"
-  DOTFILES_DOOM_CONFIG_SOURCE="$(doom_config_source)"
+  DOTFILES_FAKE_DOOM_INITIAL_SOURCE="$check_root/fake-doom-initial"
+  mkdir -p "$DOTFILES_FAKE_DOOM_INITIAL_SOURCE"
+  printf 'fake initial doom config\n' > "$DOTFILES_FAKE_DOOM_INITIAL_SOURCE/generated.el"
   export DOTFILES_HOME
-  export DOTFILES_DOOM_CONFIG_SOURCE
+  export DOTFILES_FAKE_DOOM_INITIAL_SOURCE
 
   status "[doom-check] using temporary HOME: $HOME"
   mkdir -p "$DOOM_HOME/.git" "$DOOM_HOME/bin" "$HOME/.config/doom"
@@ -493,14 +539,10 @@ done
 case "$command" in
   install)
     # This fake Doom command is used only by `dotfiles configure doom install --check`.
-    # It simulates the bootstrap files Doom creates during install without touching
-    # the real Doom checkout or network.
+    # It simulates Doom creating files under the configured doomdir without touching
+    # the real Doom checkout, real user config, or network.
     mkdir -p "$doomdir"
-    if [ ! -e "$doomdir/config.el" ]; then
-      cp "$DOTFILES_DOOM_CONFIG_SOURCE" "$doomdir/config.el"
-    fi
-    [ -e "$doomdir/init.el" ] || touch "$doomdir/init.el"
-    [ -e "$doomdir/packages.el" ] || touch "$doomdir/packages.el"
+    cp -R "$DOTFILES_FAKE_DOOM_INITIAL_SOURCE"/. "$doomdir"/
     ;;
   sync)
     ;;

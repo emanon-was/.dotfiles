@@ -49,11 +49,11 @@ doctor_dotfiles_home() {
     return 1
   fi
 
-  doom_config="$(doom_config_source)"
-  if [ -e "$doom_config" ]; then
-    ok "dotfiles path: $doom_config"
+  doom_config_dir="$(doom_managed_config_dir_source 2>/dev/null || true)"
+  if [ -d "$doom_config_dir" ]; then
+    ok "dotfiles path: $doom_config_dir"
   else
-    missing "dotfiles path: $doom_config"
+    missing "dotfiles path: $doom_config_dir"
     failed=1
   fi
 
@@ -109,39 +109,55 @@ doctor_doom_checkout() {
 
 doctor_doom_config() {
   failed=0
-  dotfiles_config="$(doom_managed_config_source 2>/dev/null || true)"
-  active_config="$HOME/.config/doom/config.el"
+  dotfiles_config_dir="$(doom_managed_config_dir_source 2>/dev/null || true)"
+  active_config_dir="$HOME/.config/doom"
 
-  if [ -n "$dotfiles_config" ] && [ -f "$dotfiles_config" ]; then
-    ok "Doom config source: $dotfiles_config"
+  if [ -n "$dotfiles_config_dir" ] && [ -d "$dotfiles_config_dir" ]; then
+    ok "Doom config source: $dotfiles_config_dir"
   else
-    missing "Doom config source"
+    missing "Doom config source directory"
     return 1
   fi
 
-  if [ -L "$active_config" ]; then
-    ok "Doom active config symlink: $active_config -> $(readlink "$active_config")"
-  elif [ -e "$active_config" ]; then
-    warn "Doom active config is not a symlink: $active_config"
-  else
-    skip "Doom active config: $active_config"
+  if [ ! -d "$active_config_dir" ]; then
+    skip "Doom config directory: $active_config_dir"
     return 0
   fi
 
-  if cmp -s "$dotfiles_config" "$active_config"; then
-    ok "Doom active config matches dotfiles source"
-  else
-    missing "Doom active config differs from dotfiles source"
-    failed=1
-  fi
+  find "$dotfiles_config_dir" -mindepth 1 -type d | while IFS= read -r source_path; do
+    relative_path="${source_path#"$dotfiles_config_dir/"}"
+    target_path="$active_config_dir/$relative_path"
+    if [ -d "$target_path" ]; then
+      ok "Doom config directory exists: $target_path"
+    else
+      missing "Doom config directory missing: $target_path"
+      exit 1
+    fi
+  done || failed=1
 
-  doom_dir="$HOME/.config/doom"
-  if [ -d "$doom_dir" ]; then
-    entry_count="$(find "$doom_dir" -mindepth 1 -maxdepth 1 | wc -l)"
-    ok "Doom config directory entries: $entry_count"
-  else
-    skip "Doom config directory: $doom_dir"
-  fi
+  find "$dotfiles_config_dir" -mindepth 1 \( -type f -o -type l \) | while IFS= read -r source_path; do
+    relative_path="${source_path#"$dotfiles_config_dir/"}"
+    target_path="$active_config_dir/$relative_path"
+
+    if [ -L "$target_path" ]; then
+      ok "Doom config symlink: $target_path -> $(readlink "$target_path")"
+    elif [ -e "$target_path" ]; then
+      warn "Doom config file is not a symlink: $target_path"
+    else
+      missing "Doom config file missing: $target_path"
+      exit 1
+    fi
+
+    if cmp -s "$source_path" "$target_path"; then
+      ok "Doom config matches dotfiles source: $relative_path"
+    else
+      missing "Doom config differs from dotfiles source: $relative_path"
+      exit 1
+    fi
+  done || failed=1
+
+  entry_count="$(find "$active_config_dir" -mindepth 1 -maxdepth 1 | wc -l)"
+  ok "Doom config directory entries: $entry_count"
 
   return "$failed"
 }

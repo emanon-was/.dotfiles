@@ -1,3 +1,25 @@
+# Shared library for dotfiles command scripts.
+#
+# Composition:
+# - pkgs/dotfiles/default.nix prepends this file to every generated dotfiles
+#   command before command-specific libraries and the command body.
+#
+# Runtime inputs expected from the composed command:
+# - POSIX shell utilities from coreutils: dirname, readlink, command, printf
+# - find and grep for home file source resolution
+#
+# Environment inputs:
+# - DOTFILES_HOME: repository or portable dist root; auto-detected when unset
+# - DOTFILES_PORTABLE_DIST: prefer dist-local home-files when set
+# - DOTFILES_BUILT_HOME_FILES: Nix-built home-files root when available
+# - DOTFILES_PROFILE, DOTFILES_USERNAME, DOTFILES_HOME_DIRECTORY: Home Manager
+#   profile selection values used by flake commands
+#
+# Provides:
+# - status helpers: status, ok, warn, missing, skip, fail
+# - command helpers: have, require_dotfiles_home
+# - source resolvers for managed/deployed files and directories
+
 # shellcheck disable=SC2329
 set -u
 

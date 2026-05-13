@@ -99,11 +99,11 @@ test_home_file_source() {
   home_dir="$test_root/source-home"
   dotfiles_dir="$test_root/source-dotfiles"
   built_dir="$test_root/source-built"
-  mkdir -p "$home_dir/.config/doom" "$dotfiles_dir/home-files/.config/doom" "$built_dir/.config/doom"
+  mkdir -p "$home_dir/.config/example" "$dotfiles_dir/home-files/.config/example" "$built_dir/.config/example"
 
-  printf 'home\n' > "$home_dir/.config/doom/config.el"
-  printf 'dist\n' > "$dotfiles_dir/home-files/.config/doom/config.el"
-  printf 'built\n' > "$built_dir/.config/doom/config.el"
+  printf 'home\n' > "$home_dir/.config/example/file"
+  printf 'dist\n' > "$dotfiles_dir/home-files/.config/example/file"
+  printf 'built\n' > "$built_dir/.config/example/file"
 
   output="$(
     HOME="$home_dir" \
@@ -115,10 +115,10 @@ test_home_file_source() {
       dotfiles_dir="$2"
       . "$repo_root/pkgs/dotfiles/scripts/lib/common.sh"
       DOTFILES_HOME="$dotfiles_dir"
-      dotfiles_home_file_source ".config/doom/config.el"
+      dotfiles_home_file_source ".config/example/file"
     ' _ "$repo_root" "$dotfiles_dir"
   )"
-  [ "$output" = "$home_dir/.config/doom/config.el" ] || {
+  [ "$output" = "$home_dir/.config/example/file" ] || {
     printf 'error: home file source should prefer deployed HOME file: %s\n' "$output" >&2
     exit 1
   }
@@ -134,15 +134,15 @@ test_home_file_source() {
       dotfiles_dir="$2"
       . "$repo_root/pkgs/dotfiles/scripts/lib/common.sh"
       DOTFILES_HOME="$dotfiles_dir"
-      dotfiles_home_file_source ".config/doom/config.el"
+      dotfiles_home_file_source ".config/example/file"
     ' _ "$repo_root" "$dotfiles_dir"
   )"
-  [ "$output" = "$dotfiles_dir/home-files/.config/doom/config.el" ] || {
+  [ "$output" = "$dotfiles_dir/home-files/.config/example/file" ] || {
     printf 'error: portable source should prefer dist home-files: %s\n' "$output" >&2
     exit 1
   }
 
-  rm "$home_dir/.config/doom/config.el"
+  rm "$home_dir/.config/example/file"
   output="$(
     HOME="$home_dir" \
     DOTFILES_HOME="$test_root/missing-dotfiles" \
@@ -151,15 +151,15 @@ test_home_file_source() {
       set -euo pipefail
       repo_root="$1"
       . "$repo_root/pkgs/dotfiles/scripts/lib/common.sh"
-      dotfiles_home_file_source ".config/doom/config.el"
+      dotfiles_home_file_source ".config/example/file"
     ' _ "$repo_root"
   )"
-  [ "$output" = "$built_dir/.config/doom/config.el" ] || {
+  [ "$output" = "$built_dir/.config/example/file" ] || {
     printf 'error: nix source should use built home-files: %s\n' "$output" >&2
     exit 1
   }
 
-  printf 'manual\n' > "$home_dir/.config/doom/config.el"
+  printf 'manual\n' > "$home_dir/.config/example/file"
   output="$(
     HOME="$home_dir" \
     DOTFILES_HOME="$dotfiles_dir" \
@@ -168,10 +168,10 @@ test_home_file_source() {
       set -euo pipefail
       repo_root="$1"
       . "$repo_root/pkgs/dotfiles/scripts/lib/common.sh"
-      dotfiles_managed_home_file_source ".config/doom/config.el"
+      dotfiles_managed_home_file_source ".config/example/file"
     ' _ "$repo_root"
   )"
-  [ "$output" = "$built_dir/.config/doom/config.el" ] || {
+  [ "$output" = "$built_dir/.config/example/file" ] || {
     printf 'error: managed source should not use deployed HOME file: %s\n' "$output" >&2
     exit 1
   }
@@ -179,8 +179,54 @@ test_home_file_source() {
   printf '[ok] home file source\n'
 }
 
+test_doom_config_dir_source() {
+  home_dir="$test_root/doom-source-home"
+  dotfiles_dir="$test_root/doom-source-dotfiles"
+  built_dir="$test_root/doom-source-built"
+  mkdir -p "$home_dir/.config/doom" "$dotfiles_dir/home-files/.config/doom" "$built_dir/.config/doom"
+  printf 'home doom config\n' > "$home_dir/.config/doom/home-file"
+  printf 'built doom config\n' > "$built_dir/.config/doom/built-file"
+
+  output="$(
+    HOME="$home_dir" \
+    DOTFILES_HOME="$dotfiles_dir" \
+    DOTFILES_BUILT_HOME_FILES="$built_dir" \
+    bash -c '
+      set -euo pipefail
+      repo_root="$1"
+      . "$repo_root/pkgs/dotfiles/scripts/lib/common.sh"
+      . "$repo_root/pkgs/dotfiles/scripts/lib/doom.sh"
+      doom_config_dir_source
+    ' _ "$repo_root"
+  )"
+  [ "$output" = "$home_dir/.config/doom" ] || {
+    printf 'error: doom config dir source should prefer deployed HOME directory: %s\n' "$output" >&2
+    exit 1
+  }
+
+  output="$(
+    HOME="$home_dir" \
+    DOTFILES_HOME="$dotfiles_dir" \
+    DOTFILES_BUILT_HOME_FILES="$built_dir" \
+    bash -c '
+      set -euo pipefail
+      repo_root="$1"
+      . "$repo_root/pkgs/dotfiles/scripts/lib/common.sh"
+      . "$repo_root/pkgs/dotfiles/scripts/lib/doom.sh"
+      doom_managed_config_dir_source
+    ' _ "$repo_root"
+  )"
+  [ "$output" = "$built_dir/.config/doom" ] || {
+    printf 'error: managed doom config dir source should prefer built home-files: %s\n' "$output" >&2
+    exit 1
+  }
+
+  printf '[ok] doom config dir source\n'
+}
+
 test_dispatcher
 test_project_init
 test_home_file_source
+test_doom_config_dir_source
 
 printf 'dotfiles command behavior checks passed\n'

@@ -251,9 +251,11 @@ doom_install_check() {
   HOME="$check_root/home"
   DOOM_HOME="$HOME/.config/emacs"
   DOOM_BIN="$DOOM_HOME/bin/doom"
-  DOTFILES_DOOM_CONFIG_SOURCE="$(doom_config_source)"
+  DOTFILES_FAKE_DOOM_INITIAL_SOURCE="$check_root/fake-doom-initial"
+  mkdir -p "$DOTFILES_FAKE_DOOM_INITIAL_SOURCE"
+  printf 'fake initial doom config\n' > "$DOTFILES_FAKE_DOOM_INITIAL_SOURCE/generated.el"
   export DOTFILES_HOME
-  export DOTFILES_DOOM_CONFIG_SOURCE
+  export DOTFILES_FAKE_DOOM_INITIAL_SOURCE
 
   status "[doom-check] using temporary HOME: $HOME"
   mkdir -p "$DOOM_HOME/.git" "$DOOM_HOME/bin" "$HOME/.config/doom"
@@ -288,14 +290,10 @@ done
 case "$command" in
   install)
     # This fake Doom command is used only by `dotfiles configure doom install --check`.
-    # It simulates the bootstrap files Doom creates during install without touching
-    # the real Doom checkout or network.
+    # It simulates Doom creating files under the configured doomdir without touching
+    # the real Doom checkout, real user config, or network.
     mkdir -p "$doomdir"
-    if [ ! -e "$doomdir/config.el" ]; then
-      cp "$DOTFILES_DOOM_CONFIG_SOURCE" "$doomdir/config.el"
-    fi
-    [ -e "$doomdir/init.el" ] || touch "$doomdir/init.el"
-    [ -e "$doomdir/packages.el" ] || touch "$doomdir/packages.el"
+    cp -R "$DOTFILES_FAKE_DOOM_INITIAL_SOURCE"/. "$doomdir"/
     ;;
   sync)
     ;;

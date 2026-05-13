@@ -124,10 +124,10 @@ dotfiles project init <nix|docker> [destination]
 
 Doom Emacs 本体は `~/.config/emacs` に置きます。Doom 設定は `~/.config/doom` に配置します。
 
-現在このリポジトリで管理する Doom 設定は以下です。今後 `home/config/doom/` 配下にファイルを追加した場合も、同じ仕組みで `~/.config/doom/` へリンクされます。
+現在このリポジトリで管理する Doom 設定は `home/config/doom/` 配下です。今後このディレクトリ配下にファイルを追加した場合も、同じ仕組みで `~/.config/doom/` へリンクされます。
 
 ```text
-home/config/doom/config.el
+home/config/doom/
 ```
 
 `dotfiles configure doom install` と `dotfiles configure doom upgrade` は、既存の Doom 設定を一時退避したうえで Doom が生成する初期 `.config/doom` 全体を `$HOME/.local/state/dotfiles/doom-initial/` に保存します。

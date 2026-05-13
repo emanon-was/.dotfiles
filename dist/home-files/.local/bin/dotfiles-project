@@ -1,5 +1,27 @@
 #!/usr/bin/env bash
 DOTFILES_PORTABLE_DIST=1
+# Shared library for dotfiles command scripts.
+#
+# Composition:
+# - pkgs/dotfiles/default.nix prepends this file to every generated dotfiles
+#   command before command-specific libraries and the command body.
+#
+# Runtime inputs expected from the composed command:
+# - POSIX shell utilities from coreutils: dirname, readlink, command, printf
+# - find and grep for home file source resolution
+#
+# Environment inputs:
+# - DOTFILES_HOME: repository or portable dist root; auto-detected when unset
+# - DOTFILES_PORTABLE_DIST: prefer dist-local home-files when set
+# - DOTFILES_BUILT_HOME_FILES: Nix-built home-files root when available
+# - DOTFILES_PROFILE, DOTFILES_USERNAME, DOTFILES_HOME_DIRECTORY: Home Manager
+#   profile selection values used by flake commands
+#
+# Provides:
+# - status helpers: status, ok, warn, missing, skip, fail
+# - command helpers: have, require_dotfiles_home
+# - source resolvers for managed/deployed files and directories
+
 # shellcheck disable=SC2329
 set -u
 
@@ -187,6 +209,25 @@ dotfiles_managed_home_dir_source() {
 
   return 1
 }
+
+# Project template helpers for dotfiles project/doctor commands.
+#
+# Composition:
+# - Loaded after scripts/lib/common.sh by pkgs/dotfiles/default.nix.
+# - Used by dotfiles-project.sh and dotfiles-doctor.sh.
+#
+# Depends on common.sh:
+# - DOTFILES_HOME initialization
+#
+# Environment inputs:
+# - DOTFILES_TEMPLATES: explicit template root override
+# - DOTFILES_BUILT_TEMPLATES: Nix-built template root when available
+# - DOTFILES_PORTABLE_DIST: disables repository fallback probing when set
+# - DOTFILES_HOME: repository or portable dist root
+# - HOME: final repository fallback probe under $HOME/.dotfiles
+#
+# Provides:
+# - dotfiles_templates_dir
 
 dotfiles_templates_dir() {
   templates_dir="${DOTFILES_TEMPLATES:-${DOTFILES_BUILT_TEMPLATES:-$DOTFILES_HOME/home-files/.local/share/dotfiles/templates}}"
