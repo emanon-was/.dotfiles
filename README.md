@@ -64,9 +64,7 @@ dotfiles project init nix [destination]
 dotfiles project init docker [destination]
 ```
 
-### リストア
-
-Home Manager でファイル衝突が起きた場合、`dotfiles flake switch` は `home-manager -b hm-backup` を使うため、既存ファイルは `.hm-backup` 付きで退避されます。必要に応じて退避ファイルを確認して戻します。
+### アンインストール
 
 Home Manager の管理をやめる場合:
 
@@ -79,6 +77,10 @@ make clean.flake
 `make init` / `make init.flake` は `$HOME/.local/state/dotfiles/init-mode` に `flake` を記録します。`make clean` はその記録を見て `make clean.flake` を実行します。
 
 `clean.flake` は Home Manager が管理している symlink や profile を外します。`.hm-backup` へ退避されたファイルを戻す必要がある場合は、内容を確認してから手で戻します。
+
+### 修復
+
+Home Manager でファイル衝突が起きた場合、`dotfiles flake switch` は `home-manager -b hm-backup` を使うため、既存ファイルは `.hm-backup` 付きで退避されます。必要に応じて退避ファイルを確認して戻します。
 
 Doom Emacs の管理設定で起動できなくなった場合:
 
@@ -120,7 +122,7 @@ dotfiles flake switch
 
 これらが必要な環境では Home Manager / flake 版を使います。
 
-### リストア
+### アンインストール
 
 `dist/install.sh` で展開した内容を戻す場合:
 
