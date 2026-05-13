@@ -76,11 +76,11 @@ make clean.flake
 
 `make init` / `make init.flake` は `$HOME/.local/state/dotfiles/init-mode` に `flake` を記録します。`make clean` はその記録を見て `make clean.flake` を実行します。
 
-`clean.flake` は Home Manager が管理している symlink や profile を外します。`.hm-backup` へ退避されたファイルを戻す必要がある場合は、内容を確認してから手で戻します。
+`clean.flake` は Home Manager が管理している symlink や profile を外します。その直後に `$HOME` 配下の `*.hm-backup` を探し、復元先が存在しない場合だけ自動で戻します。復元先が既にある場合は上書きせず skip します。
 
 ### 修復
 
-Home Manager でファイル衝突が起きた場合、`dotfiles flake switch` は `home-manager -b hm-backup` を使うため、既存ファイルは `.hm-backup` 付きで退避されます。必要に応じて退避ファイルを確認して戻します。
+Home Manager でファイル衝突が起きた場合、`dotfiles flake switch` は `home-manager -b hm-backup` を使うため、既存ファイルは `.hm-backup` 付きで退避されます。`clean.flake` 以外のタイミングで戻す場合は、退避ファイルの内容を確認してから手で戻します。
 
 Doom Emacs の管理設定で起動できなくなった場合:
 

@@ -33,9 +33,18 @@ init.doom:
 	nix run .#dotfiles -- configure doom install
 
 # Home Manager の管理をやめる。
-# 退避された *.hm-backup の復元が必要な場合は内容を確認して手で戻す。
+# home-manager uninstall 成功後に、退避された *.hm-backup を上書きなしで戻す。
 clean.flake:
 	home-manager uninstall
+	@find "$(HOME)" -xdev -name '*.hm-backup' -print | while IFS= read -r backup_path; do \
+		target_path="$${backup_path%.hm-backup}"; \
+		if [ -e "$$target_path" ] || [ -L "$$target_path" ]; then \
+			printf 'skipped hm-backup restore, path exists: %s\n' "$$target_path"; \
+		else \
+			mv "$$backup_path" "$$target_path"; \
+			printf 'restored hm-backup: %s -> %s\n' "$$backup_path" "$$target_path"; \
+		fi; \
+	done
 	@rm -f "$(DOTFILES_INIT_MODE_FILE)"
 
 # dist/install.sh で展開した symlink と backup を戻す。
