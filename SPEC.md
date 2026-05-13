@@ -41,6 +41,7 @@
 - `DOTFILES_HOME_DIRECTORY` が明示されていない場合、`root` は `/root`、それ以外は `/home/<user>` を home directory にする。
 - `home/default.nix` から機能別 module を import する。
 - shell、git、tmux、screen、Emacs、GNOME 関連は Home Manager module で管理する。
+- bash と zsh の prompt は左側 2 行表示で揃え、zsh の right prompt は使わない。
 - `home/screen.nix` と `home/tmux.nix` は分離する。
 - `home/dotfiles.nix` は `dotfilesPackage` から以下を配置する。
   - `$HOME/.local/bin`

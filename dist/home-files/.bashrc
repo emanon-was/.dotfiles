@@ -26,7 +26,35 @@ alias -- psgrep='ps aux | grep -v grep | grep --color=auto'
 alias -- su='su -l'
 
 
-PS1="\u@\h:\w\$ "
+__dotfiles_prompt_git() {
+  command -v git >/dev/null 2>&1 || return 0
+  git rev-parse --is-inside-work-tree >/dev/null 2>&1 || return 0
+
+  branch="$(git branch --show-current 2>/dev/null)"
+  if [ -z "$branch" ]; then
+    branch="$(git rev-parse --short HEAD 2>/dev/null)"
+  fi
+  [ -n "$branch" ] || return 0
+
+  dirty=""
+  if ! git diff --quiet --ignore-submodules -- 2>/dev/null || ! git diff --cached --quiet --ignore-submodules -- 2>/dev/null; then
+    dirty="*"
+  fi
+
+  printf ' [git:%s%s]' "$branch" "$dirty"
+}
+
+
+__dotfiles_prompt_command() {
+  exit_code="$?"
+  status=""
+  if [ "$exit_code" -ne 0 ]; then
+    status=" [exit:$exit_code]"
+  fi
+
+  PS1="\[\e[32m\]\u@\h\[\e[0m\] \[\e[34m\]\w\[\e[0m\]\[\e[33m\]$(__dotfiles_prompt_git)\[\e[0m\]\[\e[31m\]$status\[\e[0m\]\n\\$ "
+}
+PROMPT_COMMAND=__dotfiles_prompt_command
 
 if ls --help 2>&1 | grep -q -- --color; then
   alias ls='ls --color=auto -F'

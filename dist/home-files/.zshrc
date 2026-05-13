@@ -27,10 +27,40 @@ for opt in "${set_opts[@]}"; do
 done
 unset opt set_opts
 
-autoload colors
-colors
-PROMPT="%n@%m%# "
-RPROMPT="%B%{${fg[red]}%}[%~]%{${reset_color}%}%b"
+__dotfiles_prompt_git() {
+  command -v git >/dev/null 2>&1 || return 0
+  git rev-parse --is-inside-work-tree >/dev/null 2>&1 || return 0
+
+  branch="$(git branch --show-current 2>/dev/null)"
+  if [ -z "$branch" ]; then
+    branch="$(git rev-parse --short HEAD 2>/dev/null)"
+  fi
+  [ -n "$branch" ] || return 0
+
+  dirty=""
+  if ! git diff --quiet --ignore-submodules -- 2>/dev/null || ! git diff --cached --quiet --ignore-submodules -- 2>/dev/null; then
+    dirty="*"
+  fi
+
+  printf ' [git:%s%s]' "$branch" "$dirty"
+}
+
+
+setopt prompt_subst
+unset RPROMPT RPS1
+
+__dotfiles_prompt_precmd() {
+  exit_code="$?"
+  status=""
+  if [ "$exit_code" -ne 0 ]; then
+    status=" [exit:$exit_code]"
+  fi
+
+  PROMPT="%F{green}%n@%m%f %F{blue}%~%f%F{yellow}$(__dotfiles_prompt_git)%f%F{red}$status%f"$'\n'"%# "
+}
+if [[ " ${precmd_functions[*]} " != *" __dotfiles_prompt_precmd "* ]]; then
+  precmd_functions+=(__dotfiles_prompt_precmd)
+fi
 
 setopt complete_aliases
 
