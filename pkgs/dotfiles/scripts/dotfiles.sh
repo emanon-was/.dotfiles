@@ -10,7 +10,7 @@ Usage:
   dotfiles configure doom install [--check]
   dotfiles configure doom sync
   dotfiles configure doom upgrade
-  dotfiles configure doom restore-defaults
+  dotfiles configure doom reset
   dotfiles project init <nix|docker> [destination]
 USAGE
 }

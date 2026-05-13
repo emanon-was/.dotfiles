@@ -46,8 +46,8 @@
 - `home/dotfiles.nix` は `dotfilesPackage` から以下を配置する。
   - `$HOME/.local/bin`
   - `$HOME/.local/share/dotfiles/templates`
-- Doom Emacs の `config.el` は `home/config/doom/config.el` を生成元にして Home Manager で配置する。
-- Doom の `init.el` と `packages.el` は Doom 側の更新対象として扱い、この repo では管理しない。
+- Doom Emacs の設定は `home/config/doom/` を生成元にして Home Manager で配置する。
+- 現在は `config.el` のみを管理する。今後 `home/config/doom/` 配下に追加したファイルも同じ規則で扱う。
 - Emacs package は terminal 用の `emacs-nox` を使う。
 - shell の `emacs` alias は起動時に判定し、`emacs-nox` の場合は alias しない。それ以外の Emacs では `emacs -nw` にする。
 
@@ -70,7 +70,7 @@ dotfiles configure gnome
 dotfiles configure doom install [--check]
 dotfiles configure doom sync
 dotfiles configure doom upgrade
-dotfiles configure doom restore-defaults
+dotfiles configure doom reset
 dotfiles project init <nix|docker> [destination]
 ```
 
@@ -91,12 +91,12 @@ dotfiles project init <nix|docker> [destination]
 - Doom 初回 clone/install は `dotfiles configure doom install` で明示実行する。
 - `dotfiles configure doom sync` は `$HOME/.config/emacs/bin/doom sync` を実行する。
 - `dotfiles configure doom upgrade` は upgrade 後に sync する。
-- `dotfiles configure doom restore-defaults` は保存済みの Doom default config を `~/.config/doom/` に復元する。
+- `dotfiles configure doom reset` は保存済みの Doom 初期 config を `~/.config/doom/` に復元する。
 - `dotfiles flake switch` 成功後は通常 `doom sync` も実行する。
 - `dotfiles flake switch --skip-doom-sync` で Doom sync を飛ばせる。
-- Doom install/upgrade 時は既存の `~/.config/doom/config.el`、`init.el`、`packages.el` を一時退避し、Doom の初期 default を生成して `$HOME/.local/state/dotfiles/doom-defaults/` に保存してから復元する。
-- `doom-defaults` は現在の Doom default のみを保持し、timestamp 履歴は持たない。
-- Doom install/upgrade 時は dotfiles 側に同名ファイルがある場合だけ `~/.config/doom/` へリンクする。
+- Doom install/upgrade 時は既存の `~/.config/doom` 配下を一時退避し、Doom の初期 config を生成して `$HOME/.local/state/dotfiles/doom-initial/` に保存してから復元する。
+- `doom-initial` は現在の Doom 初期 config のみを保持し、timestamp 履歴は持たない。
+- Doom install/upgrade 時は dotfiles 側の `.config/doom` 配下にあるファイルを `~/.config/doom/` へリンクする。
 - Home Manager が同じ内容の Nix store symlink を既に配置している場合は置き換えない。
 - `dotfiles configure doom install --check` は一時 directory で install flow を検証し、実環境を変更しない。
 

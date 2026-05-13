@@ -117,3 +117,29 @@ dotfiles_home_file_source() {
 
   return 1
 }
+
+dotfiles_home_dir_source() {
+  relative_path="${1#/}"
+
+  if [ -n "${DOTFILES_PORTABLE_DIST:-}" ] && [ -d "$DOTFILES_HOME/home-files/$relative_path" ]; then
+    printf '%s\n' "$DOTFILES_HOME/home-files/$relative_path"
+    return 0
+  fi
+
+  if [ -d "$HOME/$relative_path" ] && find "$HOME/$relative_path" -mindepth 1 -print -quit | grep -q .; then
+    printf '%s\n' "$HOME/$relative_path"
+    return 0
+  fi
+
+  if [ -n "${DOTFILES_BUILT_HOME_FILES:-}" ] && [ -d "$DOTFILES_BUILT_HOME_FILES/$relative_path" ]; then
+    printf '%s\n' "$DOTFILES_BUILT_HOME_FILES/$relative_path"
+    return 0
+  fi
+
+  if [ -d "$DOTFILES_HOME/home-files/$relative_path" ]; then
+    printf '%s\n' "$DOTFILES_HOME/home-files/$relative_path"
+    return 0
+  fi
+
+  return 1
+}

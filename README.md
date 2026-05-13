@@ -40,7 +40,7 @@ NixOS の system 側は stable を使い、このリポジトリの Home Manager
 メインの利用方法です。Nix と Home Manager が使える自分の環境ではこちらを使います。
 
 - shell、tmux、screen、git、Emacs などのユーザー設定を Home Manager で管理する
-- `~/.config/doom/config.el` は Home Manager 経由で管理する
+- `~/.config/doom` は Home Manager 経由で管理する
 - Doom Emacs の install、sync、upgrade は `dotfiles configure doom ...` で明示的に実行する
 - `dotfiles flake switch` 後には Doom sync も実行する
 - GNOME 設定のような副作用のある処理は Home Manager activation には入れず、`dotfiles configure gnome` として分ける
@@ -124,28 +124,28 @@ dotfiles configure gnome
 dotfiles configure doom install [--check]
 dotfiles configure doom sync
 dotfiles configure doom upgrade
-dotfiles configure doom restore-defaults
+dotfiles configure doom reset
 dotfiles project init <nix|docker> [destination]
 ```
 
 ## Doom Emacs
 
-Doom Emacs 本体は `~/.config/emacs` に置きます。Doom の `init.el` や `packages.el` は Doom 側の更新で変わる可能性があるため、このリポジトリでは管理しません。
+Doom Emacs 本体は `~/.config/emacs` に置きます。Doom 設定は `~/.config/doom` に配置します。
 
-このリポジトリで管理する Doom 設定は以下です。
+現在このリポジトリで管理する Doom 設定は以下です。今後 `home/config/doom/` 配下にファイルを追加した場合も、同じ仕組みで `~/.config/doom/` へリンクされます。
 
 ```text
 home/config/doom/config.el
 ```
 
-`dotfiles configure doom install` と `dotfiles configure doom upgrade` は、既存の Doom 設定を一時退避したうえで Doom が生成する初期 `config.el`、`init.el`、`packages.el` を `$HOME/.local/state/dotfiles/doom-defaults/` に保存します。
+`dotfiles configure doom install` と `dotfiles configure doom upgrade` は、既存の Doom 設定を一時退避したうえで Doom が生成する初期 `.config/doom` 全体を `$HOME/.local/state/dotfiles/doom-initial/` に保存します。
 
-その後、dotfiles 側に同名ファイルがある場合は `~/.config/doom/` へリンクします。Home Manager が同じ内容の Nix store symlink を既に配置している場合は、そのリンクをそのまま使います。
+その後、dotfiles 側の `.config/doom` 配下にあるファイルを `~/.config/doom/` へリンクします。Home Manager が同じ内容の Nix store symlink を既に配置している場合は、そのリンクをそのまま使います。
 
-Doom の更新後に管理中の設定で起動できない場合は、保存済み default に戻せます。
+Doom の更新後に管理中の設定で起動できない場合は、保存済みの初期状態に戻せます。
 
 ```sh
-dotfiles configure doom restore-defaults
+dotfiles configure doom reset
 ```
 
 初回 install の流れだけを検証したい場合:

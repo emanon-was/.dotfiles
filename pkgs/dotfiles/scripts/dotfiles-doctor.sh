@@ -127,14 +127,13 @@ doctor_doom_config() {
     failed=1
   fi
 
-  for file in init.el packages.el; do
-    path="$HOME/.config/doom/$file"
-    if [ -f "$path" ]; then
-      ok "Doom bootstrap file: $path"
-    else
-      skip "Doom bootstrap file: $path"
-    fi
-  done
+  doom_dir="$HOME/.config/doom"
+  if [ -d "$doom_dir" ]; then
+    entry_count="$(find "$doom_dir" -mindepth 1 -maxdepth 1 | wc -l)"
+    ok "Doom config directory entries: $entry_count"
+  else
+    skip "Doom config directory: $doom_dir"
+  fi
 
   return "$failed"
 }

@@ -5,7 +5,7 @@ Usage:
   dotfiles configure doom install [--check]
   dotfiles configure doom sync
   dotfiles configure doom upgrade
-  dotfiles configure doom restore-defaults
+  dotfiles configure doom reset
 USAGE
 }
 
@@ -25,15 +25,6 @@ doom_checkout_ready() {
   [ -d "$DOOM_HOME/.git" ] && doom_installed
 }
 
-doom_config_ready() {
-  [ -f "$HOME/.config/doom/init.el" ] && [ -f "$HOME/.config/doom/packages.el" ]
-}
-
-doom_config_file_source() {
-  config_file="$1"
-  dotfiles_home_file_source ".config/doom/$config_file"
-}
-
 doom_backup_path() {
   original_path="$1"
   backup_dir="$(dotfiles_state_dir)/doom-link-backups/$(timestamp)"
@@ -51,18 +42,30 @@ doom_backup_path() {
 
 doom_link_dotfiles_config() {
   require_dotfiles_home
+  source_dir="$(dotfiles_home_dir_source ".config/doom" 2>/dev/null || true)"
+  target_dir="$HOME/.config/doom"
 
-  for config_file in config.el init.el packages.el; do
-    source_path="$(doom_config_file_source "$config_file" 2>/dev/null || true)"
-    [ -n "$source_path" ] || continue
+  if [ -z "$source_dir" ]; then
+    status "[doom] dotfiles doom config directory is not available"
+    return 0
+  fi
 
-    target_path="$HOME/.config/doom/$config_file"
+  if [ "$source_dir" = "$target_dir" ]; then
+    status "[doom] dotfiles doom config already deployed: $target_dir"
+    return 0
+  fi
+
+  mkdir -p "$target_dir"
+
+  find "$source_dir" -mindepth 1 -type d | while IFS= read -r source_path; do
+    relative_path="${source_path#"$source_dir/"}"
+    mkdir -p "$target_dir/$relative_path"
+  done
+
+  find "$source_dir" -mindepth 1 \( -type f -o -type l \) | while IFS= read -r source_path; do
+    relative_path="${source_path#"$source_dir/"}"
+    target_path="$target_dir/$relative_path"
     mkdir -p "$(dirname "$target_path")"
-
-    if [ "$source_path" = "$target_path" ]; then
-      status "[doom] dotfiles config already deployed: $target_path"
-      continue
-    fi
 
     if [ -L "$target_path" ]; then
       current_target="$(readlink "$target_path")"
@@ -139,14 +142,14 @@ doom_sync_raw() {
   "$DOOM_BIN" sync
 }
 
-doom_save_default_config() {
+doom_save_initial_config() {
   require_dotfiles_home
 
   if ! doom_installed; then
     fail "Doom Emacs is not installed at $DOOM_HOME. Run: dotfiles configure doom install"
   fi
 
-  defaults_dir="$(dotfiles_state_dir)/doom-defaults"
+  initial_dir="$(dotfiles_state_dir)/doom-initial"
   check_root="$(mktemp -d)"
 
   (
@@ -156,71 +159,53 @@ doom_save_default_config() {
     temp_backup="$check_root/backup"
     temp_doomlocaldir="$check_root/doom-local"
 
-    cleanup_default_capture() {
-      for config_file in config.el init.el packages.el; do
-        config_path="$real_doomdir/$config_file"
-        if [ -e "$temp_backup/$config_file" ] || [ -L "$temp_backup/$config_file" ]; then
-          rm -f "$config_path"
-          mv "$temp_backup/$config_file" "$config_path"
-        fi
+    cleanup_initial_capture() {
+      find "$real_doomdir" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+      find "$temp_backup" -mindepth 1 -maxdepth 1 | while IFS= read -r backup_path; do
+        mv "$backup_path" "$real_doomdir/$(basename "$backup_path")"
       done
       rm -rf "$check_root"
     }
-    trap cleanup_default_capture EXIT
+    trap cleanup_initial_capture EXIT
 
     mkdir -p "$temp_backup" "$temp_doomlocaldir" "$real_doomdir"
 
-    for config_file in config.el init.el packages.el; do
-      config_path="$real_doomdir/$config_file"
-      if [ -e "$config_path" ] || [ -L "$config_path" ]; then
-        mv "$config_path" "$temp_backup/$config_file"
-        status "[doom] temporarily moved existing config: $config_path"
-      fi
+    find "$real_doomdir" -mindepth 1 -maxdepth 1 | while IFS= read -r config_path; do
+      mv "$config_path" "$temp_backup/$(basename "$config_path")"
+      status "[doom] temporarily moved existing config: $config_path"
     done
 
-    status "[doom] generating Doom default config in isolated local state"
+    status "[doom] generating Doom initial config in isolated local state"
     HOME="$HOME" DOOMLOCALDIR="$temp_doomlocaldir" "$DOOM_BIN" --doomdir "$real_doomdir" install --force --no-env --no-install --no-hooks
 
-    rm -rf "$defaults_dir.tmp"
-    mkdir -p "$defaults_dir.tmp"
-    for config_file in config.el init.el packages.el; do
-      generated_path="$real_doomdir/$config_file"
-      [ -f "$generated_path" ] || fail "Doom install did not generate $config_file: $generated_path"
-      cp "$generated_path" "$defaults_dir.tmp/$config_file"
-      rm -f "$generated_path"
-      if [ -e "$temp_backup/$config_file" ] || [ -L "$temp_backup/$config_file" ]; then
-        mv "$temp_backup/$config_file" "$generated_path"
-        status "[doom] restored existing config: $generated_path"
-      fi
-    done
+    if ! find "$real_doomdir" -mindepth 1 -print -quit | grep -q .; then
+      fail "Doom install did not generate config files in: $real_doomdir"
+    fi
 
-    rm -rf "$defaults_dir"
-    mv "$defaults_dir.tmp" "$defaults_dir"
-    status "[doom] saved Doom default config: $defaults_dir"
+    rm -rf "$initial_dir.tmp"
+    mkdir -p "$initial_dir.tmp"
+    cp -R "$real_doomdir"/. "$initial_dir.tmp"/
+    rm -rf "$initial_dir"
+    mv "$initial_dir.tmp" "$initial_dir"
+    status "[doom] saved Doom initial config: $initial_dir"
   )
 }
 
-doom_restore_defaults() {
-  defaults_dir="$(dotfiles_state_dir)/doom-defaults"
-  [ -d "$defaults_dir" ] || fail "Doom defaults are not saved yet: $defaults_dir"
+doom_reset_config() {
+  initial_dir="$(dotfiles_state_dir)/doom-initial"
+  [ -d "$initial_dir" ] || fail "Doom initial config is not saved yet: $initial_dir"
 
-  mkdir -p "$HOME/.config/doom"
+  target_dir="$HOME/.config/doom"
+  mkdir -p "$target_dir"
 
-  for config_file in config.el init.el packages.el; do
-    source_path="$defaults_dir/$config_file"
-    target_path="$HOME/.config/doom/$config_file"
-
-    [ -f "$source_path" ] || fail "Doom default file does not exist: $source_path"
-
-    if [ -e "$target_path" ] || [ -L "$target_path" ]; then
-      backup_path="$(doom_backup_path "$target_path")"
-      mv "$target_path" "$backup_path"
-      status "[doom] moved existing config aside: $target_path -> $backup_path"
-    fi
-
-    cp "$source_path" "$target_path"
-    status "[doom] restored Doom default config: $target_path"
+  find "$target_dir" -mindepth 1 -maxdepth 1 | while IFS= read -r target_path; do
+    backup_path="$(doom_backup_path "$target_path")"
+    mv "$target_path" "$backup_path"
+    status "[doom] moved existing config aside: $target_path -> $backup_path"
   done
+
+  cp -R "$initial_dir"/. "$target_dir"/
+  status "[doom] reset Doom config from initial config: $target_dir"
 }
 
 doom_install_check() {
@@ -300,27 +285,30 @@ FAKE_DOOM
   status "[doom-check] verifying isolated Doom checkout detection"
   doom_checkout_ready || fail "temporary Doom checkout was not detected as ready"
 
-  status "[doom-check] verifying default config capture"
-  doom_save_default_config
-  [ -f "$HOME/.local/state/dotfiles/doom-defaults/config.el" ] || fail "Doom default config was not saved"
+  status "[doom-check] verifying initial config capture"
+  doom_save_initial_config
+  if ! find "$HOME/.local/state/dotfiles/doom-initial" -mindepth 1 -print -quit | grep -q .; then
+    fail "Doom initial config was not saved"
+  fi
 
   status "[doom-check] verifying dotfiles config link"
   doom_link_dotfiles_config
-  [ -L "$HOME/.config/doom/config.el" ] || fail "Doom config.el was not linked"
+  if ! find "$HOME/.config/doom" -mindepth 1 -type l -print -quit | grep -q .; then
+    fail "Doom config was not linked"
+  fi
 
   status "[doom-check] verifying install flow"
   "$DOOM_BIN" install
   doom_sync_raw
 
-  status "[doom-check] verifying bootstrap config detection"
-  doom_config_ready || fail "temporary Doom bootstrap files were not created"
-
   status "[doom-check] verifying sync preflight check"
   doom_sync
 
-  status "[doom-check] verifying default config restore"
-  doom_restore_defaults
-  [ ! -L "$HOME/.config/doom/config.el" ] || fail "Doom default restore should replace config link with a file"
+  status "[doom-check] verifying config reset"
+  doom_reset_config
+  if find "$HOME/.config/doom" -mindepth 1 -type l -print -quit | grep -q .; then
+    fail "Doom reset should replace config links with files"
+  fi
 
   status "[doom-check] install check passed"
 }
@@ -352,14 +340,10 @@ cmd_doom() {
       esac
       status "[doom] ensuring Doom Emacs checkout"
       doom_clone
-      doom_save_default_config
+      doom_save_initial_config
       doom_link_dotfiles_config
-      if doom_config_ready; then
-        status "[doom] config bootstrap files already exist"
-      else
-        status "[doom] running Doom install"
-        "$DOOM_BIN" install
-      fi
+      status "[doom] running Doom install"
+      "$DOOM_BIN" install
       doom_sync
       ;;
     sync)
@@ -372,12 +356,12 @@ cmd_doom() {
       doom_refresh_recipe_repositories
       status "[doom] upgrading Doom Emacs"
       "$DOOM_BIN" upgrade
-      doom_save_default_config
+      doom_save_initial_config
       doom_link_dotfiles_config
       doom_sync
       ;;
-    restore-defaults)
-      doom_restore_defaults
+    reset)
+      doom_reset_config
       ;;
     *)
       usage_configure
