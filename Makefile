@@ -1,4 +1,4 @@
-.PHONY: init init.flake init.dist init.doom clean clean.flake clean.dist flake-check dotfiles-build dist-build home-build switch-check command-check dist-install-check check dist
+.PHONY: init init.flake init.dist init.doom clean clean.flake clean.dist restore.flake flake-check dotfiles-build dist-build home-build switch-check command-check dist-install-check check dist
 
 PROFILE ?= current
 DOTFILES_USERNAME ?= $(shell id -un)
@@ -33,9 +33,14 @@ init.doom:
 	nix run .#dotfiles -- configure doom install
 
 # Home Manager の管理をやめる。
-# home-manager uninstall 成功後に、退避された *.hm-backup を上書きなしで戻す。
+# home-manager uninstall が失敗した場合は restore.flake へ進まない。
 clean.flake:
 	home-manager uninstall
+	$(MAKE) restore.flake
+	@rm -f "$(DOTFILES_INIT_MODE_FILE)"
+
+# 退避された *.hm-backup を上書きなしで戻す。
+restore.flake:
 	@find "$(HOME)" -xdev -name '*.hm-backup' -print | while IFS= read -r backup_path; do \
 		target_path="$${backup_path%.hm-backup}"; \
 		if [ -e "$$target_path" ] || [ -L "$$target_path" ]; then \
@@ -45,7 +50,6 @@ clean.flake:
 			printf 'restored hm-backup: %s -> %s\n' "$$backup_path" "$$target_path"; \
 		fi; \
 	done
-	@rm -f "$(DOTFILES_INIT_MODE_FILE)"
 
 # dist/install.sh で展開した symlink と backup を戻す。
 clean.dist:

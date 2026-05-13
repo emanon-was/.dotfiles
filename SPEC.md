@@ -60,7 +60,8 @@
 - `make init.flake` と `make init.dist` は `$HOME/.local/state/dotfiles/init-mode` に初期化方式を記録する。
 - `make clean` は init-mode を参照し、`make clean.flake` または `make clean.dist` を実行する。
 - Home Manager 管理をやめる場合は `home-manager uninstall` を使う。Makefile では `make clean.flake` として用意する。
-- `make clean.flake` は `home-manager uninstall` 成功後に `$HOME` 配下の `*.hm-backup` を復元する。復元先が存在する場合は上書きせず skip する。
+- `make clean.flake` は `home-manager uninstall` 成功後に `make restore.flake` を実行する。uninstall が失敗した場合は復元に進まない。
+- `make restore.flake` は `$HOME` 配下の `*.hm-backup` を復元する。復元先が存在する場合は上書きせず skip する。
 
 主要コマンド:
 
@@ -161,6 +162,7 @@ make init.doom
 make clean
 make clean.flake
 make clean.dist
+make restore.flake
 ```
 
 ## 運用ルール

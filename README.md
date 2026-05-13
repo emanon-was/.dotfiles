@@ -76,7 +76,9 @@ make clean.flake
 
 `make init` / `make init.flake` は `$HOME/.local/state/dotfiles/init-mode` に `flake` を記録します。`make clean` はその記録を見て `make clean.flake` を実行します。
 
-`clean.flake` は Home Manager が管理している symlink や profile を外します。その直後に `$HOME` 配下の `*.hm-backup` を探し、復元先が存在しない場合だけ自動で戻します。復元先が既にある場合は上書きせず skip します。
+`clean.flake` は Home Manager が管理している symlink や profile を外します。`home-manager uninstall` が成功した場合だけ `restore.flake` を実行します。
+
+`restore.flake` は `$HOME` 配下の `*.hm-backup` を探し、復元先が存在しない場合だけ自動で戻します。復元先が既にある場合は上書きせず skip します。
 
 ### 修復
 
@@ -163,6 +165,7 @@ make init.doom
 make clean
 make clean.flake
 make clean.dist
+make restore.flake
 ```
 
 `dist/` は `make dist` で再生成される成果物です。直接編集せず、生成元を変更してから再生成します。
