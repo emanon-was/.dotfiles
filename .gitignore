@@ -1,6 +1,7 @@
 /*
 !/.gitignore
 !/README.md
+!/SPEC.md
 !/TASKS.md
 !/Makefile
 !/flake.nix
