@@ -100,6 +100,7 @@ doom_config_diff() {
   [ -f "$dotfiles_config" ] || fail "Doom config source does not exist: $dotfiles_config"
 
   original_home="$HOME"
+  state_dir="${DOTFILES_STATE_DIR:-$original_home/.local/state/dotfiles}"
   check_root="$(mktemp -d)"
 
   (
@@ -107,14 +108,16 @@ doom_config_diff() {
     trap 'rm -rf "$check_root"' EXIT
 
     temp_home="$check_root/home"
-    DOTFILES_STATE_DIR="$original_home/.local/state/dotfiles"
+    temp_doomdir="$temp_home/.config/doom"
+    temp_doomlocaldir="$check_root/doom-local"
+    DOTFILES_STATE_DIR="$state_dir"
     export DOTFILES_STATE_DIR
 
-    mkdir -p "$temp_home"
+    mkdir -p "$temp_home" "$temp_doomdir" "$temp_doomlocaldir"
     status "[doom] generating initial Doom config with temporary HOME: $temp_home"
-    HOME="$temp_home" "$DOOM_BIN" install
+    HOME="$temp_home" DOOMLOCALDIR="$temp_doomlocaldir" "$DOOM_BIN" --doomdir "$temp_doomdir" install --force --no-env --no-install --no-hooks
 
-    generated_config="$temp_home/.config/doom/config.el"
+    generated_config="$temp_doomdir/config.el"
     [ -f "$generated_config" ] || fail "Doom install did not generate config.el: $generated_config"
 
     status "[doom] comparing generated initial config.el with dotfiles source"
@@ -153,22 +156,45 @@ doom_install_check() {
 #!/usr/bin/env bash
 set -euo pipefail
 
-  case "${1:-}" in
+doomdir="${DOOMDIR:-$HOME/.config/doom}"
+command=""
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --doomdir)
+      doomdir="$2"
+      shift 2
+      ;;
+    --emacsdir)
+      shift 2
+      ;;
+    --*)
+      shift
+      ;;
+    *)
+      command="$1"
+      shift
+      break
+      ;;
+  esac
+done
+
+case "$command" in
   install)
-    mkdir -p "$HOME/.config/doom"
+    mkdir -p "$doomdir"
     if [ -n "${DOTFILES_FAKE_DOOM_INITIAL_CONFIG:-}" ]; then
-      cp "$DOTFILES_FAKE_DOOM_INITIAL_CONFIG" "$HOME/.config/doom/config.el"
+      cp "$DOTFILES_FAKE_DOOM_INITIAL_CONFIG" "$doomdir/config.el"
     else
-      cp "$DOTFILES_DOOM_CONFIG_SOURCE" "$HOME/.config/doom/config.el"
+      cp "$DOTFILES_DOOM_CONFIG_SOURCE" "$doomdir/config.el"
     fi
-    touch "$HOME/.config/doom/init.el" "$HOME/.config/doom/packages.el"
+    touch "$doomdir/init.el" "$doomdir/packages.el"
     ;;
   sync)
     ;;
   upgrade)
     ;;
   *)
-    printf 'unexpected fake doom command: %s\n' "${1:-}" >&2
+    printf 'unexpected fake doom command: %s\n' "$command" >&2
     exit 2
     ;;
 esac
