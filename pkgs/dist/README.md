@@ -25,6 +25,7 @@ make dist
 
 ```sh
 make init.dist
+make clean
 make clean.dist
 ```
 
@@ -42,6 +43,7 @@ make clean.dist
 - 既存ファイルや既存 symlink は `.backup`, `.backup.1`, ... に退避します。
 - 既存ディレクトリは残し、配下の対象ファイルを個別に symlink します。
 - install manifest は `$HOME/.local/state/dotfiles/install-manifest.tsv` に保存します。
+- init 方式は `$HOME/.local/state/dotfiles/init-mode` に保存します。
 
 ## uninstall
 

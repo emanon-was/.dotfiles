@@ -57,6 +57,8 @@
 - `dotfiles <name>` は、同じ directory または PATH 上の `dotfiles-<name>` を実行する。
 - flake 依存コマンドは `dotfiles flake ...` 配下に置く。
 - flake 操作は `dotfiles flake check/update/switch` を使う。
+- `make init.flake` と `make init.dist` は `$HOME/.local/state/dotfiles/init-mode` に初期化方式を記録する。
+- `make clean` は init-mode を参照し、`make clean.flake` または `make clean.dist` を実行する。
 - Home Manager 管理をやめる場合は `home-manager uninstall` を使う。Makefile では `make clean.flake` として用意する。
 
 主要コマンド:
@@ -121,6 +123,7 @@ dotfiles project init <nix|docker> [destination]
 - project init 用テンプレートは `dist/home-files/.local/share/dotfiles/templates` に含める。
 - 既存ファイルや既存 symlink は `.backup`, `.backup.1`, ... に退避してから symlink する。
 - install 時の symlink と backup は `$HOME/.local/state/dotfiles/install-manifest.tsv` に記録する。
+- init 方式は `$HOME/.local/state/dotfiles/init-mode` に記録する。
 - 既存ディレクトリは残し、その配下の対象ファイルを個別に symlink する。
 - 既存ディレクトリ symlink は `.backup` へ退避し、実ディレクトリを作って配下に symlink する。
 - `dist/uninstall.sh` は install manifest を参照して管理対象 symlink を削除し、install 時に退避した backup を元の名前へ復元する。
@@ -154,6 +157,7 @@ make init
 make init.flake
 make init.dist
 make init.doom
+make clean
 make clean.flake
 make clean.dist
 ```

@@ -1,8 +1,10 @@
-.PHONY: init init.flake init.dist init.doom clean.flake clean.dist flake-check dotfiles-build dist-build home-build switch-check command-check dist-install-check check dist
+.PHONY: init init.flake init.dist init.doom clean clean.flake clean.dist flake-check dotfiles-build dist-build home-build switch-check command-check dist-install-check check dist
 
 PROFILE ?= current
 DOTFILES_USERNAME ?= $(shell id -un)
 DOTFILES_HOME_DIRECTORY ?= $(HOME)
+DOTFILES_STATE_DIR ?= $(HOME)/.local/state/dotfiles
+DOTFILES_INIT_MODE_FILE ?= $(DOTFILES_STATE_DIR)/init-mode
 
 # flake が使える環境では init.flake、使えない環境では init.dist を実行する。
 init:
@@ -17,10 +19,14 @@ init.flake:
 	nix run .#dotfiles -- flake doctor
 	nix run .#dotfiles -- configure doctor
 	nix run .#dotfiles -- flake switch
+	@mkdir -p "$(DOTFILES_STATE_DIR)"
+	@printf '%s\n' flake > "$(DOTFILES_INIT_MODE_FILE)"
 
 # dist を使う非 Nix 環境向けの初期化を実行する。
 init.dist:
 	./dist/install.sh
+	@mkdir -p "$(DOTFILES_STATE_DIR)"
+	@printf '%s\n' dist > "$(DOTFILES_INIT_MODE_FILE)"
 
 # Doom Emacs の初回セットアップを実行する。
 init.doom:
@@ -30,10 +36,30 @@ init.doom:
 # 退避された *.hm-backup の復元が必要な場合は内容を確認して手で戻す。
 clean.flake:
 	home-manager uninstall
+	@rm -f "$(DOTFILES_INIT_MODE_FILE)"
 
 # dist/install.sh で展開した symlink と backup を戻す。
 clean.dist:
 	./dist/uninstall.sh
+	@rm -f "$(DOTFILES_INIT_MODE_FILE)"
+
+# init 時に記録した方式に合わせて clean.flake / clean.dist を実行する。
+clean:
+	@if [ ! -f "$(DOTFILES_INIT_MODE_FILE)" ]; then \
+		printf 'error: init mode is not recorded: %s\n' "$(DOTFILES_INIT_MODE_FILE)" >&2; \
+		printf 'run make clean.flake or make clean.dist explicitly\n' >&2; \
+		exit 1; \
+	fi; \
+	mode="$$(sed -n '1p' "$(DOTFILES_INIT_MODE_FILE)")"; \
+	case "$$mode" in \
+		flake) $(MAKE) clean.flake ;; \
+		dist) $(MAKE) clean.dist ;; \
+		*) \
+			printf 'error: unknown init mode: %s\n' "$$mode" >&2; \
+			printf 'run make clean.flake or make clean.dist explicitly\n' >&2; \
+			exit 1; \
+			;; \
+	esac
 
 # flake 全体の評価と checks を確認する。
 flake-check:

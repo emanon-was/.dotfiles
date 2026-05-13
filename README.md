@@ -71,10 +71,14 @@ Home Manager でファイル衝突が起きた場合、`dotfiles flake switch` �
 Home Manager の管理をやめる場合:
 
 ```sh
+make clean
+# or explicitly:
 make clean.flake
 ```
 
-この操作は Home Manager が管理している symlink や profile を外します。`.hm-backup` へ退避されたファイルを戻す必要がある場合は、内容を確認してから手で戻します。
+`make init` / `make init.flake` は `$HOME/.local/state/dotfiles/init-mode` に `flake` を記録します。`make clean` はその記録を見て `make clean.flake` を実行します。
+
+`clean.flake` は Home Manager が管理している symlink や profile を外します。`.hm-backup` へ退避されたファイルを戻す必要がある場合は、内容を確認してから手で戻します。
 
 Doom Emacs の管理設定で起動できなくなった場合:
 
@@ -121,8 +125,12 @@ dotfiles flake switch
 `dist/install.sh` で展開した内容を戻す場合:
 
 ```sh
+make clean
+# or explicitly:
 make clean.dist
 ```
+
+`make init` / `make init.dist` は `$HOME/.local/state/dotfiles/init-mode` に `dist` を記録します。`make clean` はその記録を見て `make clean.dist` を実行します。
 
 `dist` の install/uninstall は `$HOME/.local/state/dotfiles/install-manifest.tsv` を使って、作成した symlink と退避した backup を管理します。
 
@@ -150,6 +158,7 @@ make init
 make init.flake
 make init.dist
 make init.doom
+make clean
 make clean.flake
 make clean.dist
 ```
