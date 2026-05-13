@@ -5,9 +5,10 @@
 
 ## 未完了タスク
 
-現時点では未完了タスクなし。
-
-新しい作業を始める場合は、この section に `- [ ] ...` として追加します。
+- [ ] `dotfiles project init` が既存ファイルを黙って上書きしないようにする。既存ファイルがある場合は失敗させ、必要なら将来 `--force` を追加する。
+- [ ] `dist/install.sh` と `dist/uninstall.sh` の復元処理を state/manifest ベースにする。install 時に作成した symlink、退避した backup path、元の path を記録し、uninstall 時はその manifest を参照して正確に戻す。
+- [ ] dist install state の保存先を決める。候補は `$HOME/.local/state/dotfiles/install-manifest.tsv` または `$HOME/.local/state/dotfiles/dist-install.tsv`。XDG state としては `.local/state/dotfiles/` が自然。
+- [ ] [home/gnome.nix](./home/gnome.nix) のコメントを現行コマンド `dotfiles configure gnome` に合わせる。
 
 ## 注意点
 
