@@ -142,3 +142,4 @@ make dist
 - Home Manager module の評価や activation に重いネットワーク処理を混ぜない。
 - 変更後は影響範囲に応じて `make flake-check`、`make dist-build`、`make dist`、dist install/uninstall の一時 HOME テストを実行する。
 - `dotfiles flake switch` の対象解決は `make switch-check` で検査する。任意ユーザー、`root`、`dist`、旧 `DOTFILES_PROFILE=<user>`、不正引数を条件に含める。
+- `dotfiles` CLI の主要 subcommand は `make command-check` で検査する。dispatcher と project init を対象にする。
