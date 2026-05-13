@@ -105,9 +105,10 @@ dotfiles project init <nix|docker> [destination]
 - command は `dist/home-files/.local/bin` に含め、install 時は `$HOME/.local/bin` へ symlink する。
 - project init 用テンプレートは `dist/home-files/.local/share/dotfiles/templates` に含める。
 - 既存ファイルや既存 symlink は `.backup`, `.backup.1`, ... に退避してから symlink する。
+- install 時の symlink と backup は `$HOME/.local/state/dotfiles/install-manifest.tsv` に記録する。
 - 既存ディレクトリは残し、その配下の対象ファイルを個別に symlink する。
 - 既存ディレクトリ symlink は `.backup` へ退避し、実ディレクトリを作って配下に symlink する。
-- `dist/uninstall.sh` は管理対象 symlink を削除し、対応する `.backup` があれば元の名前へ復元する。
+- `dist/uninstall.sh` は install manifest を参照して管理対象 symlink を削除し、install 時に退避した backup を元の名前へ復元する。
 - uninstall 時に元の名前へ別ファイルがある場合は上書きせず復元を skip する。
 - dist 生成時には `/nix/store` と固定 home path が成果物に残らないことを検査する。
 
@@ -143,3 +144,4 @@ make dist
 - 変更後は影響範囲に応じて `make flake-check`、`make dist-build`、`make dist`、dist install/uninstall の一時 HOME テストを実行する。
 - `dotfiles flake switch` の対象解決は `make switch-check` で検査する。任意ユーザー、`root`、`dist`、旧 `DOTFILES_PROFILE=<user>`、不正引数を条件に含める。
 - `dotfiles` CLI の主要 subcommand は `make command-check` で検査する。dispatcher と project init を対象にする。
+- dist install/uninstall の復元処理は `make dist-install-check` で検査する。

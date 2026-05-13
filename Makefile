@@ -1,4 +1,4 @@
-.PHONY: flake-check dotfiles-build dist-build home-build switch-check command-check check dist
+.PHONY: flake-check dotfiles-build dist-build home-build switch-check command-check dist-install-check check dist
 
 PROFILE ?= current
 DOTFILES_USERNAME ?= $(shell id -un)
@@ -24,8 +24,12 @@ switch-check:
 command-check:
 	tests/dotfiles-commands.sh
 
+# dist install/uninstall の manifest と復元処理を検査する。
+dist-install-check:
+	tests/dotfiles-dist-install.sh
+
 # 主要な非破壊チェックをまとめて実行する。
-check: flake-check switch-check command-check
+check: flake-check switch-check command-check dist-install-check
 
 # Home Manager activation package を build する。
 # PROFILE に current/dist 以外を指定した場合は任意ユーザー名として扱い、
