@@ -21,13 +21,6 @@ run_dotfiles_project() {
     ' _ "$repo_root" "$@"
 }
 
-assert_file() {
-  [ -f "$1" ] || {
-    printf 'error: expected file does not exist: %s\n' "$1" >&2
-    exit 1
-  }
-}
-
 assert_fails() {
   name="$1"
   shift
@@ -36,6 +29,18 @@ assert_fails() {
     exit 1
   fi
   printf '[ok] %s\n' "$name"
+}
+
+assert_template_copied() {
+  template="$1"
+  destination="$2"
+  source="$repo_root/pkgs/dotfiles/templates/$template"
+
+  diff -ru "$source" "$destination" >/dev/null || {
+    printf 'error: project template was not copied correctly: %s\n' "$template" >&2
+    diff -ru "$source" "$destination" >&2 || true
+    exit 1
+  }
 }
 
 test_dispatcher() {
@@ -71,12 +76,10 @@ test_project_init() {
   docker_dest="$test_root/docker-project"
 
   run_dotfiles_project init nix "$nix_dest"
-  assert_file "$nix_dest/flake.nix"
-  assert_file "$nix_dest/Makefile"
-  assert_file "$nix_dest/.envrc"
+  assert_template_copied nix "$nix_dest"
 
   run_dotfiles_project init docker "$docker_dest"
-  assert_file "$docker_dest/docker.mk"
+  assert_template_copied docker "$docker_dest"
 
   assert_fails project-missing-template run_dotfiles_project init
   assert_fails project-unknown-template run_dotfiles_project init unknown "$test_root/unknown"
