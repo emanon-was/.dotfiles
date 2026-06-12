@@ -29,8 +29,7 @@ Usage:
 
 Description:
   check   dotfiles root flake の flake check を --impure 付きで実行します。
-  build   Home Manager activation package を --impure 付きで build します。
-          result symlink は作りません。
+  build   dotfiles-profile package を build し、profile/ を再生成します。
   switch  Home Manager activation package を build して activate します。
   update  dotfiles root flake の flake.lock を更新します。
 
@@ -71,10 +70,28 @@ flake_check() {
 }
 
 flake_build() {
+  set -e
+
   have nix || fail "nix is not available"
-  require_home_manager_root
+  have chmod || fail "chmod is not available"
+  have rm || fail "rm is not available"
+  have cp || fail "cp is not available"
+
   prepare_nix_cache
-  nix build --impure --no-link --print-out-paths "$(activation_package_ref)"
+  require_home_manager_root
+
+  profile="$HOME_MANAGER_ROOT/profile"
+  tmp_profile="$HOME_MANAGER_ROOT/.profile.tmp.$$"
+  out="$(nix build "$HOME_MANAGER_ROOT#dotfiles-profile" --no-link --print-out-paths)"
+
+  rm -rf "$tmp_profile"
+  trap 'rm -rf "$tmp_profile"' EXIT
+  cp -R "$out" "$tmp_profile"
+
+  chmod -R u+w "$profile" 2>/dev/null || true
+  rm -rf "$profile"
+  mv "$tmp_profile" "$profile"
+  trap - EXIT
 }
 
 flake_switch() {

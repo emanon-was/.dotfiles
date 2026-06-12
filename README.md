@@ -51,7 +51,7 @@ dotfiles flake --help
 
 `DOTFILES_HOME` を外部から指定した場合も repository root または profile root として検証されます。
 
-`dotfiles flake` は、この repository の root flake に対する `check` / `build` / `switch` / `update` を短く呼ぶための便利 command です。Home Manager 自体は通常の `nix` / `home-manager` command でも使えます。
+`dotfiles flake` は、この repository の root flake に対する操作を短く呼ぶための便利 command です。`dotfiles flake build` は `profile/` を再生成します。Home Manager 自体は通常の `nix` / `home-manager` command でも使えます。
 
 ### アンインストール
 

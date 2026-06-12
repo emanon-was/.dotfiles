@@ -79,7 +79,9 @@
 - `nix/bin/dotfiles` は dispatcher package として完結し、shell subcommand は含めない。
 - shell subcommand の集約は `nix/bin/default.nix` の責務とする。
 - Home Manager 操作は root flake に対する通常の `nix` / `home-manager` command でも実行できる。
-- `dotfiles-flake` は root flake への `check` / `build` / `switch` / `update` を短く呼ぶ便利 wrapper とする。
+- `dotfiles-flake build` は root flake の `dotfiles-profile` package から `profile/` を再生成する。
+- `dotfiles-flake switch` は root flake の Home Manager activation package を build して activate する。
+- `dotfiles-flake update` は root flake の `flake.lock` を更新する。
 - `symsync` は `nix/bin/symsync` で別 package として生成する。
 - `dotfiles configure` は `dotfiles-configure-<command>` を呼ぶ dispatcher とする。
 - profile 用 command と completion は `nix/bin/default.nix` の profile 用 package に集約する。
