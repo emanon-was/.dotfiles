@@ -4,7 +4,7 @@
 
 `nix/` から配布用の `profile/` を生成し、`profile/` を `$HOME` へ symlink 展開して使います。build には Nix を使いますが、生成済みの `profile/` を展開するだけなら Nix は不要です。
 
-Home Manager 設定も `profile/.config/home-manager/` に含めますが、このリポジトリだけで Home Manager 管理を完結させる前提ではありません。展開後の `$HOME/.config/home-manager` を標準配置として使います。
+Home Manager 設定は repository root の `home.nix` と `flake.nix` で管理します。dotfiles の file/symlink 配置は `profile/` と `symsync` に任せ、Home Manager は package 管理を中心に使います。
 
 ## ディレクトリ構成
 
@@ -12,6 +12,7 @@ Home Manager 設定も `profile/.config/home-manager/` に含めますが、こ�
 .
 ├── Makefile        # 初期化、アンインストール、ビルド、検証の入口
 ├── flake.nix       # パッケージ、profile 生成、検証の入口
+├── home.nix        # Home Manager 設定
 ├── nix/            # profile 生成 builder と Nix package 生成元
 ├── nix/etc/        # profile/ と同じ layout の dotfiles source
 ├── profile/        # Nix build 済みの配布用成果物
@@ -46,11 +47,11 @@ dotfiles flake --help
 
 `dotfiles` dispatcher は実行場所から dotfiles の root を検出し、子 command に環境変数を渡します。
 
-`DOTFILES_HOME` には検出した repository root または profile root が入ります。repository root は `flake.nix` と `nix/` がある directory、profile root は `.local/bin` と `.local/share/dotfiles` がある directory です。
+`DOTFILES_HOME` には検出した repository root または profile root が入ります。repository root は `flake.nix`、`home.nix`、`nix/` がある directory、profile root は `.local/bin` と `.local/share/dotfiles` がある directory です。
 
 `DOTFILES_HOME` を外部から指定した場合も repository root または profile root として検証されます。
 
-`dotfiles flake` は、Home Manager 標準配置に対する `check` / `build` / `switch` を短く呼ぶための便利 command です。Home Manager 自体は通常の `nix` / `home-manager` command でそのまま使います。
+`dotfiles flake` は、この repository の root flake に対する `check` / `build` / `switch` / `update` を短く呼ぶための便利 command です。Home Manager 自体は通常の `nix` / `home-manager` command でも使えます。
 
 ### アンインストール
 
@@ -64,26 +65,15 @@ profile install/uninstall は `symsync` を使います。既存ファイルは�
 
 ## Home Manager
 
-`profile/` には Home Manager の標準配置も含めます。
-
-```sh
-profile/.config/home-manager/flake.nix
-profile/.config/home-manager/home.nix
-```
-
-profile 展開後は `$HOME/.config/home-manager` として使えます。Home Manager の実運用は展開済みの `$HOME/.config/home-manager` が主体です。repo 内の `nix/etc/.config/home-manager` は seed / build check 用です。
-
-Home Manager を使う場合は、展開後の `$HOME/.config/home-manager` を通常の Home Manager flake として扱います。
+Home Manager 設定は repository root の `home.nix` に置き、root の `flake.nix` が `homeConfigurations.default` を出力します。`profile/` には Home Manager flake を含めません。
 
 この Home Manager flake は `USER` と `HOME` から `home.username` と `home.homeDirectory` を決めます。そのため、実行時は `--impure` を付けて実環境の値を渡します。`--impure` なしで `USER` または `HOME` が読めない場合は評価エラーになります。
 
 ```sh
-nix flake check --impure "$HOME/.config/home-manager"
-home-manager --impure --flake "$HOME/.config/home-manager#default" build
-home-manager --impure --flake "$HOME/.config/home-manager#default" switch
+nix flake check --impure "$HOME/.dotfiles"
+home-manager --impure --flake "$HOME/.dotfiles#default" build
+home-manager --impure --flake "$HOME/.dotfiles#default" switch
 ```
-
-Home Manager の操作は、repo 内の `nix/etc/.config/home-manager` ではなく、展開済みの `$HOME/.config/home-manager` に対して行います。
 
 初回や大きい変更後は、先に `build` で評価と build を確認してから `switch` します。
 
@@ -96,7 +86,7 @@ homeConfigurations.default.activationPackage
 これは Home Manager 設定を適用するための成果物です。Nix で直接 build できます。
 
 ```sh
-nix build --impure "$HOME/.config/home-manager#homeConfigurations.default.activationPackage"
+nix build --impure "$HOME/.dotfiles#homeConfigurations.default.activationPackage"
 ```
 
 build された成果物には `activate` script が入っています。
@@ -106,6 +96,8 @@ build された成果物には `activate` script が入っています。
 ```
 
 つまり `home-manager --flake ... switch` は、おおまかには activation package を build して、その中の `activate` script を実行する便利 command として扱えます。
+
+`dotfiles flake switch` は `home-manager` command に依存せず、activation package を `nix build --no-link` で build して `activate` を実行します。`dotfiles flake update` は root flake の `flake.lock` を更新します。
 
 この Home Manager 設定は package 管理を中心にし、dotfiles の file/symlink 配置は `profile/` と `symsync` に任せます。`home.file` などで同じ path を管理すると conflict の原因になります。
 
@@ -140,17 +132,21 @@ bash の login shell は `.bash_profile` を読みますが、`.bashrc` は自�
 ```text
 bash login interactive
   -> .bash_profile
-       -> .profile
        -> .bashrc
+            -> .profile.d/*.sh
 ```
+
+bash の non-login interactive shell は `.bashrc` だけを読みます。この構成では `.bashrc` から `.profile.d/*.sh` を読み込みます。
 
 zsh の login interactive shell は、login 用の `.zprofile` と interactive 用の `.zshrc` を段階的に読みます。そのため、`.zprofile` から `.zshrc` を読み込ませる必要はありません。
 
 ```text
 zsh login interactive
   -> .zprofile
-       -> .profile
   -> .zshrc
+       -> .profile.d/*.sh
 ```
 
-共通環境変数は `.profile` で読み込み、shell 固有の history、completion、prompt などは `.bashrc` / `.zshrc` に置きます。
+zsh の non-login interactive shell は `.zshrc` だけを読みます。この構成では `.zshrc` から `.profile.d/*.sh` を読み込みます。
+
+共通環境変数は `.profile.d/env.sh` に置き、shell 固有の history、completion、prompt などは `.bashrc` / `.zshrc` に置きます。PATH は重複しないよう、不足している entry だけ追加します。

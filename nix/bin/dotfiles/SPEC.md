@@ -38,7 +38,7 @@
 ## Environment
 
 - `dotfiles` dispatcher は子 command に `DOTFILES_HOME` を渡す。
-- repository root は `flake.nix` と `nix/` がある directory とする。
+- repository root は `flake.nix`、`home.nix`、`nix/` がある directory とする。
 - profile root は `.local/bin` と `.local/share/dotfiles` がある directory とする。
 - executable から上位 directory を探索し、repository root より手前で profile root が見つかった場合は profile root を採用する。
 - 外部から渡された `DOTFILES_HOME` は repository root または profile root として validation する。

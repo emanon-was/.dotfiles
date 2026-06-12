@@ -6,14 +6,14 @@
 
 - `nix/` から配布用の `profile/` を生成し、`profile/` を `$HOME` へ symlink 展開して使う。
 - build と検証には Nix を使い、生成済みの `profile/` 展開は Nix に依存しない。
-- Home Manager 設定は `profile/.config/home-manager/` に含め、展開後の `$HOME/.config/home-manager` を標準配置として使う。
+- Home Manager 設定は root の `home.nix` と `flake.nix` で管理し、`profile/` には含めない。
 - 副作用のある処理は自動処理に入れず、`dotfiles` CLI の明示コマンドで実行する。
 
 ## ディレクトリ
 
 - `nix/etc/`
   - `profile/` と同じ layout の source tree。
-  - `$HOME` に置く dotfiles、Doom Emacs、git、tmux、screen、Home Manager 標準配置の設定を置く。
+  - `$HOME` に置く dotfiles、Doom Emacs、git、tmux、screen の設定を置く。
 - `nix/bin/scripts/`
   - shell 製 `dotfiles-*` subcommand の source 置き場。
   - repo 全体の仕様、docs、tests は、この配下の個別 file 名や中身に依存しない。
@@ -35,21 +35,24 @@
 - `notes/`
   - Home Manager 管理対象ではない個人メモを置く。
   - `notes/templates/` に project 用の参考ファイルを置く。
+- `home.nix`
+  - Home Manager 設定を置く。
 
 ## Home Manager
 
-- Home Manager 標準配置は `nix/etc/.config/home-manager/` に置く。
-- Home Manager flake は `homeConfigurations.default` を出力する。
+- root の `flake.nix` は `homeConfigurations.default` を出力する。
 - Home Manager flake は `USER` と `HOME` から username と home directory を決める。
 - Home Manager flake は `--impure` 前提で使い、実環境の `USER` と `HOME` を読む。
 - `USER` または `HOME` が空の場合、Home Manager flake は評価エラーにする。
 - Home Manager flake は username と home directory の fake default を持たない。
 - Home Manager activation package を直接 build する場合は、`result` symlink を作らず store path を使う。
+- root の `flake.lock` を Home Manager と profile 生成で共有する。
 - shell、git、tmux、screen、Emacs 関連の dotfiles は `nix/etc/` を source of truth にする。
-- 共通環境変数は `nix/etc/.profile` に置く。
-- session env の断片は `nix/etc/.profile.d/*.sh` に置き、`.profile` から読み込む。
-- zsh login shell は `.zprofile` から `.profile` を読み込む。
-- bash login shell は `.bash_profile` から `.profile` と `.bashrc` を読み込む。
+- 共通環境変数は `nix/etc/.profile.d/env.sh` に置く。
+- session env の断片は `nix/etc/.profile.d/*.sh` に置き、`.bashrc` / `.zshrc` から読み込む。
+- `.profile.d/env.sh` は PATH entry を重複させないように追加する。
+- zsh login shell は `.zprofile` のあと `.zshrc` を読み込む。
+- bash login shell は `.bash_profile` から `.bashrc` を読み込む。
 - bash と zsh の共通 alias は `nix/etc/.config/shell/aliases.sh` に置く。
 - `.bashrc` と `.zshrc` には shell 固有の history、completion、prompt wiring を置く。
 - git、tmux、screen の設定は `$HOME` 直下の `.gitconfig`、`.tmux.conf`、`.screenrc` に置く。
@@ -75,8 +78,8 @@
 - `dotfiles` dispatcher と `dotfiles configure` dispatcher は Go binary として生成する。
 - `nix/bin/dotfiles` は dispatcher package として完結し、shell subcommand は含めない。
 - shell subcommand の集約は `nix/bin/default.nix` の責務とする。
-- Home Manager 操作は展開済みの `$HOME/.config/home-manager` に対する通常の `nix` / `home-manager` command を主体とする。
-- `dotfiles-flake` は Home Manager 標準配置への `check` / `build` / `switch` を短く呼ぶ便利 wrapper とする。
+- Home Manager 操作は root flake に対する通常の `nix` / `home-manager` command でも実行できる。
+- `dotfiles-flake` は root flake への `check` / `build` / `switch` / `update` を短く呼ぶ便利 wrapper とする。
 - `symsync` は `nix/bin/symsync` で別 package として生成する。
 - `dotfiles configure` は `dotfiles-configure-<command>` を呼ぶ dispatcher とする。
 - profile 用 command と completion は `nix/bin/default.nix` の profile 用 package に集約する。
@@ -88,7 +91,7 @@
 ## Dispatcher Environment
 
 - `dotfiles` dispatcher は repository root または profile root を検出し、子 command に環境変数を渡す。
-- repository root は `flake.nix` と `nix/` がある directory とする。
+- repository root は `flake.nix`、`home.nix`、`nix/` がある directory とする。
 - profile root は `.local/bin` と `.local/share/dotfiles` がある directory とする。
 - repository root を検出した場合、子 command に `DOTFILES_HOME=<repository root>` を渡す。
 - profile root を検出した場合、子 command に `DOTFILES_HOME=<profile root>` を渡す。
@@ -106,6 +109,7 @@
 - `profile/` は `make build` で生成する。
 - `profile/` は profile mode 用 home files の展開専用成果物とする。
 - `profile/` の静的な dotfiles は `nix/etc/` から生成する。
+- `profile/.profile` は置かない。
 - `profile/install.sh` と `profile/uninstall.sh` は置かない。
 - `profile/.local/bin/symsync` を profile install/uninstall に使う。
 - `symsync apply --src <src> --dest <dest>` は src tree を dest tree へ symlink で反映する。
@@ -114,7 +118,6 @@
 - `$HOME/home-files` のような managed copy は作らない。
 - command は `profile/.local/bin` に含め、`symsync apply` 時は `$HOME/.local/bin` へ symlink する。
 - `profile/.local/share/dotfiles/.keep` は profile root 検出用 marker として含める。
-- `profile/.config/home-manager/` は Home Manager の標準配置用設定として含める。
 - install 対象は `profile` 配下の directory、file、symlink とする。
 - profile install/uninstall は manifest を使わない。
 - 既存ファイル、既存 symlink、既存の非 directory path は退避せず conflict とする。
@@ -125,7 +128,8 @@
 ## Makefile
 
 - root `Makefile` は repo の検証、ビルド、生成用。
-- `nix flake check` は `checks.x86_64-linux.dotfiles-tests` を実行し、Nix sandbox 内で `dotfiles` / `symsync` の Go test と profile 成果物の smoke check を行う。
+- `make check` は `nix flake check --impure` を実行する。
+- `nix flake check --impure` は `checks.x86_64-linux.dotfiles-tests` を実行し、Nix sandbox 内で `dotfiles` / `symsync` の Go test と profile 成果物の smoke check を行う。
 
 ## 運用ルール
 

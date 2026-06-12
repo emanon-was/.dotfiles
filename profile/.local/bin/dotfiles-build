@@ -27,14 +27,14 @@ prepare_nix_cache() {
 
 repository_root() {
   if [ -n "${DOTFILES_HOME:-}" ]; then
-    if [ -f "$DOTFILES_HOME/flake.nix" ] && [ -d "$DOTFILES_HOME/nix" ]; then
+    if [ -f "$DOTFILES_HOME/flake.nix" ] && [ -f "$DOTFILES_HOME/home.nix" ] && [ -d "$DOTFILES_HOME/nix" ]; then
       printf '%s\n' "$DOTFILES_HOME"
       return 0
     fi
     fail "dotfiles build requires repository root; DOTFILES_HOME is not a repository root: $DOTFILES_HOME"
   fi
 
-  if [ -f ./flake.nix ] && [ -d ./nix ]; then
+  if [ -f ./flake.nix ] && [ -f ./home.nix ] && [ -d ./nix ]; then
     pwd
     return 0
   fi

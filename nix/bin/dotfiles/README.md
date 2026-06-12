@@ -34,7 +34,7 @@ dispatcher は repository root または profile root を検出し、子 command
 
 `DOTFILES_HOME` には検出した root が入ります。
 
-repository root は `flake.nix` と `nix/` がある directory、profile root は `.local/bin` と `.local/share/dotfiles` がある directory です。外部から `DOTFILES_HOME` を指定した場合も同じ条件で検証します。
+repository root は `flake.nix`、`home.nix`、`nix/` がある directory、profile root は `.local/bin` と `.local/share/dotfiles` がある directory です。外部から `DOTFILES_HOME` を指定した場合も同じ条件で検証します。
 
 ## ファイル
 

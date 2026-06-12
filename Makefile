@@ -10,7 +10,7 @@ clean:
 
 # 主要な非破壊チェックをまとめて実行する。
 check:
-	nix flake check
+	nix flake check --impure
 
 # profile/ を Nix build の成果物で再生成する。
 build:

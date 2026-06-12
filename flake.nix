@@ -3,15 +3,26 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    home-manager = {
+      url = "github:nix-community/home-manager/release-26.05";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, ... }:
+  outputs = { self, nixpkgs, home-manager, ... }:
     let
       system = "x86_64-linux";
       pkgs = import nixpkgs {
         inherit system;
         config.allowUnfree = true;
       };
+      requiredEnv = name:
+        let
+          value = builtins.getEnv name;
+        in
+        if value != "" then value else throw "home-manager configuration requires ${name}; run with --impure";
+      username = requiredEnv "USER";
+      homeDirectory = requiredEnv "HOME";
       dotfilesDispatcherPackage = pkgs.callPackage ./nix/bin/dotfiles { };
       symsyncPackage = pkgs.callPackage ./nix/bin/symsync { };
       dotfilesBin = pkgs.callPackage ./nix/bin {
@@ -29,6 +40,16 @@
         dotfiles-bin = dotfilesBin.package;
         dotfiles-profile = dotfilesProfile;
         default = dotfilesBin.package;
+      };
+
+      homeConfigurations.default = home-manager.lib.homeManagerConfiguration {
+        inherit pkgs;
+        extraSpecialArgs = {
+          inherit username homeDirectory;
+        };
+        modules = [
+          ./home.nix
+        ];
       };
 
       devShells.${system}.default = pkgs.mkShell {

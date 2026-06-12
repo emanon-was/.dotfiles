@@ -27,7 +27,6 @@ make clean
 
 - `default.nix`: `dotfiles-profile` package の定義。
 - `etc/`: `profile/` と同じ layout の静的 dotfiles source。
-- `etc/.config/home-manager/`: Home Manager 標準配置用の設定。
 - `profile/.local/bin/`: `nix/bin` の profile 用 package から集約した command。
 - `profile/.local/share/bash-completion/`: 各 command package から集約した bash completion。
 - `profile/.local/share/zsh/site-functions/`: 各 command package から集約した zsh completion。

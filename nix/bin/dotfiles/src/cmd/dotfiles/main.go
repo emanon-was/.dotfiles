@@ -266,6 +266,7 @@ func findDotfilesHome(start string) (string, bool) {
 
 func isRepositoryRoot(dir string) bool {
 	return isFile(filepath.Join(dir, "flake.nix")) &&
+		isFile(filepath.Join(dir, "home.nix")) &&
 		isDir(filepath.Join(dir, "nix"))
 }
 

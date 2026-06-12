@@ -94,6 +94,7 @@ func TestDotfilesEnvRepositoryRoot(t *testing.T) {
 	mkdirAll(t, binDir)
 	mkdirAll(t, filepath.Join(repo, "nix"))
 	writeFile(t, filepath.Join(repo, "flake.nix"), "")
+	writeFile(t, filepath.Join(repo, "home.nix"), "")
 	invoked := filepath.Join(binDir, "dotfiles")
 	writeExecutable(t, invoked, "")
 	t.Setenv("PATH", "")
@@ -106,6 +107,25 @@ func TestDotfilesEnvRepositoryRoot(t *testing.T) {
 	assertEnv(t, env, "DOTFILES_HOME", repo)
 }
 
+func TestDotfilesEnvRejectsRepositoryRootWithoutHomeNix(t *testing.T) {
+	root := t.TempDir()
+	repo := filepath.Join(root, "repo")
+	binDir := filepath.Join(repo, "bin")
+	mkdirAll(t, binDir)
+	mkdirAll(t, filepath.Join(repo, "nix"))
+	writeFile(t, filepath.Join(repo, "flake.nix"), "")
+	invoked := filepath.Join(binDir, "dotfiles")
+	writeExecutable(t, invoked, "")
+	t.Setenv("PATH", "")
+	t.Setenv("DOTFILES_HOME", "")
+
+	env, err := dotfilesEnv([]string{"PATH="}, invoked)
+	if err != nil {
+		t.Fatalf("dotfilesEnv returned error: %v", err)
+	}
+	assertEnvMissing(t, env, "DOTFILES_HOME")
+}
+
 func TestDotfilesEnvRejectsInvalidExplicitHome(t *testing.T) {
 	invalid := t.TempDir()
 	t.Setenv("DOTFILES_HOME", invalid)
@@ -116,6 +136,16 @@ func TestDotfilesEnvRejectsInvalidExplicitHome(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "not a dotfiles repository or profile root") {
 		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func assertEnvMissing(t *testing.T, env []string, key string) {
+	t.Helper()
+	prefix := key + "="
+	for _, entry := range env {
+		if strings.HasPrefix(entry, prefix) {
+			t.Fatalf("expected %s to be missing, got %q", key, entry)
+		}
 	}
 }
 

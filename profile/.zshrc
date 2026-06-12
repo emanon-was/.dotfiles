@@ -1,5 +1,14 @@
 typeset -U path cdpath fpath manpath
 
+# 共通環境変数と session env の断片。
+dotfiles_profile_dir="$HOME/.profile.d"
+if [ -d "$dotfiles_profile_dir" ]; then
+  for dotfiles_profile in "$dotfiles_profile_dir"/*.sh; do
+    [ -r "$dotfiles_profile" ] && . "$dotfiles_profile"
+  done
+fi
+unset dotfiles_profile dotfiles_profile_dir
+
 # Nix profile 由来の zsh completion 探索 path。
 for profile in ${(z)NIX_PROFILES}; do
   fpath+=($profile/share/zsh/site-functions $profile/share/zsh/$ZSH_VERSION/functions $profile/share/zsh/vendor-completions)
