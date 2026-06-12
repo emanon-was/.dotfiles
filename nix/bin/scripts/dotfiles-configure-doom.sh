@@ -14,13 +14,17 @@ Usage:
 Description:
   install    Doom Emacs を $DOOM_HOME に clone し、doom install と doom sync を実行します。
   uninstall  $DOOM_HOME の Doom Emacs checkout だけを削除します。$HOME/.config/doom は削除しません。
-  sync       既存の Doom Emacs checkout で doom sync を実行します。
-  upgrade    既存の Doom Emacs checkout で doom upgrade と doom sync を実行します。
+  sync       recipe repository 更新後に doom sync を実行します。
+  upgrade    recipe repository 更新後に doom upgrade と doom sync を実行します。
 USAGE
 }
 
 status() {
   printf '%s\n' "$*"
+}
+
+warn() {
+  status "[warn] $*"
 }
 
 fail() {
@@ -76,6 +80,7 @@ doom_sync() {
   if ! doom_installed; then
     fail "Doom Emacs is not installed at $DOOM_HOME. Run: dotfiles configure doom install"
   fi
+  doom_refresh_recipe_repositories
   doom_sync_raw
 }
 
@@ -98,6 +103,47 @@ doom_run() {
 doom_sync_raw() {
   status "[doom] syncing Doom profile"
   doom_run sync
+}
+
+straight_recipe_repository() {
+  repo_path="$1"
+  [ -d "$repo_path/recipes" ] && return 0
+  [ -f "$repo_path/archive-contents" ] && return 0
+  find "$repo_path" -maxdepth 2 -type f \( -name '*-recipes.el' -o -name 'recipes.el' \) -print -quit | grep -q .
+}
+
+doom_refresh_recipe_repositories() {
+  if ! doom_installed; then
+    fail "Doom Emacs is not installed at $DOOM_HOME. Run: dotfiles configure doom install"
+  fi
+
+  recipes_dir="$DOOM_HOME/.local/straight/repos"
+  [ -d "$recipes_dir" ] || return 0
+
+  status "[doom] refreshing straight recipe repositories"
+  find "$recipes_dir" -mindepth 2 -maxdepth 2 -type d -name .git -print | while IFS= read -r git_dir; do
+    repo_path="${git_dir%/.git}"
+    repo="$(basename "$repo_path")"
+    if ! straight_recipe_repository "$repo_path"; then
+      continue
+    fi
+
+    branch="$(git -C "$repo_path" branch --show-current)"
+    if [ -z "$branch" ]; then
+      status "[doom] recipe repository is detached, skipping: $repo"
+      continue
+    fi
+
+    status "[doom] updating recipe repository: $repo"
+    if ! git -C "$repo_path" fetch origin "$branch"; then
+      warn "[doom] failed to fetch recipe repository, skipping: $repo"
+      continue
+    fi
+    if ! git -C "$repo_path" merge --ff-only "origin/$branch"; then
+      warn "[doom] failed to fast-forward recipe repository, skipping: $repo"
+      continue
+    fi
+  done
 }
 
 cmd_doom() {

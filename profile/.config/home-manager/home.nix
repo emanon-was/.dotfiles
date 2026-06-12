@@ -14,6 +14,7 @@
       pkgs.gnumake
       pkgs.tmux
       pkgs.screen
+      pkgs.emacs-nox
     ];
   };
 
