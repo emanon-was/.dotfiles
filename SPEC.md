@@ -44,6 +44,7 @@
 - Home Manager flake は `--impure` 前提で使い、実環境の `USER` と `HOME` を読む。
 - `USER` または `HOME` が空の場合、Home Manager flake は評価エラーにする。
 - Home Manager flake は username と home directory の fake default を持たない。
+- Home Manager activation package を直接 build する場合は、`result` symlink を作らず store path を使う。
 - shell、git、tmux、screen、Emacs 関連の dotfiles は `nix/etc/` を source of truth にする。
 - 共通環境変数は `nix/etc/.profile` に置く。
 - session env の断片は `nix/etc/.profile.d/*.sh` に置き、`.profile` から読み込む。

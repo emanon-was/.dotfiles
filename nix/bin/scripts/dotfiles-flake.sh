@@ -28,6 +28,7 @@ Usage:
 Description:
   check   Home Manager 標準配置の flake check を --impure 付きで実行します。
   build   Home Manager 標準配置の activation package を --impure 付きで build します。
+          result symlink は作りません。
   switch  Home Manager 標準配置の activation package を build して activate します。
 
 Environment:
@@ -71,7 +72,7 @@ flake_build() {
   have nix || fail "nix is not available"
   require_home_manager_flake
   prepare_nix_cache
-  nix build --impure "$(activation_package_ref)"
+  nix build --impure --no-link --print-out-paths "$(activation_package_ref)"
 }
 
 flake_switch() {
