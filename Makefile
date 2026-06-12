@@ -14,8 +14,13 @@ check:
 
 # profile/ を Nix build の成果物で再生成する。
 build:
-	@chmod -R u+w profile 2>/dev/null || true
-	@rm -rf profile
 	@set -e; \
 	out="$$(nix build .#dotfiles-profile --no-link --print-out-paths)"; \
-	cp -R "$$out" profile
+	tmp_profile=".profile.tmp.$$$$"; \
+	rm -rf "$$tmp_profile"; \
+	trap 'rm -rf "$$tmp_profile"' EXIT; \
+	cp -R "$$out" "$$tmp_profile"; \
+	chmod -R u+w profile 2>/dev/null || true; \
+	rm -rf profile; \
+	mv "$$tmp_profile" profile; \
+	trap - EXIT

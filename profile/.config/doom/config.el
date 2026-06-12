@@ -76,7 +76,6 @@
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
 
-
 (setq select-enable-clipboard t)
 
 ;; n: normal
@@ -106,3 +105,25 @@
 (map! :leader (:desc "Query & replace" :prefix "c" "q" #'query-replace))
 ;; "SPC c Q" = #'query-replace-regexp
 (map! :leader (:desc "Query & replace/regex" :prefix "c" "Q" #'query-replace-regexp))
+
+
+;; Doom dashboard は menu item 間に `relative-height 0.01' の spacer を入れる。
+;; terminal Emacs ではそれが潰れず空行として見えることがあるため、terminal
+;; のときだけ該当 spacer を取り除く。
+(defun dotfiles-doom-dashboard-drop-terminal-menu-spacers (args)
+  (if (display-graphic-p)
+      args
+    (cl-remove-if
+     (lambda (arg)
+       (and (stringp arg)
+            (string= arg "\n")
+            (equal (get-text-property 0 'display arg)
+                   '(space . (:relative-height 0.01)))))
+     args)))
+
+(defun dotfiles-doom-dashboard-setup ()
+  (advice-add #'+dashboard-insert
+              :filter-args
+              #'dotfiles-doom-dashboard-drop-terminal-menu-spacers))
+
+(add-hook 'doom-init-ui-hook #'dotfiles-doom-dashboard-setup)
