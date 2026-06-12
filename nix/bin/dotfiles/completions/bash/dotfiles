@@ -1,0 +1,22 @@
+_dotfiles()
+{
+  local cur words cword
+  words=("${COMP_WORDS[@]}")
+  cword="$COMP_CWORD"
+  cur="${words[$cword]:-}"
+
+  case "${words[1]:-}" in
+    configure)
+      if [ "$cword" -eq 2 ]; then
+        COMPREPLY=( $(compgen -W "$(dotfiles configure --commands 2>/dev/null)" -- "$cur") )
+      fi
+      ;;
+    *)
+      if [ "$cword" -eq 1 ]; then
+        COMPREPLY=( $(compgen -W "$(dotfiles --commands 2>/dev/null)" -- "$cur") )
+      fi
+      ;;
+  esac
+}
+
+complete -F _dotfiles dotfiles

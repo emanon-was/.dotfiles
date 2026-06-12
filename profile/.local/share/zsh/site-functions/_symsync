@@ -1,0 +1,25 @@
+#compdef symsync
+
+local -a commands
+
+commands=(
+  'apply:link source tree entries into destination'
+  'unapply:remove destination links that point into source tree'
+  'help:show usage'
+)
+
+case "$CURRENT" in
+  2)
+    _describe 'symsync command' commands
+    ;;
+  *)
+    case "${words[2]:-}" in
+      apply|unapply)
+        _arguments \
+          '--src[source tree]:source tree:_files -/' \
+          '--dest[destination tree]:destination tree:_files -/' \
+          '--dry-run[show planned operations without changing the filesystem]'
+        ;;
+    esac
+    ;;
+esac

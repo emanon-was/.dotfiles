@@ -1,0 +1,28 @@
+_symsync()
+{
+  local cur words cword command
+  words=("${COMP_WORDS[@]}")
+  cword="$COMP_CWORD"
+  cur="${words[$cword]:-}"
+  command="${words[1]:-}"
+
+  if [ "$cword" -eq 1 ]; then
+    COMPREPLY=( $(compgen -W "apply unapply help --help -h" -- "$cur") )
+    return
+  fi
+
+  case "$command" in
+    apply|unapply)
+      case "$cur" in
+        --*)
+          COMPREPLY=( $(compgen -W "--src --dest --dry-run" -- "$cur") )
+          ;;
+        *)
+          COMPREPLY=()
+          ;;
+      esac
+      ;;
+  esac
+}
+
+complete -F _symsync symsync

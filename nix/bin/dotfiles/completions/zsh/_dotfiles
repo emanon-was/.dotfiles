@@ -1,0 +1,18 @@
+#compdef dotfiles
+
+local -a commands
+
+case "${words[2]:-}" in
+  configure)
+    if [ "$CURRENT" -eq 3 ]; then
+      commands=(${(f)"$(dotfiles configure --commands 2>/dev/null)"})
+      _describe 'dotfiles configure command' commands
+    fi
+    ;;
+  *)
+    if [ "$CURRENT" -eq 2 ]; then
+      commands=(${(f)"$(dotfiles --commands 2>/dev/null)"})
+      _describe 'dotfiles command' commands
+    fi
+    ;;
+esac

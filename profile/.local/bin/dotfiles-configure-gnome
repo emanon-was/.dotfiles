@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+# This script is composed by nix/bin/default.nix.
+
+usage_gnome() {
+  cat <<'USAGE'
+Usage:
+  dotfiles configure gnome [--dry-run]
+
+Description:
+  GNOME の interface 設定に、Emacs key theme とフォント設定を適用します。
+  --dry-run  実際には変更せず、現在値と設定予定値を表示します。
+USAGE
+}
+
+fail() {
+  printf 'error: %s\n' "$*" >&2
+  exit 1
+}
+
+have() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+gnome_settings() {
+  cat <<'SETTINGS'
+gtk-key-theme	Emacs
+document-font-name	Sans 11
+font-name	Sans-serif 10
+monospace-font-name	Monospace 11
+SETTINGS
+}
+
+gnome_schema="org.gnome.desktop.interface"
+
+gnome_validate_settings() {
+  have gsettings || fail "gsettings is not available"
+
+  if ! gsettings list-schemas | grep -qx "$gnome_schema"; then
+    fail "GNOME schema is not available: $gnome_schema"
+  fi
+
+  available_keys="$(gsettings list-keys "$gnome_schema")"
+  gnome_settings | while IFS='	' read -r key value; do
+    if ! printf '%s\n' "$available_keys" | grep -qx "$key"; then
+      fail "GNOME key is not available: $gnome_schema $key"
+    fi
+  done
+}
+
+gnome_configure() {
+  gnome_validate_settings
+  gnome_settings | while IFS='	' read -r key value; do
+    gsettings set "$gnome_schema" "$key" "$value"
+  done
+}
+
+gnome_dry_run() {
+  gnome_validate_settings
+  gnome_settings | while IFS='	' read -r key value; do
+    current_value="$(gsettings get "$gnome_schema" "$key")"
+    printf '[dry-run] %s %s: %s -> %s\n' "$gnome_schema" "$key" "$current_value" "'$value'"
+  done
+}
+
+case "${1:-}" in
+  --dry-run)
+    shift
+    [ "$#" -eq 0 ] || fail "unexpected argument for gnome --dry-run: $1"
+    gnome_dry_run
+    ;;
+  -h|--help|help)
+    usage_gnome
+    ;;
+  "")
+    gnome_configure
+    ;;
+  *)
+    usage_gnome
+    exit 2
+    ;;
+esac
