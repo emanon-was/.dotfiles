@@ -16,23 +16,17 @@
       # search and file inspection
       pkgs.ripgrep # grep
       pkgs.fd # find
-      pkgs.bat # cat
-      pkgs.eza # ls
-      pkgs.dust # du
-      pkgs.sd # sed
-
-      # GNU-compatible tool replacements
-      pkgs.uutils-coreutils
-      pkgs.uutils-findutils
-      pkgs.uutils-diffutils
 
       # build tools
       pkgs.gnumake
 
       # terminal multiplexers
-      pkgs.tmux
       pkgs.screen
+      pkgs.tmux
       pkgs.zellij
+
+      # AI coding tools
+      pkgs.codex
 
       # editor
       pkgs.emacs-nox
