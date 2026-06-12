@@ -45,11 +45,14 @@
 - `USER` または `HOME` が空の場合、Home Manager flake は評価エラーにする。
 - Home Manager flake は username と home directory の fake default を持たない。
 - shell、git、tmux、screen、Emacs 関連の dotfiles は `nix/etc/` を source of truth にする。
+- 共通環境変数は `nix/etc/.profile` に置く。
 - session env の断片は `nix/etc/.profile.d/*.sh` に置き、`.profile` から読み込む。
+- zsh login shell は `.zprofile` から `.profile` を読み込む。
+- bash login shell は `.bash_profile` から `.profile` と `.bashrc` を読み込む。
 - bash と zsh の共通 alias は `nix/etc/.config/shell/aliases.sh` に置く。
 - `.bashrc` と `.zshrc` には shell 固有の history、completion、prompt wiring を置く。
 - git、tmux、screen の設定は `$HOME` 直下の `.gitconfig`、`.tmux.conf`、`.screenrc` に置く。
-- bash と zsh の prompt は左側 2 行表示で揃え、zsh の right prompt は使わない。
+- bash と zsh の prompt は shell 名を含む左側 2 行表示で揃え、zsh の right prompt は使わない。
 - bash は `~/.local/share/bash-completion/completions` 配下の completion を読み込む。
 - zsh は `compinit` 前に `~/.local/share/zsh/site-functions` を `fpath` に追加する。
 - Doom Emacs の設定は `nix/etc/.config/doom/` を生成元にする。

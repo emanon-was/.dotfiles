@@ -83,8 +83,6 @@ home-manager --impure --flake "$HOME/.config/home-manager#default" build
 home-manager --impure --flake "$HOME/.config/home-manager#default" switch
 ```
 
-### Tips
-
 Home Manager の操作は、repo 内の `nix/etc/.config/home-manager` ではなく、展開済みの `$HOME/.config/home-manager` に対して行います。
 
 初回や大きい変更後は、先に `build` で評価と build を確認してから `switch` します。
@@ -134,3 +132,25 @@ gopls version
 repo root の `go.work` で `nix/bin/dotfiles/src` と `nix/bin/symsync/src` を workspace として扱います。
 
 `profile/` は `make build` で再生成される成果物です。直接編集せず、生成元を変更してから再生成します。
+
+## Tips
+
+bash の login shell は `.bash_profile` を読みますが、`.bashrc` は自動では読みません。そのため、bash login shell でも interactive 設定を使う場合は、`.bash_profile` から `.bashrc` を読み込ませます。
+
+```text
+bash login interactive
+  -> .bash_profile
+       -> .profile
+       -> .bashrc
+```
+
+zsh の login interactive shell は、login 用の `.zprofile` と interactive 用の `.zshrc` を段階的に読みます。そのため、`.zprofile` から `.zshrc` を読み込ませる必要はありません。
+
+```text
+zsh login interactive
+  -> .zprofile
+       -> .profile
+  -> .zshrc
+```
+
+共通環境変数は `.profile` で読み込み、shell 固有の history、completion、prompt などは `.bashrc` / `.zshrc` に置きます。

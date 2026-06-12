@@ -50,7 +50,7 @@ __dotfiles_prompt_command() {
     prompt_status=" [exit:$exit_code]"
   fi
 
-  PS1="\[\e[32m\]\u@\h\[\e[0m\] \[\e[34m\]\w\[\e[0m\]\[\e[33m\]$(__dotfiles_prompt_git)\[\e[0m\]\[\e[31m\]$prompt_status\[\e[0m\]\n\\$ "
+  PS1="\[\e[35m\][bash]\[\e[0m\] \[\e[32m\]\u@\h\[\e[0m\] \[\e[34m\]\w\[\e[0m\]\[\e[33m\]$(__dotfiles_prompt_git)\[\e[0m\]\[\e[31m\]$prompt_status\[\e[0m\]\n\\$ "
 }
 PROMPT_COMMAND=__dotfiles_prompt_command
 

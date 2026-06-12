@@ -68,7 +68,7 @@ __dotfiles_prompt_precmd() {
     prompt_status=" [exit:$exit_code]"
   fi
 
-  PROMPT="%F{green}%n@%m%f %F{blue}%~%f%F{yellow}$(__dotfiles_prompt_git)%f%F{red}$prompt_status%f"$'\n'"%# "
+  PROMPT="%F{magenta}[zsh]%f %F{green}%n@%m%f %F{blue}%~%f%F{yellow}$(__dotfiles_prompt_git)%f%F{red}$prompt_status%f"$'\n'"%# "
 }
 if [[ " ${precmd_functions[*]} " != *" __dotfiles_prompt_precmd "* ]]; then
   precmd_functions+=(__dotfiles_prompt_precmd)
