@@ -1,6 +1,6 @@
 go 1.22
 
 use (
-	./nix/bin/dotfiles/src
-	./nix/bin/symsync/src
+	./nix/dotfiles/src
+	./nix/symsync/src
 )

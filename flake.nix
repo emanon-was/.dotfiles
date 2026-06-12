@@ -23,23 +23,19 @@
         if value != "" then value else throw "home-manager configuration requires ${name}; run with --impure";
       username = requiredEnv "USER";
       homeDirectory = requiredEnv "HOME";
-      dotfilesDispatcherPackage = pkgs.callPackage ./nix/bin/dotfiles { };
-      symsyncPackage = pkgs.callPackage ./nix/bin/symsync { };
-      dotfilesBin = pkgs.callPackage ./nix/bin {
-        inherit dotfilesDispatcherPackage;
+      dotfilesPackage = pkgs.callPackage ./nix/dotfiles { };
+      symsyncPackage = pkgs.callPackage ./nix/symsync { };
+      dotfilesGenerated = pkgs.callPackage ./default.nix {
+        inherit dotfilesPackage;
         inherit symsyncPackage;
-      };
-      dotfilesProfile = pkgs.callPackage ./nix {
-        dotfilesBinProfilePackage = dotfilesBin.profilePackage;
       };
     in
     {
       packages.${system} = {
-        dotfiles = dotfilesDispatcherPackage;
+        dotfiles = dotfilesPackage;
         symsync = symsyncPackage;
-        dotfiles-bin = dotfilesBin.package;
-        dotfiles-profile = dotfilesProfile;
-        default = dotfilesBin.package;
+        dotfiles-generated = dotfilesGenerated;
+        default = dotfilesPackage;
       };
 
       homeConfigurations.default = home-manager.lib.homeManagerConfiguration {
@@ -72,18 +68,21 @@
           ''
             export GOCACHE="$TMPDIR/go-cache"
             export HOME="$TMPDIR/home"
-            cd ${self.outPath}/nix/bin/dotfiles/src
+            cd ${self.outPath}/nix/dotfiles/src
             go test ./...
-            cd ${self.outPath}/nix/bin/symsync/src
+            cd ${self.outPath}/nix/symsync/src
             go test ./...
-            test -x ${dotfilesProfile}/.local/bin/dotfiles
-            test -x ${dotfilesProfile}/.local/bin/dotfiles-configure
-            test -x ${dotfilesProfile}/.local/bin/symsync
-            test -f ${dotfilesProfile}/.local/share/bash-completion/completions/dotfiles
-            test -f ${dotfilesProfile}/.local/share/bash-completion/completions/symsync
-            test -f ${dotfilesProfile}/.local/share/zsh/site-functions/_dotfiles
-            test -f ${dotfilesProfile}/.local/share/zsh/site-functions/_symsync
-            test -f ${dotfilesProfile}/.local/share/dotfiles/.keep
+            test -x ${dotfilesGenerated}/.local/bin/dotfiles
+            test -x ${dotfilesGenerated}/.local/bin/dotfiles-configure
+            test -x ${dotfilesGenerated}/.local/bin/symsync
+            test -f ${dotfilesGenerated}/.local/share/bash-completion/completions/dotfiles
+            test -f ${dotfilesGenerated}/.local/share/bash-completion/completions/symsync
+            test -f ${dotfilesGenerated}/.local/share/zsh/site-functions/_dotfiles
+            test -f ${dotfilesGenerated}/.local/share/zsh/site-functions/_symsync
+            test -f ${dotfilesGenerated}/.local/share/dotfiles/.keep
+            test -x ${self.outPath}/static/.local/bin/dotfiles-flake
+            test -x ${self.outPath}/static/.local/bin/dotfiles-configure-doom
+            test -x ${self.outPath}/static/.local/bin/dotfiles-configure-gnome
             touch "$out"
           '';
       };
@@ -91,7 +90,7 @@
       apps.${system} = {
         dotfiles = {
           type = "app";
-          program = "${dotfilesBin.package}/bin/dotfiles";
+          program = "${dotfilesPackage}/bin/dotfiles";
           meta.description = "Dotfiles management helper";
         };
         default = self.apps.${system}.dotfiles;

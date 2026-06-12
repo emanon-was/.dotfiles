@@ -6,11 +6,13 @@
 !/TASKS.md
 !/ROADMAP.md
 !/Makefile
+!/default.nix
 !/.envrc
 !/flake.nix
 !/flake.lock
 !/go.work
-!/profile
+!/static
+!/generated
 !/nix
 !/notes
 !/tests

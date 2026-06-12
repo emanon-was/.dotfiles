@@ -1,26 +1,28 @@
 .PHONY: init clean build check
 
-# profile を $HOME へ展開する。
+# static/ と generated/ を $HOME へ展開する。
 init:
-	./profile/.local/bin/symsync apply --src profile --dest "$(HOME)"
+	./generated/.local/bin/symsync apply --src static --dest "$(HOME)"
+	./generated/.local/bin/symsync apply --src generated --dest "$(HOME)"
 
-# profile で展開した symlink を外す。
+# static/ と generated/ で展開した symlink を外す。
 clean:
-	./profile/.local/bin/symsync unapply --src profile --dest "$(HOME)"
+	./generated/.local/bin/symsync unapply --src generated --dest "$(HOME)"
+	./generated/.local/bin/symsync unapply --src static --dest "$(HOME)"
 
 # 主要な非破壊チェックをまとめて実行する。
 check:
 	nix flake check --impure
 
-# profile/ を Nix build の成果物で再生成する。
+# generated/ を Nix build の成果物で再生成する。
 build:
 	@set -e; \
-	out="$$(nix build .#dotfiles-profile --no-link --print-out-paths)"; \
-	tmp_profile=".profile.tmp.$$$$"; \
-	rm -rf "$$tmp_profile"; \
-	trap 'rm -rf "$$tmp_profile"' EXIT; \
-	cp -R "$$out" "$$tmp_profile"; \
-	chmod -R u+w profile 2>/dev/null || true; \
-	rm -rf profile; \
-	mv "$$tmp_profile" profile; \
+	out="$$(nix build .#dotfiles-generated --no-link --print-out-paths)"; \
+	tmp_generated=".generated.tmp.$$$$"; \
+	rm -rf "$$tmp_generated"; \
+	trap 'rm -rf "$$tmp_generated"' EXIT; \
+	cp -R "$$out" "$$tmp_generated"; \
+	chmod -R u+w generated 2>/dev/null || true; \
+	rm -rf generated; \
+	mv "$$tmp_generated" generated; \
 	trap - EXIT
