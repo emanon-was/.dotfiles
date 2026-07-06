@@ -51,6 +51,9 @@
 ## Home Manager
 
 - root の `flake.nix` は `homeConfigurations.default` を出力する。
+- root の `flake.nix` は `builtins.currentSystem` を使い、評価している host system 向けの packages / checks / devShells / apps を出力する。
+- この flake は個人 dotfiles 用で、Home Manager 設定も実行環境の `USER` と `HOME` を読む `--impure` 前提である。そのため、複数 system を明示列挙するより、実行 host の system に合わせる単純な構成を採用する。
+- cross build や pure flake としての利用は現在の目的に含めない。
 - Home Manager flake は `USER` と `HOME` から username と home directory を決める。
 - Home Manager flake は `--impure` 前提で使い、実環境の `USER` と `HOME` を読む。
 - `USER` または `HOME` が空の場合、Home Manager flake は評価エラーにする。
@@ -102,7 +105,7 @@
 
 ## Development Shell
 
-- `devShells.x86_64-linux.default` は Go 開発用に `go` と `gopls` を提供する。
+- `devShells.<current system>.default` は Go 開発用に `go` と `gopls` を提供する。
 - repository root の `go.work` は `nix/dotfiles/src` と `nix/symsync/src` を workspace として扱う。
 
 ## Makefile
@@ -110,7 +113,7 @@
 - root `Makefile` は repo の検証、ビルド、生成用。
 - `make build` は `generated/` を再生成する。
 - `make check` は `nix flake check --impure` を実行する。
-- `nix flake check --impure` は `checks.x86_64-linux.dotfiles-tests` を実行し、Nix sandbox 内で `dotfiles` / `symsync` の Go test と generated 成果物の smoke check を行う。
+- `nix flake check --impure` は `checks.<current system>.dotfiles-tests` を実行し、Nix sandbox 内で `dotfiles` / `symsync` の Go test と generated 成果物の smoke check を行う。
 
 ## 運用ルール
 

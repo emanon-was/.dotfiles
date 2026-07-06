@@ -6,12 +6,12 @@
 
 ## 未完了タスク
 
-- [ ] flake 出力を `x86_64-linux` 固定から複数 system 対応へ広げるか検討する。
+- なし。
 
 ## 注意点
 
 - ユーザーの未コミット変更を勝手に戻さない。
-- `profile/` の生成済み成果物を直接編集しない。
-- profile init / install / uninstall 系は、再実行しても既存の状態ファイルを空にしたり管理対象 entry を失ったりしないようにする。
+- `generated/` の生成済み成果物を直接編集しない。
+- `static/` / `generated/` の init / clean 系は、再実行しても既存の状態ファイルを空にしたり管理対象 entry を失ったりしないようにする。
 - `gsettings` や `doom install` のような副作用コマンドを自動処理に入れない。
 - Home Manager の build / switch に重いネットワーク処理を混ぜない。

@@ -1,5 +1,5 @@
 {
-  description = "Dotfiles packages and profile artifacts";
+  description = "Dotfiles packages and generated artifacts";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -11,7 +11,7 @@
 
   outputs = { self, nixpkgs, home-manager, ... }:
     let
-      system = "x86_64-linux";
+      system = builtins.currentSystem;
       pkgs = import nixpkgs {
         inherit system;
         config.allowUnfree = true;

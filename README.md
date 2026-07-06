@@ -96,6 +96,48 @@ build された成果物には `activate` script が入っています。
 
 この Home Manager 設定は package 管理を中心にし、dotfiles の file/symlink 配置は `static/`、`generated/`、`symsync` に任せます。`home.file` などで同じ path を管理すると conflict の原因になります。
 
+### Home Manager の無効化
+
+Home Manager で有効にした package や option を外す場合は、`home.nix` から該当項目を削除してから再度 switch します。
+
+```sh
+home-manager --impure --flake "$HOME/.dotfiles#default" switch
+```
+
+または:
+
+```sh
+dotfiles flake switch
+```
+
+Home Manager は世代管理なので、直前の状態に戻したい場合は generation を確認し、戻したい generation の `activate` を実行します。
+
+```sh
+home-manager generations
+/nix/store/...-home-manager-generation/activate
+```
+
+古い generation が不要になったら、必要に応じて削除します。
+
+```sh
+home-manager expire-generations '-30 days'
+```
+
+Home Manager 管理自体をこの user から外したい場合は、Home Manager の uninstall command を使います。
+
+```sh
+home-manager uninstall
+```
+
+古い導入方法や手動 cleanup で user profile に `home-manager-path` が残っている場合は、Nix profile から削除します。
+
+```sh
+nix-env -q
+nix-env -e home-manager-path
+```
+
+`make clean` は `static/` と `generated/` の symlink を外すだけで、Home Manager の package や generation は変更しません。
+
 ## ドキュメント
 
 - [SPEC.md](./SPEC.md): 現在仕様

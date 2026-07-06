@@ -17,4 +17,4 @@
 
 ## マイルストーン候補
 
-- profile 直下を `$HOME` へ symlink する layout は単純だが、`profile/` 自体に README や metadata を置きにくい。将来 metadata が必要になった場合は、管理対象外にする場所を別途決める。
+- なし。

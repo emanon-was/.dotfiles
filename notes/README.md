@@ -12,12 +12,12 @@ Home Manager 管理対象ではない個人メモ置き場です。
 
 正式に管理したい設定に昇格する場合は、対応する生成元へ移動します。
 
-- dotfiles: `nix/etc/`
-- command: `nix/bin/scripts/`
+- dotfiles: `static/`
+- command: `static/.local/bin/`
 
-ここに置いたファイルは `make build` で生成する `profile/` にも含めません。
+ここに置いたファイルは `static/` / `generated/` にも含めません。
 
-配布用 profile に含めたい内容にする場合は、notes ではなく `nix/etc/` などの生成対象へ移します。
+管理対象に含めたい内容にする場合は、notes ではなく `static/` などの生成対象へ移します。
 
 ## 現在の内容
 

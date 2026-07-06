@@ -12,7 +12,8 @@ clean:
 
 # 主要な非破壊チェックをまとめて実行する。
 check:
-	nix flake check --impure
+	mkdir -p .cache/nix
+	XDG_CACHE_HOME="$(CURDIR)/.cache" nix flake check --impure
 
 # generated/ を Nix build の成果物で再生成する。
 build:
