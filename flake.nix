@@ -62,6 +62,7 @@
               bash
               coreutils
               go
+              gnumake
               gnugrep
             ];
           }
@@ -83,6 +84,27 @@
             test -x ${self.outPath}/static/.local/bin/dotfiles-flake
             test -x ${self.outPath}/static/.local/bin/dotfiles-configure-doom
             test -x ${self.outPath}/static/.local/bin/dotfiles-configure-gnome
+
+            mkdir -p "$TMPDIR/build-test/bin" "$TMPDIR/build-test/fixture" "$TMPDIR/build-test/generated"
+            touch "$TMPDIR/build-test/generated/original"
+            printf '%s\n' '#!${pkgs.runtimeShell}' 'printf "%s\n" "$TMPDIR/build-test/fixture"' > "$TMPDIR/build-test/bin/nix"
+            printf '%s\n' '#!${pkgs.runtimeShell}' \
+              'if [ ! -e "$TMPDIR/build-test/moved" ]; then' \
+              '  touch "$TMPDIR/build-test/moved"' \
+              '  exec ${pkgs.coreutils}/bin/mv "$@"' \
+              'fi' \
+              'if [ ! -e "$TMPDIR/build-test/failed" ] && [ "$2" = generated ]; then' \
+              '  touch "$TMPDIR/build-test/failed"' \
+              '  exit 1' \
+              'fi' \
+              'exec ${pkgs.coreutils}/bin/mv "$@"' > "$TMPDIR/build-test/bin/mv"
+            chmod +x "$TMPDIR/build-test/bin/nix" "$TMPDIR/build-test/bin/mv"
+            if cd "$TMPDIR/build-test" && PATH="$TMPDIR/build-test/bin:$PATH" make -f ${self.outPath}/Makefile build; then
+              printf 'error: make build unexpectedly succeeded when replacement failed\n' >&2
+              exit 1
+            fi
+            test -e "$TMPDIR/build-test/generated/original"
+            test -z "$(find "$TMPDIR/build-test" -maxdepth 1 \( -name '.generated.tmp.*' -o -name '.generated.old.*' \) -print -quit)"
             touch "$out"
           '';
       };

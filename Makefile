@@ -20,10 +20,11 @@ build:
 	@set -e; \
 	out="$$(nix build .#dotfiles-generated --no-link --print-out-paths)"; \
 	tmp_generated=".generated.tmp.$$$$"; \
-	rm -rf "$$tmp_generated"; \
-	trap 'rm -rf "$$tmp_generated"' EXIT; \
+	old_generated=".generated.old.$$$$"; \
+	rm -rf "$$tmp_generated" "$$old_generated"; \
+	trap 'rm -rf "$$tmp_generated"; if [ -e "$$old_generated" ] && [ ! -e generated ]; then mv "$$old_generated" generated; fi' EXIT; \
 	cp -R "$$out" "$$tmp_generated"; \
-	chmod -R u+w generated 2>/dev/null || true; \
-	rm -rf generated; \
+	if [ -e generated ]; then mv generated "$$old_generated"; fi; \
 	mv "$$tmp_generated" generated; \
+	if [ -e "$$old_generated" ]; then chmod -R u+w "$$old_generated"; rm -rf "$$old_generated"; fi; \
 	trap - EXIT

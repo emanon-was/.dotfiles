@@ -112,6 +112,7 @@
 
 - root `Makefile` は repo の検証、ビルド、生成用。
 - `make build` は `generated/` を再生成する。
+- `make build` は新しい成果物を準備してから既存の `generated/` を置換し、置換に失敗した場合は既存成果物を復元する。
 - `make check` は `nix flake check --impure` を実行する。
 - `nix flake check --impure` は `checks.<current system>.dotfiles-tests` を実行し、Nix sandbox 内で `dotfiles` / `symsync` の Go test と generated 成果物の smoke check を行う。
 
