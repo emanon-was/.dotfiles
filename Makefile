@@ -1,5 +1,7 @@
 .PHONY: init clean build check
 
+NIX_CACHE_HOME ?= $(CURDIR)/.cache
+
 # static/ と generated/ を $HOME へ展開する。
 init:
 	./generated/.local/bin/symsync apply --src static --dest "$(HOME)"
@@ -12,13 +14,14 @@ clean:
 
 # 主要な非破壊チェックをまとめて実行する。
 check:
-	mkdir -p .cache/nix
-	XDG_CACHE_HOME="$(CURDIR)/.cache" nix flake check --impure
+	mkdir -p "$(NIX_CACHE_HOME)/nix"
+	XDG_CACHE_HOME="$(NIX_CACHE_HOME)" nix flake check --impure
 
 # generated/ を Nix build の成果物で再生成する。
 build:
 	@set -e; \
-	out="$$(nix build .#dotfiles-generated --no-link --print-out-paths)"; \
+	mkdir -p "$(NIX_CACHE_HOME)/nix"; \
+	out="$$(XDG_CACHE_HOME="$(NIX_CACHE_HOME)" nix build --impure .#dotfiles-generated --no-link --print-out-paths)"; \
 	tmp_generated=".generated.tmp.$$$$"; \
 	old_generated=".generated.old.$$$$"; \
 	rm -rf "$$tmp_generated" "$$old_generated"; \

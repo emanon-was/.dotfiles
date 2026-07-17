@@ -63,7 +63,6 @@
               coreutils
               go
               gnumake
-              gnugrep
             ];
           }
           ''
@@ -81,9 +80,6 @@
             test -f ${dotfilesGenerated}/.local/share/zsh/site-functions/_dotfiles
             test -f ${dotfilesGenerated}/.local/share/zsh/site-functions/_symsync
             test -f ${dotfilesGenerated}/.local/share/dotfiles/.keep
-            test -x ${self.outPath}/static/.local/bin/dotfiles-flake
-            test -x ${self.outPath}/static/.local/bin/dotfiles-configure-doom
-            test -x ${self.outPath}/static/.local/bin/dotfiles-configure-gnome
 
             mkdir -p "$TMPDIR/build-test/bin" "$TMPDIR/build-test/fixture" "$TMPDIR/build-test/generated"
             touch "$TMPDIR/build-test/generated/original"
