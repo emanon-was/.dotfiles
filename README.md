@@ -46,7 +46,7 @@ dotfiles flake --help
 
 `DOTFILES_HOME` には検出した repository root または local root が入ります。repository root は `flake.nix`、`home.nix`、`nix/` がある directory、local root は `.local/bin` と `.local/share/dotfiles` がある directory です。
 
-`dotfiles flake` は、この repository の root flake に対する操作を短く呼ぶための便利 command です。`dotfiles flake build` は `generated/` を再生成します。Home Manager 自体は通常の `nix` / `home-manager` command でも使えます。
+`dotfiles flake` は、この repository の root flake に対する操作を `--impure` 付きで短く呼ぶための便利 command です。`dotfiles flake build` は `generated/` を再生成します。Home Manager 自体は通常の `nix` / `home-manager` command でも使えます。
 
 ## アンインストール
 
@@ -154,7 +154,7 @@ nix-env -e home-manager-path
 build と検証には Nix を使います。Go の開発ツールは flake の dev shell で提供します。
 
 ```sh
-nix develop
+nix develop --impure
 gopls version
 ```
 

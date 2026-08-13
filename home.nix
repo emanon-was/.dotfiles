@@ -24,6 +24,7 @@
       pkgs.screen
       pkgs.tmux
       pkgs.zellij
+      pkgs.herdr
 
       # AI coding tools
       pkgs.codex

@@ -1,0 +1,7 @@
+onboarding = false
+
+[keys]
+prefix = "ctrl+z"
+
+[ui]
+agent_panel_sort = "spaces"

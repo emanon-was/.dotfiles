@@ -45,11 +45,14 @@
 - bash は `~/.local/share/bash-completion/completions` 配下の completion を読み込む。
 - zsh は `compinit` 前に `~/.local/share/zsh/site-functions` を `fpath` に追加する。
 - Doom Emacs の設定は `static/.config/doom/` を生成元にする。
+- Herdr の prefix key は `C-z` とし、`static/.config/herdr/config.toml` で管理する。
 - Emacs package は terminal 用の `emacs-nox` を使う。
 - shell の `emacs` alias は起動時に判定し、`emacs-nox` の場合は alias しない。それ以外の Emacs では `emacs -nw` にする。
 
 ## Home Manager
 
+- Nixpkgs は常に `nixos-unstable` を使い、Home Manager が管理する package もこの Nixpkgs から取得する。
+- Home Manager 自体は `master` branch を使い、その Nixpkgs input は root の `nixpkgs` に追従させる。
 - root の `flake.nix` は `homeConfigurations.default` を出力する。
 - root の `flake.nix` は `builtins.currentSystem` を使い、評価している host system 向けの packages / checks / devShells / apps を出力する。
 - この flake は個人 dotfiles 用で、Home Manager 設定も実行環境の `USER` と `HOME` を読む `--impure` 前提である。そのため、複数 system を明示列挙するより、実行 host の system に合わせる単純な構成を採用する。
@@ -67,6 +70,7 @@
 - `dotfiles <name>` は、同じ directory または PATH 上の `dotfiles-<name>` を実行する。
 - `dotfiles configure` は `dotfiles-configure-<command>` を呼ぶ dispatcher とする。
 - shell script subcommand は `static/.local/bin/` に置く。
+- `dotfiles-flake` の Nix flake 操作はすべて `--impure` 付きで実行する。
 - `dotfiles-flake build` は root flake の `dotfiles-generated` package から `generated/` を再生成する。
 - `dotfiles-flake switch` は root flake の Home Manager activation package を build して activate する。
 - `dotfiles-flake update` は root flake の `flake.lock` を更新する。
@@ -106,6 +110,7 @@
 ## Development Shell
 
 - `devShells.<current system>.default` は Go 開発用に `go` と `gopls` を提供する。
+- `.envrc` は `use flake --impure` で development shell を読み込む。
 - repository root の `go.work` は `nix/dotfiles/src` と `nix/symsync/src` を workspace として扱う。
 
 ## Makefile

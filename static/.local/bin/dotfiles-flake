@@ -27,7 +27,8 @@ Usage:
   dotfiles flake update
 
 Description:
-  check   dotfiles root flake の flake check を --impure 付きで実行します。
+  すべての Nix flake 操作を --impure 付きで実行します。
+  check   dotfiles root flake の flake check を実行します。
   build   generated/ を Nix build の成果物で再生成します。
   switch  Home Manager activation package を build して activate します。
   update  dotfiles root flake の flake.lock を更新します。
@@ -81,7 +82,7 @@ flake_build() {
 
   generated="$HOME_MANAGER_ROOT/generated"
   tmp_generated="$HOME_MANAGER_ROOT/.generated.tmp.$$"
-  out="$(nix build "$HOME_MANAGER_ROOT#dotfiles-generated" --no-link --print-out-paths)"
+  out="$(nix build --impure "$HOME_MANAGER_ROOT#dotfiles-generated" --no-link --print-out-paths)"
 
   rm -rf "$tmp_generated"
   trap 'rm -rf "$tmp_generated"' EXIT
@@ -105,7 +106,7 @@ flake_update() {
   have nix || fail "nix is not available"
   require_home_manager_root
   prepare_nix_cache
-  nix flake update --flake "$HOME_MANAGER_ROOT"
+  nix flake update --impure --flake "$HOME_MANAGER_ROOT"
 }
 
 case "${1:-}" in
