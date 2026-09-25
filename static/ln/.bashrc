@@ -1,6 +1,9 @@
 # interactive shell でだけ適用する設定。
 [[ $- == *i* ]] || return
 
+# コマンドライン編集は Emacs キーバインドを使う。
+set -o emacs
+
 # 共通環境変数と session env の断片。
 dotfiles_profile_dir="$HOME/.profile.d"
 if [ -d "$dotfiles_profile_dir" ]; then

@@ -76,6 +76,7 @@ Doom Emacs の GUI 版は標準の連携を使います。クリップボード�
 - Herdr のサイドバーは、起動時に最小表示になります。
 - Zellij は復元用セッションを保存せず、スクロール履歴エディタに Vim を使います。
 - 共通の環境変数は `static/ln/.profile.d/env.sh`、シェル別の設定は `.bashrc` / `.zshrc` に置きます。
+- bash / zsh は Emacs キーバインドを使用します。
 - 外部エディターは `EDITOR=vim` / `VISUAL=vim` に設定しています。Codex の `Ctrl+G` でも Vim が開きます。変更前から開いているシェルでは `source ~/.profile.d/env.sh` を実行し、Codex を起動し直してください。
 - direnv の `use flake` / `use nix` は、読み込み前の `$SHELL` を保持します。nix-direnv を使う場合は、その読み込み後にこのリポジトリの `direnvrc` を読み込んでください。
 

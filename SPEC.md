@@ -102,6 +102,8 @@ shell subcommand は `static/ln/.local/bin/` に置く任意の拡張とする�
 - session 環境変数は `.profile.d/*.sh` に置き、`.bashrc` / `.zshrc` から読み込む。共通設定の `.profile.d/env.sh` は PATH entry を重複させない。
 - bash login shell は `.bash_profile` から `.bashrc` を読み込む。zsh login shell は `.zprofile` のあと `.zshrc` を読み込む。
 - bash / zsh の共通 alias は `.config/shell/aliases.sh` に集約する。
+- zsh は `.zshrc` の `bindkey -e` で Emacs キーバインドに固定し、`EDITOR` / `VISUAL` が Vim でも `Ctrl-r` で履歴検索できるようにする。
+- bash は `.bashrc` の `set -o emacs` で Emacs キーバインドに固定する。
 - `generated/` から配置する補完を使うため、bash は `~/.local/share/bash-completion/completions` を読み込む。zsh は `compinit` 前に `~/.local/share/zsh/site-functions` を `fpath` に追加する。
 - `.config/direnv/direnvrc` は `use flake` / `use nix` の前後で元の `$SHELL` を保持し、他の開発環境変数は通常どおり取り込む。nix-direnv と併用する場合は、その読み込み後にこの設定を読み込む。
 

@@ -1,5 +1,8 @@
 typeset -U path cdpath fpath manpath
 
+# EDITOR / VISUAL によらず Emacs キーバインドを使う。
+bindkey -e
+
 # 共通環境変数と session env の断片。
 dotfiles_profile_dir="$HOME/.profile.d"
 if [ -d "$dotfiles_profile_dir" ]; then
