@@ -48,13 +48,15 @@
 - bash は `~/.local/share/bash-completion/completions` 配下の completion を読み込む。
 - zsh は `compinit` 前に `~/.local/share/zsh/site-functions` を `fpath` に追加する。
 - Doom Emacs の設定は `static/ln/.config/doom/` を生成元にする。
+- Doom Emacs の端末 frame は、利用可能な環境変数とコマンドから WSL (`clip.exe` / `powershell.exe`)、macOS (`pbcopy` / `pbpaste`)、Wayland (`wl-copy` / `wl-paste`)、X11 (`xclip`) の順に clipboard 連携を選ぶ。Emacs の selection backend を通して通常の kill / yank と Evil の `y` / `p`、`+` / `*` register をシステム clipboard に接続する。WSL のコピーは UTF-16LE、読み取りは UTF-8 と CRLF 変換を使う。GUI frame と利用可能な外部コマンドがない環境は標準 backend を使う。
 - Herdr の prefix key は `C-z` とし、`static/ln/.config/herdr/config.toml` で管理する。
 - Zellij は `static/ln/.config/zellij/config.kdl` で `session_serialization false` を指定し、終了後の復元用セッションを保存しない。
+- Zellij のスクロール履歴エディタは `scrollback_editor "vim"` で指定し、PATH 上の Vim を使う。
+- Vim は `static/ln/.config/vim/vimrc` に Vim9script で設定する。clipboard provider 機能がある場合、利用可能なコマンドと環境変数から WSL (`WSL_DISTRO_NAME` と `clip.exe` / `powershell.exe` / `iconv`)、macOS (`pbcopy` / `pbpaste`)、Wayland (`WAYLAND_DISPLAY` と `wl-copy` / `wl-paste`)、X11 (`DISPLAY` と `xclip`) の順に連携方法を選ぶ。WSL のコピーは UTF-16LE、貼り付けは UTF-8 を使う。貼り付け時は CRLF を LF に変換する。provider または Vim 組み込みの clipboard 機能が使える場合、`unnamedplus` により通常の yank / delete / change / put をシステム clipboard と連携する。外部 provider の `+` / `*` register は同じシステム clipboard を使う。
 - Codex のグローバル指示は `static/ln/.codex/`、共通のNix開発環境は `static/cp/.codex/flake.nix` で管理する。Codex用の `flake.lock`、認証情報、履歴、セッション、キャッシュは管理対象に含めない。
 - ユーザー共通の Codex Skill は `static/cp/.agents/skills/` で管理し、通常fileとして配置する。
 - Codex の外部ツールの実行許可ルールは `static/cp/.codex/rules/external-tools.rules` で管理し、`zellij` / `herdr` / `nix build` / `nix flake check` / `nix flake metadata` を確認なしで実行できるようにする。
 - Zellij のセッション、タブ、ペインを安全に操作する Skill は `static/cp/.agents/skills/zellij/` に置く。
-- Zellij Skill は Zellij が明示された依頼に適用し、端末操作は Zellij 内から行う。既定では現在のタブと作業ディレクトリを維持してフォーカスを奪わずにペインを作成し、実際の CLI とペイン ID・状態を確認する。失敗やタイムアウト後は実行状況を確認してから再試行する。
 - Emacs package は terminal 用の `emacs-nox` を使う。
 - shell の `emacs` alias は起動時に判定し、`emacs-nox` の場合は alias しない。それ以外の Emacs では `emacs -nw` にする。
 
@@ -63,6 +65,8 @@
 - Nixpkgs は `NIX_PATH` の `<nixpkgs>` から取得する。
 - Home Manager 自体は同じ Nixpkgs に含まれる `pkgs.home-manager` の source を使う。
 - Home Manager が管理する package には同じ `<nixpkgs>` から作った `pkgs` を渡す。
+- Home Manager は `pkgs.vim` を導入し、Zellij のスクロール履歴エディタとして利用できるようにする。
+- Linux では Vim / Doom Emacs の clipboard 連携用に `pkgs.wl-clipboard` と `pkgs.xclip` を導入する。
 - root の `flake.nix` は `homeConfigurations.default` を出力する。
 - root の `flake.nix` は `builtins.currentSystem` を使い、評価している host system 向けの packages / checks / devShells / apps を出力する。
 - この flake は個人 dotfiles 用で、Home Manager 設定も実行環境の `USER` と `HOME` を読む `--impure` 前提である。そのため、複数 system を明示列挙するより、実行 host の system に合わせる単純な構成を採用する。

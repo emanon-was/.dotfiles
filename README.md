@@ -26,13 +26,17 @@ Home Manager 設定は repository root の `home.nix` と `flake.nix` で管理�
 
 Codex のグローバル指示は `static/ln/.codex/`、共通のNix開発環境は `static/cp/.codex/flake.nix` で管理します。`flake.lock`、認証情報、履歴、セッション、キャッシュなどの実行時データは管理しません。
 
-ユーザー共通の Codex Skill は `static/cp/.agents/skills/` で管理し、通常ファイルとして配置します。現在は Zellij のセッション、タブ、ペインを操作する `zellij` Skill を含みます。Zellij 内でエージェントを起動し、Zellij を使うことを明示して依頼してください。既定では現在のタブと作業ディレクトリを維持し、フォーカスを奪わずにコマンド用のペインを作成します。
+ユーザー共通の Codex Skill は `static/cp/.agents/skills/` で管理し、通常ファイルとして配置します。現在は Zellij のセッション、タブ、ペインを操作する `zellij` Skill を含みます。
 
 Codex の外部ツールの実行許可ルールは `static/cp/.codex/rules/external-tools.rules` で管理します。配置後に Codex を再起動すると、`zellij` / `herdr` / `nix build` / `nix flake check` / `nix flake metadata` の実行時の承認確認を省略できます。
 
 ## セットアップ
 
-Zellij は終了したセッションを一覧に残さないよう、復元用データの保存を無効にしています。設定は新しく起動するセッションから有効です。以前の設定で保存された `EXITED` セッションは `zellij delete-session <名前>` で削除できます。
+Doom Emacs の端末版でも WSL / macOS / Wayland / X11 のクリップボードを自動選択します。Evil の `y` / `p` と `"+y` / `"+p`、Emacs 標準の `M-w` / `C-w` / `C-y` が連携します。Linux 用ツールは Vim と共通で Home Manager が導入します。設定反映には Emacs を再起動してください（`doom sync` は不要）。GUI 版は標準のクリップボード連携を使います。
+
+Zellij は終了したセッションを一覧に残さないよう、復元用データの保存を無効にしています。
+
+Vim の `y` / `yy` / `"+y` はシステムのクリップボードへコピーし、`p` / `"+p` はそこから貼り付けます。通常の削除・変更もクリップボードを更新します。Vim9script と Vim の clipboard provider 機能を使い、WSL は `clip.exe` / `powershell.exe` / `iconv`、macOS は `pbcopy` / `pbpaste`、Linux は Wayland の `wl-copy` / `wl-paste` または X11 の `xclip` を自動選択します。Linux 用ツールは Home Manager で導入します。`make init` で `.config/vim/vimrc` を配置し、Home Manager の switch 後に Vim を開き直してください。連携先のない端末環境では自動連携しません。SSH 先では接続先のクリップボードが対象です。
 
 ```sh
 git clone https://github.com/emanon-was/.dotfiles.git "$HOME/.dotfiles"
@@ -164,7 +168,7 @@ nix-env -e home-manager-path
 
 build と検証には Nix を使います。Go の開発ツールは flake の dev shell で提供します。
 
-共通の `~/.config/direnv/direnvrc` は `use flake` / `use nix` を読み込む前の `$SHELL` を保持します。Zellij の shell path や各プロジェクトの devShell を変更する必要はありません。nix-direnv を使う場合は、その読み込み後にこの設定を読み込んでください。直接の `nix develop` / `nix-shell` は対象外です。すでに `$SHELL` が変わった環境を復元する処理ではないため、設定を配置したあと、通常のログイン環境から新しい Zellij セッションを起動してください。
+共通の `~/.config/direnv/direnvrc` は `use flake` / `use nix` を読み込む前の `$SHELL` を保持します。nix-direnv を使う場合は、その読み込み後にこの設定を読み込んでください。直接の `nix develop` / `nix-shell` は対象外です。すでに `$SHELL` が変わった環境を復元する処理は含みません。
 
 ```sh
 nix develop --impure

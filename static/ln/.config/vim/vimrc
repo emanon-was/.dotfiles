@@ -1,0 +1,56 @@
+vim9script
+
+source $VIMRUNTIME/defaults.vim
+
+var copy_command = ''
+var paste_command = ''
+if !empty($WSL_DISTRO_NAME)
+    && executable('clip.exe') && executable('powershell.exe') && executable('iconv')
+  copy_command = 'iconv -f UTF-8 -t UTF-16LE | clip.exe'
+  paste_command = 'powershell.exe -NoLogo -NoProfile -NonInteractive -Command '
+    .. shellescape('[Console]::OutputEncoding = [System.Text.Encoding]::UTF8; [Console]::Write((Get-Clipboard -Raw))')
+elseif executable('pbcopy') && executable('pbpaste')
+  copy_command = 'pbcopy'
+  paste_command = 'pbpaste'
+elseif !empty($WAYLAND_DISPLAY) && executable('wl-copy') && executable('wl-paste')
+  copy_command = 'wl-copy --type "text/plain;charset=utf-8"'
+  paste_command = 'wl-paste --no-newline --type text'
+elseif !empty($DISPLAY) && executable('xclip')
+  copy_command = 'xclip -selection clipboard -in'
+  paste_command = 'xclip -selection clipboard -out'
+endif
+
+if has('clipboard_provider') && !empty(copy_command)
+  def CopyClipboard(reg: string, regtype: string, lines: list<string>)
+    var text = join(lines, "\n") .. (regtype ==# 'V' ? "\n" : '')
+    silent system(copy_command, text)
+    if v:shell_error
+      echoerr 'System clipboard copy failed'
+    endif
+  enddef
+
+  def PasteClipboard(reg: string): list<any>
+    silent var text = system(paste_command)
+    if v:shell_error
+      echoerr 'System clipboard paste failed'
+      return []
+    endif
+    text = substitute(text, "\r\n", "\n", 'g')
+    var lines = split(text, "\n", 1)
+    if text =~# "\n$"
+      remove(lines, -1)
+      return ['V', lines]
+    endif
+    return ['v', lines]
+  enddef
+
+  v:clipproviders['system'] = {
+    copy: {'+': CopyClipboard, '*': CopyClipboard},
+    paste: {'+': PasteClipboard, '*': PasteClipboard},
+  }
+  set clipmethod^=system
+endif
+
+if has('clipboard') || (has('clipboard_provider') && !empty(copy_command))
+  set clipboard^=unnamedplus
+endif

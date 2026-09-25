@@ -78,6 +78,55 @@
 
 (setq select-enable-clipboard t)
 
+;; Terminal Emacs uses the host clipboard tools; graphical frames keep their
+;; native selection backend.  WSL takes precedence over WSLg's displays.
+(defvar dotfiles-clipboard-copy-command nil)
+(defvar dotfiles-clipboard-paste-command nil)
+(defvar dotfiles-clipboard-write-coding 'utf-8-unix)
+
+(cond
+ ((and (getenv "WSL_DISTRO_NAME")
+       (executable-find "clip.exe") (executable-find "powershell.exe"))
+  (setq dotfiles-clipboard-copy-command '("clip.exe")
+        dotfiles-clipboard-write-coding 'utf-16le-dos
+        dotfiles-clipboard-paste-command
+        '("powershell.exe" "-NoLogo" "-NoProfile" "-NonInteractive" "-Command"
+          "[Console]::OutputEncoding = [System.Text.Encoding]::UTF8; [Console]::Write((Get-Clipboard -Raw))")))
+ ((and (eq system-type 'darwin)
+       (executable-find "pbcopy") (executable-find "pbpaste"))
+  (setq dotfiles-clipboard-copy-command '("pbcopy")
+        dotfiles-clipboard-paste-command '("pbpaste")))
+ ((and (getenv "WAYLAND_DISPLAY")
+       (executable-find "wl-copy") (executable-find "wl-paste"))
+  (setq dotfiles-clipboard-copy-command '("wl-copy" "--type" "text/plain;charset=utf-8")
+        dotfiles-clipboard-paste-command '("wl-paste" "--no-newline" "--type" "text")))
+ ((and (getenv "DISPLAY") (executable-find "xclip"))
+  (setq dotfiles-clipboard-copy-command '("xclip" "-selection" "clipboard" "-in")
+        dotfiles-clipboard-paste-command '("xclip" "-selection" "clipboard" "-out"))))
+
+(cl-defmethod gui-backend-set-selection :around
+  (selection value &context (window-system nil))
+  (if (and dotfiles-clipboard-copy-command
+           (memq selection '(CLIPBOARD PRIMARY)) (stringp value))
+      (let ((coding-system-for-write dotfiles-clipboard-write-coding))
+        (unless (eq 0 (apply #'call-process-region value nil
+                             (car dotfiles-clipboard-copy-command) nil nil nil
+                             (cdr dotfiles-clipboard-copy-command)))
+          (error "System clipboard copy failed")))
+    (cl-call-next-method)))
+
+(cl-defmethod gui-backend-get-selection :around
+  (selection target-type &context (window-system nil))
+  (if (and dotfiles-clipboard-paste-command
+           (memq selection '(CLIPBOARD PRIMARY)))
+      (with-temp-buffer
+        (let ((coding-system-for-read 'utf-8-dos))
+          (when (eq 0 (apply #'call-process
+                             (car dotfiles-clipboard-paste-command) nil '(t nil) nil
+                             (cdr dotfiles-clipboard-paste-command)))
+            (buffer-string))))
+    (cl-call-next-method)))
+
 ;; n: normal
 ;; v: visual
 ;; i: insert
