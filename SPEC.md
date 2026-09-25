@@ -44,8 +44,9 @@
 
 ### 評価環境
 
-- root flake は input と `flake.lock` を持たず、`NIX_PATH` の `<nixpkgs>` を使う。
-- Home Manager は同じ Nixpkgs の `pkgs.home-manager` の source を使い、管理する package にも同じ `pkgs` を渡す。
+- root flake は `github:NixOS/nixpkgs/nixos-unstable` を input に宣言し、`flake.lock` を commit してリビジョンを固定する。Nixpkgs の取得元はシステムやユーザーの channel、`NIX_PATH` に依存しない。
+- lock の更新は明示的な操作で行い、生成物の再ビルドや Home Manager の適用とは分ける。
+- Home Manager は `github:nix-community/home-manager` を input に宣言し、`flake.lock` で固定する。Home Manager の Nixpkgs input は dotfiles の `nixpkgs` input に follows させ、管理する package にも同じ `pkgs` を渡す。
 - `builtins.currentSystem` により、実行 host 向けの packages / checks / devShells / apps を出力する。cross build や pure flake としての利用は対象外とする。
 - `homeConfigurations.default` は、実環境の `USER` と `HOME` から username と home directory を決める。`--impure` を前提とし、どちらかが空なら評価エラーにする。仮の既定値や固定の home path は使わない。
 - Home Manager activation package を直接 build する場合は、`result` symlink を作らず store path を使う。

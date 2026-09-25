@@ -1,15 +1,18 @@
 {
   description = "Dotfiles packages and generated artifacts";
 
-  outputs = { self }:
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+  inputs.home-manager = {
+    url = "github:nix-community/home-manager";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
+
+  outputs = { self, nixpkgs, home-manager }:
     let
       system = builtins.currentSystem;
-      pkgs = import <nixpkgs> {
+      pkgs = import nixpkgs {
         inherit system;
         config.allowUnfree = true;
-      };
-      homeManagerLib = import "${pkgs.home-manager.src}/lib" {
-        inherit (pkgs) lib;
       };
       requiredEnv = name:
         let
@@ -34,7 +37,7 @@
         default = dotfilesPackage;
       };
 
-      homeConfigurations.default = homeManagerLib.homeManagerConfiguration {
+      homeConfigurations.default = home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
         extraSpecialArgs = {
           inherit username homeDirectory;

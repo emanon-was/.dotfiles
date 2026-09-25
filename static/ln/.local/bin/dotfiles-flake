@@ -21,12 +21,14 @@ HOME_MANAGER_ROOT="$(default_home_manager_root)"
 usage_flake() {
   cat <<'USAGE'
 Usage:
+  dotfiles flake update
   dotfiles flake check
   dotfiles flake build
   dotfiles flake switch
 
 Description:
   すべての Nix flake 操作を --impure 付きで実行します。
+  update  dotfiles root flake の全 input を更新し、flake.lock に保存します。
   check   dotfiles root flake の flake check を実行します。
   build   generated/ を Nix build の成果物で再生成します。
   switch  Home Manager activation package を build して activate します。
@@ -58,6 +60,13 @@ prepare_nix_cache() {
 
 activation_package_ref() {
   printf '%s\n' "$HOME_MANAGER_ROOT#homeConfigurations.default.activationPackage"
+}
+
+flake_update() {
+  have nix || fail "nix is not available"
+  require_home_manager_root
+  prepare_nix_cache
+  nix flake update --impure --flake "$HOME_MANAGER_ROOT"
 }
 
 flake_check() {
@@ -102,6 +111,11 @@ flake_switch() {
 }
 
 case "${1:-}" in
+  update)
+    shift
+    [ "$#" -eq 0 ] || fail "unexpected argument for flake update: $1"
+    flake_update
+    ;;
   check)
     shift
     [ "$#" -eq 0 ] || fail "unexpected argument for flake check: $1"

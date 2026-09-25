@@ -6,7 +6,7 @@
 
 ## セットアップ
 
-Git、Make、flakes を使える Nix が必要です。Nixpkgs は `NIX_PATH` の `<nixpkgs>` を参照します。Home Manager も同じ Nixpkgs から取得するため、最初から `home-manager` コマンドが入っている必要はありません。
+Git、Make、flakes を使える Nix が必要です。Nixpkgs は root の `flake.nix` に宣言した `nixos-unstable` を使い、`flake.lock` でリビジョンを固定します。Home Manager も flake input として取得・固定し、同じ Nixpkgs を共有するため、最初から `home-manager` コマンドが入っている必要はありません。
 
 ### 1. 設定ファイルを配置する
 
@@ -36,7 +36,7 @@ nix build --impure .#homeConfigurations.default.activationPackage --no-link
 
 この操作はパッケージを導入し、Home Manager の設定を有効にします。完了後はシェルやエディタを開き直してください。`$HOME/.local/bin` に PATH が通っていれば、以後は `dotfiles` として実行できます。
 
-Home Manager は実行ユーザーの `USER` と `HOME` を使います。Nix を直接実行するときに `--impure` が必要なのはこのためです。ルートの flake は `flake.lock` を持たず、Nixpkgs channel の更新に追従します。
+Home Manager は実行ユーザーの `USER` と `HOME` を使います。Nix を直接実行するときに `--impure` が必要なのはこのためです。Nixpkgs と Home Manager はシステムやユーザーの channel に依存しません。更新する場合はリポジトリで `nix flake update` を実行し、`make build` と `make check` で確認して `flake.lock` と生成物を commit します。
 
 ## 設定を変更する
 
