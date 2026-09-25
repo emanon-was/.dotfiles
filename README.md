@@ -26,7 +26,7 @@ Home Manager 設定は repository root の `home.nix` と `flake.nix` で管理�
 
 Codex のグローバル指示は `static/ln/.codex/`、共通のNix開発環境は `static/cp/.codex/flake.nix` で管理します。`flake.lock`、認証情報、履歴、セッション、キャッシュなどの実行時データは管理しません。
 
-ユーザー共通の Codex Skill は `static/cp/.agents/skills/` で管理し、通常ファイルとして配置します。現在は Zellij のセッション、タブ、ペインを操作する `zellij` Skill を含みます。
+ユーザー共通の Codex Skill は `static/cp/.agents/skills/` で管理し、通常ファイルとして配置します。現在は Zellij のセッション、タブ、ペインを操作する `zellij` Skill を含みます。Zellij 内でエージェントを起動し、Zellij を使うことを明示して依頼してください。既定では現在のタブと作業ディレクトリを維持し、フォーカスを奪わずにコマンド用のペインを作成します。
 
 Codex の外部ツールの実行許可ルールは `static/cp/.codex/rules/external-tools.rules` で管理します。配置後に Codex を再起動すると、`zellij` / `herdr` / `nix build` / `nix flake check` / `nix flake metadata` の実行時の承認確認を省略できます。
 

@@ -54,6 +54,7 @@
 - ユーザー共通の Codex Skill は `static/cp/.agents/skills/` で管理し、通常fileとして配置する。
 - Codex の外部ツールの実行許可ルールは `static/cp/.codex/rules/external-tools.rules` で管理し、`zellij` / `herdr` / `nix build` / `nix flake check` / `nix flake metadata` を確認なしで実行できるようにする。
 - Zellij のセッション、タブ、ペインを安全に操作する Skill は `static/cp/.agents/skills/zellij/` に置く。
+- Zellij Skill は Zellij が明示された依頼に適用し、端末操作は Zellij 内から行う。既定では現在のタブと作業ディレクトリを維持してフォーカスを奪わずにペインを作成し、実際の CLI とペイン ID・状態を確認する。失敗やタイムアウト後は実行状況を確認してから再試行する。
 - Emacs package は terminal 用の `emacs-nox` を使う。
 - shell の `emacs` alias は起動時に判定し、`emacs-nox` の場合は alias しない。それ以外の Emacs では `emacs -nw` にする。
 
