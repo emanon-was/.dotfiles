@@ -38,6 +38,7 @@
 - 共通環境変数は `static/ln/.profile.d/env.sh` に置く。
 - session env の断片は `static/ln/.profile.d/*.sh` に置き、`.bashrc` / `.zshrc` から読み込む。
 - `.profile.d/env.sh` は PATH entry を重複させないように追加する。
+- `static/ln/.config/direnv/direnvrc` は `use flake` / `use nix` の前後で元の `$SHELL` を保持し、他の開発環境変数は通常どおり取り込む。nix-direnv を使う場合は、その読み込み後にこの設定を読み込む。
 - zsh login shell は `.zprofile` のあと `.zshrc` を読み込む。
 - bash login shell は `.bash_profile` から `.bashrc` を読み込む。
 - bash と zsh の共通 alias は `static/ln/.config/shell/aliases.sh` に置く。
@@ -48,6 +49,7 @@
 - zsh は `compinit` 前に `~/.local/share/zsh/site-functions` を `fpath` に追加する。
 - Doom Emacs の設定は `static/ln/.config/doom/` を生成元にする。
 - Herdr の prefix key は `C-z` とし、`static/ln/.config/herdr/config.toml` で管理する。
+- Zellij は `static/ln/.config/zellij/config.kdl` で `session_serialization false` を指定し、終了後の復元用セッションを保存しない。
 - Codex のグローバル指示は `static/ln/.codex/`、共通のNix開発環境は `static/cp/.codex/flake.nix` で管理する。Codex用の `flake.lock`、認証情報、履歴、セッション、キャッシュは管理対象に含めない。
 - ユーザー共通の Codex Skill は `static/cp/.agents/skills/` で管理し、通常fileとして配置する。
 - Codex の外部ツールの実行許可ルールは `static/cp/.codex/rules/external-tools.rules` で管理し、`zellij` / `herdr` / `nix build` / `nix flake check` / `nix flake metadata` を確認なしで実行できるようにする。

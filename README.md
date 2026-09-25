@@ -32,6 +32,8 @@ Codex の外部ツールの実行許可ルールは `static/cp/.codex/rules/exte
 
 ## セットアップ
 
+Zellij は終了したセッションを一覧に残さないよう、復元用データの保存を無効にしています。設定は新しく起動するセッションから有効です。以前の設定で保存された `EXITED` セッションは `zellij delete-session <名前>` で削除できます。
+
 ```sh
 git clone https://github.com/emanon-was/.dotfiles.git "$HOME/.dotfiles"
 cd "$HOME/.dotfiles"
@@ -161,6 +163,8 @@ nix-env -e home-manager-path
 ## 開発
 
 build と検証には Nix を使います。Go の開発ツールは flake の dev shell で提供します。
+
+共通の `~/.config/direnv/direnvrc` は `use flake` / `use nix` を読み込む前の `$SHELL` を保持します。Zellij の shell path や各プロジェクトの devShell を変更する必要はありません。nix-direnv を使う場合は、その読み込み後にこの設定を読み込んでください。直接の `nix develop` / `nix-shell` は対象外です。すでに `$SHELL` が変わった環境を復元する処理ではないため、設定を配置したあと、通常のログイン環境から新しい Zellij セッションを起動してください。
 
 ```sh
 nix develop --impure

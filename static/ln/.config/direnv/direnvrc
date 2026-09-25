@@ -1,0 +1,14 @@
+# nix-direnv を使う場合は、その読み込みより後に置く。
+# 元の実装を使い、SHELL の変更だけを関数内に限定する。
+eval "$(declare -f use_flake | sed '1s/use_flake/_dotfiles_original_use_flake/')"
+eval "$(declare -f use_nix | sed '1s/use_nix/_dotfiles_original_use_nix/')"
+
+use_flake() {
+  local SHELL="${SHELL-}"
+  _dotfiles_original_use_flake "$@"
+}
+
+use_nix() {
+  local SHELL="${SHELL-}"
+  _dotfiles_original_use_nix "$@"
+}
