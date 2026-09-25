@@ -139,3 +139,5 @@ WSL のコピーは UTF-16LE、読み取りは UTF-8 を使い、貼り付け時
 | 外部ツールの実行許可 | `static/cp/.codex/rules/external-tools.rules` |
 
 個別の Skill や許可コマンドは各設定ファイルで管理する。Codex 用の `flake.lock`、認証情報、履歴、セッション、キャッシュは管理対象に含めない。
+
+Codex の作業環境自動作成ルールは `/etc/nixos` 以下を例外とする。システム設定への作業用 flake・direnv 設定の追加を避け、作業ツールは Codex の共通開発環境で管理する。
