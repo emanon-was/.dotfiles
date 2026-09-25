@@ -1,0 +1,5 @@
+prefix_rule(pattern=["zellij"], decision="allow")
+prefix_rule(pattern=["herdr"], decision="allow")
+prefix_rule(pattern=["nix", "build"], decision="allow")
+prefix_rule(pattern=["nix", "flake", "check"], decision="allow")
+prefix_rule(pattern=["nix", "flake", "metadata"], decision="allow")

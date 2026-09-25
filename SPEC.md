@@ -50,6 +50,7 @@
 - Herdr の prefix key は `C-z` とし、`static/ln/.config/herdr/config.toml` で管理する。
 - Codex のグローバル指示は `static/ln/.codex/`、共通のNix開発環境は `static/cp/.codex/flake.nix` で管理する。Codex用の `flake.lock`、認証情報、履歴、セッション、キャッシュは管理対象に含めない。
 - ユーザー共通の Codex Skill は `static/cp/.agents/skills/` で管理し、通常fileとして配置する。
+- Codex の外部ツールの実行許可ルールは `static/cp/.codex/rules/external-tools.rules` で管理し、`zellij` / `herdr` / `nix build` / `nix flake check` / `nix flake metadata` を確認なしで実行できるようにする。
 - Zellij のセッション、タブ、ペインを安全に操作する Skill は `static/cp/.agents/skills/zellij/` に置く。
 - Emacs package は terminal 用の `emacs-nox` を使う。
 - shell の `emacs` alias は起動時に判定し、`emacs-nox` の場合は alias しない。それ以外の Emacs では `emacs -nw` にする。
