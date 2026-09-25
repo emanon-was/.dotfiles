@@ -1,42 +1,14 @@
 # .dotfiles
 
-自分用の dotfiles 管理リポジトリです。
+シェル、エディタ、ターミナルなどの設定と、普段使うパッケージを管理する個人用リポジトリです。
 
-`static/ln/` と `generated/` は `$HOME` へ symlink 展開し、`static/cp/` は file copy で展開します。`static/` は手で編集する dotfiles source、`generated/` は Nix build で生成する command / completion です。
-
-Home Manager 設定は repository root の `home.nix` と `flake.nix` で管理します。dotfiles の file/symlink 配置は `static/`、`generated/`、`dotfiles-ln`、`dotfiles-cp` に任せ、Home Manager は package 管理を中心に使います。
-
-## ディレクトリ構成
-
-```text
-.
-├── Makefile        # 初期化、アンインストール、ビルド、検証の入口
-├── default.nix     # generated/ 生成 package
-├── flake.nix       # パッケージ、generated 生成、検証の入口
-├── home.nix        # Home Manager 設定
-├── static/         # ln/ と cp/ に分けた手書き dotfiles
-├── generated/      # Nix build 済み command / completion
-├── nix/            # dotfiles / dotfiles-ln / dotfiles-cp package 生成元
-├── notes/          # 管理対象外のメモや作業用断片
-├── SPEC.md         # 現在仕様
-└── TASKS.md        # 未完了タスク
-```
-
-`static/ln/` と `static/cp/` は、それぞれ `$HOME` layout を直接編集します。`generated/` は `make build` または `dotfiles flake build` で再生成される成果物なので直接編集しません。
-
-Codex のグローバル指示は `static/ln/.codex/`、共通のNix開発環境は `static/cp/.codex/flake.nix` で管理します。`flake.lock`、認証情報、履歴、セッション、キャッシュなどの実行時データは管理しません。
-
-ユーザー共通の Codex Skill は `static/cp/.agents/skills/` で管理し、通常ファイルとして配置します。現在は Zellij のセッション、タブ、ペインを操作する `zellij` Skill を含みます。
-
-Codex の外部ツールの実行許可ルールは `static/cp/.codex/rules/external-tools.rules` で管理します。配置後に Codex を再起動すると、`zellij` / `herdr` / `nix build` / `nix flake check` / `nix flake metadata` の実行時の承認確認を省略できます。
+設定ファイルは `make init` でホームディレクトリに配置し、パッケージは Home Manager で導入します。この2つは別々に適用します。
 
 ## セットアップ
 
-Doom Emacs の端末版でも WSL / macOS / Wayland / X11 のクリップボードを自動選択します。Evil の `y` / `p` と `"+y` / `"+p`、Emacs 標準の `M-w` / `C-w` / `C-y` が連携します。Linux 用ツールは Vim と共通で Home Manager が導入します。設定反映には Emacs を再起動してください（`doom sync` は不要）。GUI 版は標準のクリップボード連携を使います。
+Git、Make、flakes を使える Nix が必要です。Nixpkgs は `NIX_PATH` の `<nixpkgs>` を参照します。Home Manager も同じ Nixpkgs から取得するため、最初から `home-manager` コマンドが入っている必要はありません。
 
-Zellij は終了したセッションを一覧に残さないよう、復元用データの保存を無効にしています。
-
-Vim の `y` / `yy` / `"+y` はシステムのクリップボードへコピーし、`p` / `"+p` はそこから貼り付けます。通常の削除・変更もクリップボードを更新します。Vim9script と Vim の clipboard provider 機能を使い、WSL は `clip.exe` / `powershell.exe` / `iconv`、macOS は `pbcopy` / `pbpaste`、Linux は Wayland の `wl-copy` / `wl-paste` または X11 の `xclip` を自動選択します。Linux 用ツールは Home Manager で導入します。`make init` で `.config/vim/vimrc` を配置し、Home Manager の switch 後に Vim を開き直してください。連携先のない端末環境では自動連携しません。SSH 先では接続先のクリップボードが対象です。
+### 1. 設定ファイルを配置する
 
 ```sh
 git clone https://github.com/emanon-was/.dotfiles.git "$HOME/.dotfiles"
@@ -44,164 +16,118 @@ cd "$HOME/.dotfiles"
 make init
 ```
 
-`make init` は `static/ln/` と `generated/` をsymlink、`static/cp/` をcopyで `$HOME` へ展開します。既存pathは管理対象と同じ状態ならkeepし、異なる場合は上書きせずconflictとして扱います。
+既存ファイルは上書きしません。配置先が管理対象と同じ状態ならそのまま使い、異なる場合は競合として報告します。
 
-`make init` 後は `$HOME/.local/bin` に `dotfiles` dispatcher と関連 command が入ります。
+`make init` は同梱の `generated/` を使います。別の環境向けにビルドし直す必要がある場合は、先に `make build` を実行してください。
+
+### 2. パッケージを導入する
+
+まず Home Manager の設定をビルドして確認します。
 
 ```sh
-dotfiles --help
-dotfiles configure --help
-dotfiles flake --help
+nix build --impure .#homeConfigurations.default.activationPackage --no-link
 ```
 
-`dotfiles` dispatcher は実行場所から dotfiles の root を検出し、子 command に環境変数を渡します。
+成功したら適用します。
 
-`DOTFILES_HOME` には検出した repository root または local root が入ります。repository root は `flake.nix`、`home.nix`、`nix/` がある directory、local root は `.local/bin` と `.local/share/dotfiles` がある directory です。
+```sh
+./generated/.local/bin/dotfiles flake switch
+```
 
-`dotfiles flake` は、この repository の root flake に対する操作を `--impure` 付きで短く呼ぶための便利 command です。`dotfiles flake build` は `generated/` を再生成します。Home Manager 自体は通常の `nix` / `home-manager` command でも使えます。
+この操作はパッケージを導入し、Home Manager の設定を有効にします。完了後はシェルやエディタを開き直してください。`$HOME/.local/bin` に PATH が通っていれば、以後は `dotfiles` として実行できます。
 
-## アンインストール
+Home Manager は実行ユーザーの `USER` と `HOME` を使います。Nix を直接実行するときに `--impure` が必要なのはこのためです。ルートの flake は `flake.lock` を持たず、Nixpkgs channel の更新に追従します。
 
-`static/` と `generated/` で展開したfileとsymlinkを外す場合:
+## 設定を変更する
+
+| 変更したいもの | 編集する場所 | 反映方法 |
+| --- | --- | --- |
+| シンボリックリンクで配置する設定 | `static/ln/` | 既存ファイルの内容は直接反映。追加したら `make init` |
+| コピーで配置する設定 | `static/cp/` | 配置先と内容を確認して反映。`make init` は異なる内容を上書きしない |
+| 導入するパッケージ | `home.nix` | `dotfiles flake switch` |
+| Go 製コマンドや補完の生成元 | `nix/`、`default.nix` | `make build` → `make check` → `make init` |
+
+`static/ln/` と `static/cp/` は、ホームディレクトリと同じ構成です。例えば `static/ln/.config/vim/vimrc` は `~/.config/vim/vimrc` に配置されます。アプリが設定を読み直すには、再起動や再読み込みが必要な場合があります。
+
+`generated/` は生成物なので直接編集しません。また、同じ設定ファイルを Home Manager の `home.file` などでも配置すると競合します。
+
+よく使うコマンドは次のとおりです。`make` はリポジトリのルートで実行します。
+
+| コマンド | 用途 |
+| --- | --- |
+| `make init` | 設定ファイルと生成済みコマンドを配置する |
+| `make build` | `generated/` を再生成する |
+| `make check` | Nix 経由でテストと生成物の検証を行う |
+| `dotfiles flake switch` | Home Manager の設定をビルドして適用する |
+| `dotfiles --help` | 利用できるコマンドを確認する |
+
+## 主な設定
+
+### エディタとクリップボード
+
+Vim と端末版 Doom Emacs は、WSL・macOS・Wayland・X11 に合わせてシステムのクリップボードへ接続します。Linux 用の `wl-clipboard` と `xclip` は Home Manager で導入します。WSL では Windows の `clip.exe` / `powershell.exe`、Vim では加えて `iconv` が PATH 上に必要です。
+
+設定元は [Vim](./static/ln/.config/vim/vimrc) と [Doom Emacs](./static/ln/.config/doom/config.el) です。Vim は Vim9script と clipboard provider 機能を使います。通常のコピー・貼り付けに加え、削除・切り取りもクリップボードを更新します。SSH 先では接続先のクリップボードが対象です。
+
+Doom Emacs の GUI 版は標準の連携を使います。クリップボード設定の反映は Emacs の再起動だけでよく、`doom sync` は不要です。
+
+### ターミナルとシェル
+
+- Herdr のサイドバーは、起動時に最小表示になります。
+- Zellij は復元用セッションを保存せず、スクロール履歴エディタに Vim を使います。
+- 共通の環境変数は `static/ln/.profile.d/env.sh`、シェル別の設定は `.bashrc` / `.zshrc` に置きます。
+- direnv の `use flake` / `use nix` は、読み込み前の `$SHELL` を保持します。nix-direnv を使う場合は、その読み込み後にこのリポジトリの `direnvrc` を読み込んでください。
+
+### Codex
+
+グローバル指示は `static/ln/.codex/`、共通の Nix 開発環境は `static/cp/.codex/flake.nix`、Skill は `static/cp/.agents/skills/` で管理します。認証情報・履歴・セッション・キャッシュは管理対象に含めません。
+
+外部ツールの実行許可ルールは `static/cp/.codex/rules/external-tools.rules` にあります。変更は Codex を再起動すると反映されます。
+
+## 設定を外す
+
+ホームディレクトリへ配置した設定とコマンドを外すには、リポジトリのルートで実行します。
 
 ```sh
 make clean
 ```
 
-symlinkのinstall/uninstallには `dotfiles-ln`（`dotfiles ln`）、copyには `dotfiles-cp`（`dotfiles cp`）を使います。既存ファイルは上書きも退避もしません。`dotfiles-cp unapply` はsourceと内容が同一のcopyだけを削除し、変更済みfileはconflictとして残します。
+管理対象のリンクと、配置元と内容が同じコピーを削除します。配置後に変更されたコピーは競合として残します。Home Manager のパッケージや世代は削除しません。
 
-## Home Manager
-
-Home Manager 設定は repository root の `home.nix` に置き、root の `flake.nix` が `homeConfigurations.default` を出力します。
-
-Nixpkgs は `NIX_PATH` の `<nixpkgs>` を使います。Home Manager 自体も同じ Nixpkgs に含まれる `pkgs.home-manager` から取得するため、Nixpkgs channel の更新に合わせて両方が更新されます。root flake は input と `flake.lock` を持ちません。
-
-この Home Manager flake は `USER` と `HOME` から `home.username` と `home.homeDirectory` を決めます。そのため、実行時は `--impure` を付けて実環境の値を渡します。`--impure` なしで `USER` または `HOME` が読めない場合は評価エラーになります。
-
-```sh
-nix flake check --impure "$HOME/.dotfiles"
-home-manager --impure --flake "$HOME/.dotfiles#default" build
-home-manager --impure --flake "$HOME/.dotfiles#default" switch
-```
-
-初回や大きい変更後は、先に `build` で評価と build を確認してから `switch` します。
-
-Home Manager の flake は、内部的に次の出力を持ちます。
-
-```text
-homeConfigurations.default.activationPackage
-```
-
-これは Home Manager 設定を適用するための成果物です。Nix で直接 build できます。
-
-```sh
-nix build --impure "$HOME/.dotfiles#homeConfigurations.default.activationPackage"
-```
-
-build された成果物には `activate` script が入っています。
-
-```sh
-./result/activate
-```
-
-つまり `home-manager --flake ... switch` は、おおまかには activation package を build して、その中の `activate` script を実行する便利 command として扱えます。
-
-`dotfiles flake switch` は `home-manager` command に依存せず、activation package を `nix build --no-link` で build して `activate` を実行します。
-
-この Home Manager 設定は package 管理を中心にし、dotfiles の file/symlink 配置は `static/`、`generated/`、`dotfiles-ln`、`dotfiles-cp` に任せます。`home.file` などで同じpathを管理するとconflictの原因になります。
-
-### Home Manager の無効化
-
-Home Manager で有効にした package や option を外す場合は、`home.nix` から該当項目を削除してから再度 switch します。
-
-```sh
-home-manager --impure --flake "$HOME/.dotfiles#default" switch
-```
-
-または:
-
-```sh
-dotfiles flake switch
-```
-
-Home Manager は世代管理なので、直前の状態に戻したい場合は generation を確認し、戻したい generation の `activate` を実行します。
-
-```sh
-home-manager generations
-/nix/store/...-home-manager-generation/activate
-```
-
-古い generation が不要になったら、必要に応じて削除します。
-
-```sh
-home-manager expire-generations '-30 days'
-```
-
-Home Manager 管理自体をこの user から外したい場合は、Home Manager の uninstall command を使います。
+パッケージを個別に外す場合は `home.nix` から削除して `dotfiles flake switch` を実行します。Home Manager による管理自体を終了する場合は、次を実行します。
 
 ```sh
 home-manager uninstall
 ```
 
-古い導入方法や手動 cleanup で user profile に `home-manager-path` が残っている場合は、Nix profile から削除します。
+## 開発と構成
 
-```sh
-nix-env -q
-nix-env -e home-manager-path
-```
-
-`make clean` は `static/` と `generated/` の管理対象fileとsymlinkを外すだけで、Home Manager の package や generation は変更しません。
-
-## ドキュメント
-
-- [SPEC.md](./SPEC.md): 現在仕様
-- [TASKS.md](./TASKS.md): 未完了タスクと作業時の注意
-- [ROADMAP.md](./ROADMAP.md): タスク化前の方向性、マイルストーン、設計メモ
-- [static](./static): symlink用 `ln/` とcopy用 `cp/` に分けた `$HOME` layoutのdotfiles
-- [generated](./generated): Nix build 済み command / completion
-- [nix/dotfiles](./nix/dotfiles): `dotfiles` CLI package
-- [nix/dotfiles-ln](./nix/dotfiles-ln): `dotfiles-ln` package
-- [nix/dotfiles-cp](./nix/dotfiles-cp): `dotfiles-cp` package
-- [notes/README.md](./notes/README.md): 管理対象外メモ
-
-## 開発
-
-build と検証には Nix を使います。Go の開発ツールは flake の dev shell で提供します。
-
-共通の `~/.config/direnv/direnvrc` は `use flake` / `use nix` を読み込む前の `$SHELL` を保持します。nix-direnv を使う場合は、その読み込み後にこの設定を読み込んでください。直接の `nix develop` / `nix-shell` は対象外です。すでに `$SHELL` が変わった環境を復元する処理は含みません。
+開発環境には Go と gopls が含まれています。
 
 ```sh
 nix develop --impure
-gopls version
+make check
 ```
 
-repo root の `go.work` で `nix/dotfiles/src`、`nix/dotfiles-ln/src`、`nix/dotfiles-cp/src` をworkspaceとして扱います。
+生成元を変更した場合は `make build` のあとに `make check` を実行します。ルートの `go.work` で3つの Go パッケージをまとめて扱えます。
 
-`generated/` は `make build` で再生成される成果物です。直接編集せず、生成元を変更してから再生成します。
-再生成時にはコピー先に所有者の書き込み権限を付与するため、その後の `git pull` でも成果物を更新できます。
+| 場所 | 役割 |
+| --- | --- |
+| `static/ln/`、`static/cp/` | 手で編集する設定ファイル |
+| `generated/` | 生成済みのコマンドと補完 |
+| `nix/` | `dotfiles`、`dotfiles-ln`、`dotfiles-cp` の実装 |
+| `default.nix` | `generated/` の生成定義 |
+| `home.nix` | Home Manager の設定 |
+| `flake.nix` | パッケージ・開発環境・検証の入口 |
+| `Makefile` | 配置・削除・ビルド・検証の入口 |
+| `notes/` | ホームへの配置対象外のメモ |
 
-## Tips
+詳しい仕様や個別コマンドの説明は、以下を参照してください。
 
-bash の login shell は `.bash_profile` を読みますが、`.bashrc` は自動では読みません。そのため、bash login shell でも interactive 設定を使う場合は、`.bash_profile` から `.bashrc` を読み込ませます。
-
-```text
-bash login interactive
-  -> .bash_profile
-       -> .bashrc
-            -> .profile.d/*.sh
-```
-
-bash の non-login interactive shell は `.bashrc` だけを読みます。この構成では `.bashrc` から `.profile.d/*.sh` を読み込みます。
-
-zsh の login interactive shell は、login 用の `.zprofile` と interactive 用の `.zshrc` を段階的に読みます。そのため、`.zprofile` から `.zshrc` を読み込ませる必要はありません。
-
-```text
-zsh login interactive
-  -> .zprofile
-  -> .zshrc
-       -> .profile.d/*.sh
-```
-
-zsh の non-login interactive shell は `.zshrc` だけを読みます。この構成では `.zshrc` から `.profile.d/*.sh` を読み込みます。
-
-共通環境変数は `.profile.d/env.sh` に置き、shell 固有の history、completion、prompt などは `.bashrc` / `.zshrc` に置きます。PATH は重複しないよう、不足している entry だけ追加します。
+- [SPEC.md](./SPEC.md)：現在の仕様と設定の詳細
+- [TASKS.md](./TASKS.md)：未完了の作業と注意点
+- [ROADMAP.md](./ROADMAP.md)：今後の方向性
+- [dotfiles](./nix/dotfiles/README.md)：コマンドの振り分け
+- [dotfiles-ln](./nix/dotfiles-ln/README.md)：シンボリックリンクの配置・削除
+- [dotfiles-cp](./nix/dotfiles-cp/README.md)：ファイルのコピー・削除
+- [notes](./notes/README.md)：メモの扱い

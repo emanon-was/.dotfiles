@@ -50,6 +50,7 @@
 - Doom Emacs の設定は `static/ln/.config/doom/` を生成元にする。
 - Doom Emacs の端末 frame は、利用可能な環境変数とコマンドから WSL (`clip.exe` / `powershell.exe`)、macOS (`pbcopy` / `pbpaste`)、Wayland (`wl-copy` / `wl-paste`)、X11 (`xclip`) の順に clipboard 連携を選ぶ。Emacs の selection backend を通して通常の kill / yank と Evil の `y` / `p`、`+` / `*` register をシステム clipboard に接続する。WSL のコピーは UTF-16LE、読み取りは UTF-8 と CRLF 変換を使う。GUI frame と利用可能な外部コマンドがない環境は標準 backend を使う。
 - Herdr の prefix key は `C-z` とし、`static/ln/.config/herdr/config.toml` で管理する。
+- Herdr のサイドバーは起動時に折りたたみ、`compact` の最小表示にする。
 - Zellij は `static/ln/.config/zellij/config.kdl` で `session_serialization false` を指定し、終了後の復元用セッションを保存しない。
 - Zellij のスクロール履歴エディタは `scrollback_editor "vim"` で指定し、PATH 上の Vim を使う。
 - Vim は `static/ln/.config/vim/vimrc` に Vim9script で設定する。clipboard provider 機能がある場合、利用可能なコマンドと環境変数から WSL (`WSL_DISTRO_NAME` と `clip.exe` / `powershell.exe` / `iconv`)、macOS (`pbcopy` / `pbpaste`)、Wayland (`WAYLAND_DISPLAY` と `wl-copy` / `wl-paste`)、X11 (`DISPLAY` と `xclip`) の順に連携方法を選ぶ。WSL のコピーは UTF-16LE、貼り付けは UTF-8 を使う。貼り付け時は CRLF を LF に変換する。provider または Vim 組み込みの clipboard 機能が使える場合、`unnamedplus` により通常の yank / delete / change / put をシステム clipboard と連携する。外部 provider の `+` / `*` register は同じシステム clipboard を使う。
