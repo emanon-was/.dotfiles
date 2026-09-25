@@ -85,6 +85,7 @@ flake_build() {
   rm -rf "$tmp_generated"
   trap 'rm -rf "$tmp_generated"' EXIT
   cp -R "$out" "$tmp_generated"
+  chmod -R u+w "$tmp_generated"
 
   chmod -R u+w "$generated" 2>/dev/null || true
   rm -rf "$generated"
