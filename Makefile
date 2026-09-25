@@ -29,6 +29,7 @@ build:
 	rm -rf "$$tmp_generated" "$$old_generated"; \
 	trap 'rm -rf "$$tmp_generated"; if [ -e "$$old_generated" ] && [ ! -e generated ]; then mv "$$old_generated" generated; fi' EXIT; \
 	cp -R "$$out" "$$tmp_generated"; \
+	chmod -R u+w "$$tmp_generated"; \
 	if [ -e generated ]; then mv generated "$$old_generated"; fi; \
 	mv "$$tmp_generated" generated; \
 	if [ -e "$$old_generated" ]; then chmod -R u+w "$$old_generated"; rm -rf "$$old_generated"; fi; \

@@ -174,6 +174,7 @@ gopls version
 repo root の `go.work` で `nix/dotfiles/src`、`nix/dotfiles-ln/src`、`nix/dotfiles-cp/src` をworkspaceとして扱います。
 
 `generated/` は `make build` で再生成される成果物です。直接編集せず、生成元を変更してから再生成します。
+再生成時にはコピー先に所有者の書き込み権限を付与するため、その後の `git pull` でも成果物を更新できます。
 
 ## Tips
 

@@ -127,6 +127,7 @@
 - root `Makefile` は repo の検証、ビルド、生成用。
 - `make build` と `make check` は `NIX_CACHE_HOME`（既定値は repository root の `.cache`）を `XDG_CACHE_HOME` とし、`--impure` を付けて Nix を実行する。
 - `make build` は `generated/` を再生成する。
+- 成果物を作業ツリーへコピーした後、所有者の書き込み権限を付与し、Git による更新・削除を可能にする。Nix store 内の成果物の権限は変更しない。
 - `make build` は新しい成果物を準備してから既存の `generated/` を置換し、置換に失敗した場合は既存成果物を復元する。
 - `make check` は `nix flake check --impure` を実行する。
 - `nix flake check --impure` は `checks.<current system>.dotfiles-tests` を実行し、Nix sandbox内で `dotfiles` / `dotfiles-ln` / `dotfiles-cp` のGo test、generated成果物のsmoke check、`make build` の失敗時復元を検査する。

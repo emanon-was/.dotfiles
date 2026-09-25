@@ -94,6 +94,9 @@
             test -f ${dotfilesGenerated}/.local/share/dotfiles/.keep
 
             mkdir -p "$TMPDIR/build-test/bin" "$TMPDIR/build-test/fixture" "$TMPDIR/build-test/generated"
+            mkdir -p "$TMPDIR/build-test/fixture/nested"
+            printf 'old\n' > "$TMPDIR/build-test/fixture/nested/file"
+            chmod -R a-w "$TMPDIR/build-test/fixture"
             touch "$TMPDIR/build-test/generated/original"
             printf '%s\n' '#!${pkgs.runtimeShell}' 'printf "%s\n" "$TMPDIR/build-test/fixture"' > "$TMPDIR/build-test/bin/nix"
             printf '%s\n' '#!${pkgs.runtimeShell}' \
@@ -112,6 +115,12 @@
               exit 1
             fi
             test -e "$TMPDIR/build-test/generated/original"
+            test -z "$(find "$TMPDIR/build-test" -maxdepth 1 \( -name '.generated.tmp.*' -o -name '.generated.old.*' \) -print -quit)"
+            PATH="$TMPDIR/build-test/bin:$PATH" make -f ${self.outPath}/Makefile build
+            test ! -e "$TMPDIR/build-test/generated/original"
+            printf 'new\n' > "$TMPDIR/build-test/generated/nested/file"
+            rm "$TMPDIR/build-test/generated/nested/file"
+            rmdir "$TMPDIR/build-test/generated/nested"
             test -z "$(find "$TMPDIR/build-test" -maxdepth 1 \( -name '.generated.tmp.*' -o -name '.generated.old.*' \) -print -quit)"
             touch "$out"
           '';
