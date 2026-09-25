@@ -1,7 +1,8 @@
 { runCommand
 , coreutils
 , dotfilesPackage
-, symsyncPackage
+, dotfilesCpPackage
+, dotfilesLnPackage
 }:
 
 runCommand "dotfiles-generated"
@@ -13,14 +14,17 @@ runCommand "dotfiles-generated"
   mkdir -p "$out/.local/bin"
   cp ${dotfilesPackage}/bin/dotfiles "$out/.local/bin/dotfiles"
   cp ${dotfilesPackage}/bin/dotfiles-configure "$out/.local/bin/dotfiles-configure"
-  cp ${symsyncPackage}/bin/symsync "$out/.local/bin/symsync"
+  cp ${dotfilesCpPackage}/bin/dotfiles-cp "$out/.local/bin/dotfiles-cp"
+  cp ${dotfilesLnPackage}/bin/dotfiles-ln "$out/.local/bin/dotfiles-ln"
 
   mkdir -p "$out/.local/share/bash-completion/completions"
   mkdir -p "$out/.local/share/zsh/site-functions"
   cp ${dotfilesPackage}/share/bash-completion/completions/dotfiles "$out/.local/share/bash-completion/completions/dotfiles"
-  cp ${symsyncPackage}/share/bash-completion/completions/symsync "$out/.local/share/bash-completion/completions/symsync"
+  cp ${dotfilesCpPackage}/share/bash-completion/completions/dotfiles-cp "$out/.local/share/bash-completion/completions/dotfiles-cp"
+  cp ${dotfilesLnPackage}/share/bash-completion/completions/dotfiles-ln "$out/.local/share/bash-completion/completions/dotfiles-ln"
   cp ${dotfilesPackage}/share/zsh/site-functions/_dotfiles "$out/.local/share/zsh/site-functions/_dotfiles"
-  cp ${symsyncPackage}/share/zsh/site-functions/_symsync "$out/.local/share/zsh/site-functions/_symsync"
+  cp ${dotfilesCpPackage}/share/zsh/site-functions/_dotfiles-cp "$out/.local/share/zsh/site-functions/_dotfiles-cp"
+  cp ${dotfilesLnPackage}/share/zsh/site-functions/_dotfiles-ln "$out/.local/share/zsh/site-functions/_dotfiles-ln"
 
   mkdir -p "$out/.local/share/dotfiles"
   touch "$out/.local/share/dotfiles/.keep"

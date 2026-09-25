@@ -27,7 +27,7 @@ LLM が coding task で起こしがちなミスを減らすための作業規範
 - 実際には起きない状況のために複雑な error handling を足さない。
 - 変更が大きくなりすぎたら、より小さくできないか見直す。
 
-この repo では、`dotfiles` CLI の dispatcher 構造を保ちます。`static/.local/bin/` 配下の個別 command 名や挙動は拡張領域として扱い、作業規範や repo 全体仕様へ固定しません。
+この repo では、`dotfiles` CLI の dispatcher 構造を保ちます。`static/ln/.local/bin/` 配下の個別 command 名や挙動は拡張領域として扱い、作業規範や repo 全体仕様へ固定しません。
 
 ## 3. 変更を局所化する
 
@@ -86,13 +86,13 @@ LLM が coding task で起こしがちなミスを減らすための作業規範
 
 - `generated/` は直接編集しない。必ず生成元を変更してから `make build` で再生成する。
 - `nix/dotfiles/` は dispatcher package として完結させる。shell subcommand を含めない。
-- `static/.local/bin/` は shell subcommand の source 置き場とし、dispatcher package へ依存させない。
-- repo 全体の仕様、docs、tests、flake check は `static/.local/bin/` 配下の個別 file 名や中身に依存させない。
+- `static/ln/.local/bin/` は shell subcommand の source 置き場とし、dispatcher package へ依存させない。
+- repo 全体の仕様、docs、tests、flake check は `static/ln/.local/bin/` 配下の個別 file 名や中身に依存させない。
 - root `default.nix` は `generated/` 成果物の生成に集中させ、個別 command package の内部構造へ直接依存させない。
-- `nix/dotfiles/`、`nix/symsync/`、`static/.local/bin/` の間に相互依存を作らない。共有が必要な場合は、どの aggregate 層に置くべきかを先に確認する。
+- `nix/dotfiles/`、`nix/dotfiles-ln/`、`nix/dotfiles-cp/`、`static/ln/.local/bin/` の間に相互依存を作らない。共有が必要な場合は、どの aggregate 層に置くべきかを先に確認する。
 - `static/` は `$HOME` に置くファイルの source tree とし、command package や completion の生成元を置かない。
-- `nix/dotfiles` のテストは Go test として `nix/dotfiles/src` 配下に置く。shell helper や `static/.local/bin/` の個別テストは、明示的な必要がない限り追加しない。
-- `symsync` の挙動は `nix/symsync/src` 配下の Go test で検査する。`generated/` のテストは成果物の基本構成確認に留め、`symsync apply/unapply` の詳細挙動を generated 側で検査しない。
+- `nix/dotfiles` のテストは Go test として `nix/dotfiles/src` 配下に置く。shell helper や `static/ln/.local/bin/` の個別テストは、明示的な必要がない限り追加しない。
+- `dotfiles-ln` と `dotfiles-cp` の挙動はそれぞれの `nix/<command>/src` 配下の Go test で検査する。`generated/` のテストは成果物の基本構成確認に留め、`apply/unapply` の詳細挙動を generated 側で検査しない。
 - Home Manager の build / switch に外部環境へ副作用を起こす処理を入れない。
 - Home Manager は任意ユーザーと `root` で動くことを前提にする。`/home/nixos` や `/home/emanon` のような固定 path を埋め込まない。
 - `static/` / `generated/` 展開では既存ファイルを上書きせず conflict として扱う。Home Manager の `.hm-backup` はこの repo の Makefile で manifest 管理しない。

@@ -2,5 +2,6 @@ go 1.22
 
 use (
 	./nix/dotfiles/src
-	./nix/symsync/src
+	./nix/dotfiles-cp/src
+	./nix/dotfiles-ln/src
 )

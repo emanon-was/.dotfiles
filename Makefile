@@ -2,15 +2,17 @@
 
 NIX_CACHE_HOME ?= $(CURDIR)/.cache
 
-# static/ と generated/ を $HOME へ展開する。
+# static/ln と generated/ を symlink、static/cp を copy で $HOME へ展開する。
 init:
-	./generated/.local/bin/symsync apply --src static --dest "$(HOME)"
-	./generated/.local/bin/symsync apply --src generated --dest "$(HOME)"
+	./generated/.local/bin/dotfiles-ln apply --src static/ln --dest "$(HOME)"
+	./generated/.local/bin/dotfiles-cp apply --src static/cp --dest "$(HOME)"
+	./generated/.local/bin/dotfiles-ln apply --src generated --dest "$(HOME)"
 
-# static/ と generated/ で展開した symlink を外す。
+# static/ と generated/ で展開した file と symlink を外す。
 clean:
-	./generated/.local/bin/symsync unapply --src generated --dest "$(HOME)"
-	./generated/.local/bin/symsync unapply --src static --dest "$(HOME)"
+	./generated/.local/bin/dotfiles-ln unapply --src generated --dest "$(HOME)"
+	./generated/.local/bin/dotfiles-cp unapply --src static/cp --dest "$(HOME)"
+	./generated/.local/bin/dotfiles-ln unapply --src static/ln --dest "$(HOME)"
 
 # 主要な非破壊チェックをまとめて実行する。
 check:

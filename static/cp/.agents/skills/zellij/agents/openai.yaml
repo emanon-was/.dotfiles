@@ -1,0 +1,4 @@
+interface:
+  display_name: "Zellij"
+  short_description: "Zellijのセッション、タブ、ペインを安全に操作"
+  default_prompt: "Use $zellij to run and monitor a command in a managed Zellij pane."

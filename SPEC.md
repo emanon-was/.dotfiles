@@ -4,8 +4,8 @@
 
 ## 方針
 
-- `static/` と `generated/` を `$HOME` へ symlink 展開して使う。
-- `static/` は手で編集する `$HOME` layout の dotfiles source とする。
+- `static/ln/` と `generated/` は `$HOME` へ symlink展開し、`static/cp/` はcopy展開して使う。
+- `static/` は `ln/` と `cp/` に分けた、手で編集する `$HOME` layoutのdotfiles sourceとする。
 - `generated/` は Nix build 済み command / completion の成果物として commit する。
 - Home Manager 設定は root の `home.nix` と `flake.nix` で管理する。
 - 副作用のある処理は自動処理に入れず、`dotfiles` CLI の明示コマンドで実行する。
@@ -13,16 +13,18 @@
 ## ディレクトリ
 
 - `static/`
-  - `$HOME` に置く静的 dotfiles source tree。
-  - shell、git、tmux、screen、Doom Emacs、Zellij、shell scripts を置く。
+  - `ln/` はsymlinkで配置する `$HOME` layoutのsource tree。
+  - `cp/` はcopyで配置する `$HOME` layoutのsource tree。
 - `generated/`
   - `make build` または `dotfiles flake build` で再生成する成果物。
   - Go binary、completion、local root marker を置く。
   - 手で編集しない。
 - `nix/dotfiles/`
   - `dotfiles` dispatcher と `dotfiles configure` dispatcher の package 生成元。
-- `nix/symsync/`
-  - `symsync` package の生成元。
+- `nix/dotfiles-ln/`
+  - `dotfiles-ln` package の生成元。
+- `nix/dotfiles-cp/`
+  - `dotfiles-cp` package の生成元。
 - `default.nix`
   - `generated/` layout を生成する package 定義。
 - `home.nix`
@@ -33,26 +35,30 @@
 
 ## Static Files
 
-- 共通環境変数は `static/.profile.d/env.sh` に置く。
-- session env の断片は `static/.profile.d/*.sh` に置き、`.bashrc` / `.zshrc` から読み込む。
+- 共通環境変数は `static/ln/.profile.d/env.sh` に置く。
+- session env の断片は `static/ln/.profile.d/*.sh` に置き、`.bashrc` / `.zshrc` から読み込む。
 - `.profile.d/env.sh` は PATH entry を重複させないように追加する。
 - zsh login shell は `.zprofile` のあと `.zshrc` を読み込む。
 - bash login shell は `.bash_profile` から `.bashrc` を読み込む。
-- bash と zsh の共通 alias は `static/.config/shell/aliases.sh` に置く。
+- bash と zsh の共通 alias は `static/ln/.config/shell/aliases.sh` に置く。
 - `.bashrc` と `.zshrc` には shell 固有の history、completion、prompt wiring を置く。
 - git、tmux、screen の設定は `$HOME` 直下の `.gitconfig`、`.tmux.conf`、`.screenrc` に置く。
 - bash と zsh の prompt は shell 名を含む左側 2 行表示で揃え、zsh の right prompt は使わない。
 - bash は `~/.local/share/bash-completion/completions` 配下の completion を読み込む。
 - zsh は `compinit` 前に `~/.local/share/zsh/site-functions` を `fpath` に追加する。
-- Doom Emacs の設定は `static/.config/doom/` を生成元にする。
-- Herdr の prefix key は `C-z` とし、`static/.config/herdr/config.toml` で管理する。
+- Doom Emacs の設定は `static/ln/.config/doom/` を生成元にする。
+- Herdr の prefix key は `C-z` とし、`static/ln/.config/herdr/config.toml` で管理する。
+- Codex のグローバル指示は `static/ln/.codex/`、共通のNix開発環境は `static/cp/.codex/flake.nix` で管理する。Codex用の `flake.lock`、認証情報、履歴、セッション、キャッシュは管理対象に含めない。
+- ユーザー共通の Codex Skill は `static/cp/.agents/skills/` で管理し、通常fileとして配置する。
+- Zellij のセッション、タブ、ペインを安全に操作する Skill は `static/cp/.agents/skills/zellij/` に置く。
 - Emacs package は terminal 用の `emacs-nox` を使う。
 - shell の `emacs` alias は起動時に判定し、`emacs-nox` の場合は alias しない。それ以外の Emacs では `emacs -nw` にする。
 
 ## Home Manager
 
-- Nixpkgs は常に `nixos-unstable` を使い、Home Manager が管理する package もこの Nixpkgs から取得する。
-- Home Manager 自体は `master` branch を使い、その Nixpkgs input は root の `nixpkgs` に追従させる。
+- Nixpkgs は `NIX_PATH` の `<nixpkgs>` から取得する。
+- Home Manager 自体は同じ Nixpkgs に含まれる `pkgs.home-manager` の source を使う。
+- Home Manager が管理する package には同じ `<nixpkgs>` から作った `pkgs` を渡す。
 - root の `flake.nix` は `homeConfigurations.default` を出力する。
 - root の `flake.nix` は `builtins.currentSystem` を使い、評価している host system 向けの packages / checks / devShells / apps を出力する。
 - この flake は個人 dotfiles 用で、Home Manager 設定も実行環境の `USER` と `HOME` を読む `--impure` 前提である。そのため、複数 system を明示列挙するより、実行 host の system に合わせる単純な構成を採用する。
@@ -62,18 +68,17 @@
 - `USER` または `HOME` が空の場合、Home Manager flake は評価エラーにする。
 - Home Manager flake は username と home directory の fake default を持たない。
 - Home Manager activation package を直接 build する場合は、`result` symlink を作らず store path を使う。
-- root の `flake.lock` を Home Manager と generated 生成で共有する。
+- root flake は input を持たず、`flake.lock` を使用しない。
 
 ## dotfiles CLI
 
 - `dotfiles` は Go 製の Cargo 風 dispatcher。
 - `dotfiles <name>` は、同じ directory または PATH 上の `dotfiles-<name>` を実行する。
 - `dotfiles configure` は `dotfiles-configure-<command>` を呼ぶ dispatcher とする。
-- shell script subcommand は `static/.local/bin/` に置く。
+- shell script subcommand は `static/ln/.local/bin/` に置く。
 - `dotfiles-flake` の Nix flake 操作はすべて `--impure` 付きで実行する。
 - `dotfiles-flake build` は root flake の `dotfiles-generated` package から `generated/` を再生成する。
 - `dotfiles-flake switch` は root flake の Home Manager activation package を build して activate する。
-- `dotfiles-flake update` は root flake の `flake.lock` を更新する。
 
 ## Dispatcher Environment
 
@@ -89,29 +94,30 @@
 ## Generated
 
 - `generated/` は `make build` で生成する。
-- `generated/.local/bin/dotfiles`、`generated/.local/bin/dotfiles-configure`、`generated/.local/bin/symsync` を含める。
+- `generated/.local/bin/dotfiles`、`generated/.local/bin/dotfiles-configure`、`generated/.local/bin/dotfiles-ln`、`generated/.local/bin/dotfiles-cp` を含める。
 - bash / zsh completion は `generated/.local/share/` に含める。
 - `generated/.local/share/dotfiles/.keep` は local root 検出用 marker として含める。
 - generated 生成時には `/nix/store` と固定 home path が成果物に残らないことを検査する。
 
 ## Install
 
-- `make init` は `static/` と `generated/` を symsync で `$HOME` へ展開する。
-- `make clean` は `generated/`、`static/` の順に symlink を外す。
-- `symsync apply --src <src> --dest <dest>` は src tree を dest tree へ symlink で反映する。
-- `symsync unapply --src <src> --dest <dest>` は src tree 由来の dest 側 symlink だけを削除する。
-- `symsync apply --dry-run` と `symsync unapply --dry-run` は filesystem を変更せず、実行予定の操作と conflict を表示する。
+- `make init` は `static/ln/` と `generated/` を `dotfiles-ln`、`static/cp/` を `dotfiles-cp` で `$HOME` へ展開する。
+- `make clean` は `generated/`、`static/cp/`、`static/ln/` の順に管理対象を外す。
+- `dotfiles-ln apply/unapply` はsymlink treeを反映・削除する。
+- `dotfiles-cp apply` は未配置fileをcopyし、同一内容ならkeep、異なる既存pathはconflictとする。
+- `dotfiles-cp unapply` はsourceと内容が同一のdestination fileだけを削除し、変更済みfileはconflictとする。
+- `dotfiles-ln` と `dotfiles-cp` の `--dry-run` はfilesystemを変更せず、実行予定の操作とconflictを表示する。
 - `$HOME/home-files` のような managed copy は作らない。
-- install 対象は `static/` と `generated/` 配下の directory、file、symlink とする。
+- install対象は `static/ln/`、`static/cp/`、`generated/` 配下のdirectory、file、symlinkとする。
 - install/uninstall は manifest を使わない。
 - 既存ファイル、既存 symlink、既存の非 directory path は退避せず conflict とする。
-- conflict がある場合、`symsync apply` は filesystem を変更せず失敗する。
+- conflictがある場合、`dotfiles-ln` と `dotfiles-cp` はfilesystemを変更せず失敗する。
 
 ## Development Shell
 
 - `devShells.<current system>.default` は Go 開発用に `go` と `gopls` を提供する。
 - `.envrc` は `use flake --impure` で development shell を読み込む。
-- repository root の `go.work` は `nix/dotfiles/src` と `nix/symsync/src` を workspace として扱う。
+- repository root の `go.work` は `nix/dotfiles/src`、`nix/dotfiles-ln/src`、`nix/dotfiles-cp/src` をworkspaceとして扱う。
 
 ## Makefile
 
@@ -120,8 +126,8 @@
 - `make build` は `generated/` を再生成する。
 - `make build` は新しい成果物を準備してから既存の `generated/` を置換し、置換に失敗した場合は既存成果物を復元する。
 - `make check` は `nix flake check --impure` を実行する。
-- `nix flake check --impure` は `checks.<current system>.dotfiles-tests` を実行し、Nix sandbox 内で `dotfiles` / `symsync` の Go test、generated 成果物の smoke check、`make build` の失敗時復元を検査する。
-- `static/.local/bin/` の shell subcommand は任意の拡張として扱い、repo 全体の checks から名前、内容、構造を参照しない。
+- `nix flake check --impure` は `checks.<current system>.dotfiles-tests` を実行し、Nix sandbox内で `dotfiles` / `dotfiles-ln` / `dotfiles-cp` のGo test、generated成果物のsmoke check、`make build` の失敗時復元を検査する。
+- `static/ln/.local/bin/` の shell subcommand は任意の拡張として扱い、repo全体のchecksから名前、内容、構造を参照しない。
 
 ## 運用ルール
 

@@ -13,7 +13,7 @@ Home Manager 管理対象ではない個人メモ置き場です。
 正式に管理したい設定に昇格する場合は、対応する生成元へ移動します。
 
 - dotfiles: `static/`
-- command: `static/.local/bin/`
+- command: `static/ln/.local/bin/`
 
 ここに置いたファイルは `static/` / `generated/` にも含めません。
 

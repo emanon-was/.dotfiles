@@ -2,9 +2,9 @@
 
 自分用の dotfiles 管理リポジトリです。
 
-`static/` と `generated/` を `$HOME` へ symlink 展開して使います。`static/` は手で編集する dotfiles source、`generated/` は Nix build で生成する command / completion です。
+`static/ln/` と `generated/` は `$HOME` へ symlink 展開し、`static/cp/` は file copy で展開します。`static/` は手で編集する dotfiles source、`generated/` は Nix build で生成する command / completion です。
 
-Home Manager 設定は repository root の `home.nix` と `flake.nix` で管理します。dotfiles の file/symlink 配置は `static/`、`generated/`、`symsync` に任せ、Home Manager は package 管理を中心に使います。
+Home Manager 設定は repository root の `home.nix` と `flake.nix` で管理します。dotfiles の file/symlink 配置は `static/`、`generated/`、`dotfiles-ln`、`dotfiles-cp` に任せ、Home Manager は package 管理を中心に使います。
 
 ## ディレクトリ構成
 
@@ -14,15 +14,19 @@ Home Manager 設定は repository root の `home.nix` と `flake.nix` で管理�
 ├── default.nix     # generated/ 生成 package
 ├── flake.nix       # パッケージ、generated 生成、検証の入口
 ├── home.nix        # Home Manager 設定
-├── static/         # 手で編集する $HOME layout の dotfiles
+├── static/         # ln/ と cp/ に分けた手書き dotfiles
 ├── generated/      # Nix build 済み command / completion
-├── nix/            # dotfiles / symsync package 生成元
+├── nix/            # dotfiles / dotfiles-ln / dotfiles-cp package 生成元
 ├── notes/          # 管理対象外のメモや作業用断片
 ├── SPEC.md         # 現在仕様
 └── TASKS.md        # 未完了タスク
 ```
 
-`static/` は直接編集します。`generated/` は `make build` または `dotfiles flake build` で再生成される成果物なので直接編集しません。
+`static/ln/` と `static/cp/` は、それぞれ `$HOME` layout を直接編集します。`generated/` は `make build` または `dotfiles flake build` で再生成される成果物なので直接編集しません。
+
+Codex のグローバル指示は `static/ln/.codex/`、共通のNix開発環境は `static/cp/.codex/flake.nix` で管理します。`flake.lock`、認証情報、履歴、セッション、キャッシュなどの実行時データは管理しません。
+
+ユーザー共通の Codex Skill は `static/cp/.agents/skills/` で管理し、通常ファイルとして配置します。現在は Zellij のセッション、タブ、ペインを操作する `zellij` Skill を含みます。
 
 ## セットアップ
 
@@ -32,7 +36,7 @@ cd "$HOME/.dotfiles"
 make init
 ```
 
-`make init` は `static/` と `generated/` を `$HOME` へ symlink 展開します。既存ファイルは上書きせず conflict として扱います。
+`make init` は `static/ln/` と `generated/` をsymlink、`static/cp/` をcopyで `$HOME` へ展開します。既存pathは管理対象と同じ状態ならkeepし、異なる場合は上書きせずconflictとして扱います。
 
 `make init` 後は `$HOME/.local/bin` に `dotfiles` dispatcher と関連 command が入ります。
 
@@ -50,17 +54,19 @@ dotfiles flake --help
 
 ## アンインストール
 
-`static/` と `generated/` で展開した symlink を外す場合:
+`static/` と `generated/` で展開したfileとsymlinkを外す場合:
 
 ```sh
 make clean
 ```
 
-install/uninstall は `symsync` を使います。既存ファイルは上書きも退避もせず conflict として扱い、uninstall は source tree 配下を指す symlink だけを削除します。
+symlinkのinstall/uninstallには `dotfiles-ln`（`dotfiles ln`）、copyには `dotfiles-cp`（`dotfiles cp`）を使います。既存ファイルは上書きも退避もしません。`dotfiles-cp unapply` はsourceと内容が同一のcopyだけを削除し、変更済みfileはconflictとして残します。
 
 ## Home Manager
 
 Home Manager 設定は repository root の `home.nix` に置き、root の `flake.nix` が `homeConfigurations.default` を出力します。
+
+Nixpkgs は `NIX_PATH` の `<nixpkgs>` を使います。Home Manager 自体も同じ Nixpkgs に含まれる `pkgs.home-manager` から取得するため、Nixpkgs channel の更新に合わせて両方が更新されます。root flake は input と `flake.lock` を持ちません。
 
 この Home Manager flake は `USER` と `HOME` から `home.username` と `home.homeDirectory` を決めます。そのため、実行時は `--impure` を付けて実環境の値を渡します。`--impure` なしで `USER` または `HOME` が読めない場合は評価エラーになります。
 
@@ -92,9 +98,9 @@ build された成果物には `activate` script が入っています。
 
 つまり `home-manager --flake ... switch` は、おおまかには activation package を build して、その中の `activate` script を実行する便利 command として扱えます。
 
-`dotfiles flake switch` は `home-manager` command に依存せず、activation package を `nix build --no-link` で build して `activate` を実行します。`dotfiles flake update` は root flake の `flake.lock` を更新します。
+`dotfiles flake switch` は `home-manager` command に依存せず、activation package を `nix build --no-link` で build して `activate` を実行します。
 
-この Home Manager 設定は package 管理を中心にし、dotfiles の file/symlink 配置は `static/`、`generated/`、`symsync` に任せます。`home.file` などで同じ path を管理すると conflict の原因になります。
+この Home Manager 設定は package 管理を中心にし、dotfiles の file/symlink 配置は `static/`、`generated/`、`dotfiles-ln`、`dotfiles-cp` に任せます。`home.file` などで同じpathを管理するとconflictの原因になります。
 
 ### Home Manager の無効化
 
@@ -136,17 +142,18 @@ nix-env -q
 nix-env -e home-manager-path
 ```
 
-`make clean` は `static/` と `generated/` の symlink を外すだけで、Home Manager の package や generation は変更しません。
+`make clean` は `static/` と `generated/` の管理対象fileとsymlinkを外すだけで、Home Manager の package や generation は変更しません。
 
 ## ドキュメント
 
 - [SPEC.md](./SPEC.md): 現在仕様
 - [TASKS.md](./TASKS.md): 未完了タスクと作業時の注意
 - [ROADMAP.md](./ROADMAP.md): タスク化前の方向性、マイルストーン、設計メモ
-- [static](./static): 手で編集する `$HOME` layout の dotfiles
+- [static](./static): symlink用 `ln/` とcopy用 `cp/` に分けた `$HOME` layoutのdotfiles
 - [generated](./generated): Nix build 済み command / completion
 - [nix/dotfiles](./nix/dotfiles): `dotfiles` CLI package
-- [nix/symsync](./nix/symsync): `symsync` package
+- [nix/dotfiles-ln](./nix/dotfiles-ln): `dotfiles-ln` package
+- [nix/dotfiles-cp](./nix/dotfiles-cp): `dotfiles-cp` package
 - [notes/README.md](./notes/README.md): 管理対象外メモ
 
 ## 開発
@@ -158,7 +165,7 @@ nix develop --impure
 gopls version
 ```
 
-repo root の `go.work` で `nix/dotfiles/src` と `nix/symsync/src` を workspace として扱います。
+repo root の `go.work` で `nix/dotfiles/src`、`nix/dotfiles-ln/src`、`nix/dotfiles-cp/src` をworkspaceとして扱います。
 
 `generated/` は `make build` で再生成される成果物です。直接編集せず、生成元を変更してから再生成します。
 

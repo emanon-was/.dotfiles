@@ -1,20 +1,15 @@
 {
   description = "Dotfiles packages and generated artifacts";
 
-  inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    home-manager = {
-      url = "github:nix-community/home-manager/master";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-  };
-
-  outputs = { self, nixpkgs, home-manager, ... }:
+  outputs = { self }:
     let
       system = builtins.currentSystem;
-      pkgs = import nixpkgs {
+      pkgs = import <nixpkgs> {
         inherit system;
         config.allowUnfree = true;
+      };
+      homeManagerLib = import "${pkgs.home-manager.src}/lib" {
+        inherit (pkgs) lib;
       };
       requiredEnv = name:
         let
@@ -24,21 +19,22 @@
       username = requiredEnv "USER";
       homeDirectory = requiredEnv "HOME";
       dotfilesPackage = pkgs.callPackage ./nix/dotfiles { };
-      symsyncPackage = pkgs.callPackage ./nix/symsync { };
+      dotfilesCpPackage = pkgs.callPackage ./nix/dotfiles-cp { };
+      dotfilesLnPackage = pkgs.callPackage ./nix/dotfiles-ln { };
       dotfilesGenerated = pkgs.callPackage ./default.nix {
-        inherit dotfilesPackage;
-        inherit symsyncPackage;
+        inherit dotfilesCpPackage dotfilesLnPackage dotfilesPackage;
       };
     in
     {
       packages.${system} = {
         dotfiles = dotfilesPackage;
-        symsync = symsyncPackage;
+        dotfiles-cp = dotfilesCpPackage;
+        dotfiles-ln = dotfilesLnPackage;
         dotfiles-generated = dotfilesGenerated;
         default = dotfilesPackage;
       };
 
-      homeConfigurations.default = home-manager.lib.homeManagerConfiguration {
+      homeConfigurations.default = homeManagerLib.homeManagerConfiguration {
         inherit pkgs;
         extraSpecialArgs = {
           inherit username homeDirectory;
@@ -50,8 +46,19 @@
 
       devShells.${system}.default = pkgs.mkShell {
         packages = with pkgs; [
+          bashInteractive
+          coreutils
+          findutils
+          git
           go
           gopls
+          gnumake
+          gnused
+          nix
+          python3
+          python3Packages.pyyaml
+          ripgrep
+          zellij
         ];
       };
 
@@ -70,15 +77,20 @@
             export HOME="$TMPDIR/home"
             cd ${self.outPath}/nix/dotfiles/src
             go test ./...
-            cd ${self.outPath}/nix/symsync/src
+            cd ${self.outPath}/nix/dotfiles-cp/src
+            go test ./...
+            cd ${self.outPath}/nix/dotfiles-ln/src
             go test ./...
             test -x ${dotfilesGenerated}/.local/bin/dotfiles
             test -x ${dotfilesGenerated}/.local/bin/dotfiles-configure
-            test -x ${dotfilesGenerated}/.local/bin/symsync
+            test -x ${dotfilesGenerated}/.local/bin/dotfiles-cp
+            test -x ${dotfilesGenerated}/.local/bin/dotfiles-ln
             test -f ${dotfilesGenerated}/.local/share/bash-completion/completions/dotfiles
-            test -f ${dotfilesGenerated}/.local/share/bash-completion/completions/symsync
+            test -f ${dotfilesGenerated}/.local/share/bash-completion/completions/dotfiles-cp
+            test -f ${dotfilesGenerated}/.local/share/bash-completion/completions/dotfiles-ln
             test -f ${dotfilesGenerated}/.local/share/zsh/site-functions/_dotfiles
-            test -f ${dotfilesGenerated}/.local/share/zsh/site-functions/_symsync
+            test -f ${dotfilesGenerated}/.local/share/zsh/site-functions/_dotfiles-cp
+            test -f ${dotfilesGenerated}/.local/share/zsh/site-functions/_dotfiles-ln
             test -f ${dotfilesGenerated}/.local/share/dotfiles/.keep
 
             mkdir -p "$TMPDIR/build-test/bin" "$TMPDIR/build-test/fixture" "$TMPDIR/build-test/generated"
