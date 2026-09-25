@@ -1,150 +1,140 @@
 # Dotfiles Specification
 
-このリポジトリの現在仕様をまとめます。
+このリポジトリの現在仕様をまとめます。利用手順は [README.md](./README.md)、作業規範は [AGENTS.md](./AGENTS.md)、未完了の作業は [TASKS.md](./TASKS.md) を参照してください。
 
-## 方針
+ここでは管理範囲、配置・ビルドの契約、ツール間の依存関係を記録する。単独で完結する alias、キー割り当て、表示設定などは設定ファイルを正とし、列挙しない。具体的な設定値は、他のツールとの連携に必要な場合に理由と併せて記載する。
 
-- `static/ln/` と `generated/` は `$HOME` へ symlink展開し、`static/cp/` はcopy展開して使う。
-- `static/` は `ln/` と `cp/` に分けた、手で編集する `$HOME` layoutのdotfiles sourceとする。
-- `generated/` は Nix build 済み command / completion の成果物として commit する。
-- Home Manager 設定は root の `home.nix` と `flake.nix` で管理する。
-- 副作用のある処理は自動処理に入れず、`dotfiles` CLI の明示コマンドで実行する。
+## 管理範囲と構成
 
-## ディレクトリ
+設定ファイルの配置と Home Manager によるパッケージ管理は、別々に適用する。`static/` は手で編集する設定の生成元、`generated/` は Nix で生成して commit する成果物とする。
 
-- `static/`
-  - `ln/` はsymlinkで配置する `$HOME` layoutのsource tree。
-  - `cp/` はcopyで配置する `$HOME` layoutのsource tree。
-- `generated/`
-  - `make build` または `dotfiles flake build` で再生成する成果物。
-  - Go binary、completion、local root marker を置く。
-  - 手で編集しない。
-- `nix/dotfiles/`
-  - `dotfiles` dispatcher と `dotfiles configure` dispatcher の package 生成元。
-- `nix/dotfiles-ln/`
-  - `dotfiles-ln` package の生成元。
-- `nix/dotfiles-cp/`
-  - `dotfiles-cp` package の生成元。
-- `default.nix`
-  - `generated/` layout を生成する package 定義。
-- `home.nix`
-  - Home Manager 設定を置く。
-- `notes/`
-  - Home Manager 管理対象ではない個人メモを置く。
-  - `notes/templates/` に project 用の参考ファイルを置く。
+| 場所 | 役割 |
+| --- | --- |
+| `static/ln/` | `$HOME` と同じ構成で置く、symlink 配置用の設定 |
+| `static/cp/` | `$HOME` と同じ構成で置く、copy 配置用の設定 |
+| `generated/` | ビルド済みコマンド、補完、local root 検出用 marker |
+| `nix/dotfiles/` | `dotfiles` と `dotfiles configure` の dispatcher package |
+| `nix/dotfiles-ln/`、`nix/dotfiles-cp/` | symlink / copy 配置を行う package |
+| `default.nix` | `generated/` の構成を定義する集約層 |
+| `home.nix` | Home Manager 設定 |
+| `flake.nix` | packages / checks / devShells / apps と Home Manager の出力 |
+| `Makefile` | 配置・削除・ビルド・検証の入口 |
+| `notes/` | Home Manager 管理対象外の個人メモ。`templates/` は project 用の参考ファイル |
 
-## Static Files
+副作用のある外部環境の操作は明示的なコマンドで実行し、Home Manager activation や build check に組み込まない。Home Manager の build / switch に重いネットワーク処理を混ぜない。
 
-- 共通環境変数は `static/ln/.profile.d/env.sh` に置く。
-- session env の断片は `static/ln/.profile.d/*.sh` に置き、`.bashrc` / `.zshrc` から読み込む。
-- `.profile.d/env.sh` は PATH entry を重複させないように追加する。
-- `static/ln/.config/direnv/direnvrc` は `use flake` / `use nix` の前後で元の `$SHELL` を保持し、他の開発環境変数は通常どおり取り込む。nix-direnv を使う場合は、その読み込み後にこの設定を読み込む。
-- zsh login shell は `.zprofile` のあと `.zshrc` を読み込む。
-- bash login shell は `.bash_profile` から `.bashrc` を読み込む。
-- bash と zsh の共通 alias は `static/ln/.config/shell/aliases.sh` に置く。
-- `.bashrc` と `.zshrc` には shell 固有の history、completion、prompt wiring を置く。
-- git、tmux、screen の設定は `$HOME` 直下の `.gitconfig`、`.tmux.conf`、`.screenrc` に置く。
-- bash と zsh の prompt は shell 名を含む左側 2 行表示で揃え、zsh の right prompt は使わない。
-- bash は `~/.local/share/bash-completion/completions` 配下の completion を読み込む。
-- zsh は `compinit` 前に `~/.local/share/zsh/site-functions` を `fpath` に追加する。
-- Doom Emacs の設定は `static/ln/.config/doom/` を生成元にする。
-- Doom Emacs の端末 frame は、利用可能な環境変数とコマンドから WSL (`clip.exe` / `powershell.exe`)、macOS (`pbcopy` / `pbpaste`)、Wayland (`wl-copy` / `wl-paste`)、X11 (`xclip`) の順に clipboard 連携を選ぶ。Emacs の selection backend を通して通常の kill / yank と Evil の `y` / `p`、`+` / `*` register をシステム clipboard に接続する。WSL のコピーは UTF-16LE、読み取りは UTF-8 と CRLF 変換を使う。GUI frame と利用可能な外部コマンドがない環境は標準 backend を使う。
-- Herdr の prefix key は `C-z` とし、`static/ln/.config/herdr/config.toml` で管理する。
-- Herdr のサイドバーは起動時に折りたたみ、`compact` の最小表示にする。
-- Zellij は `static/ln/.config/zellij/config.kdl` で `session_serialization false` を指定し、終了後の復元用セッションを保存しない。
-- Zellij のスクロール履歴エディタは `scrollback_editor "vim"` で指定し、PATH 上の Vim を使う。
-- Vim は `static/ln/.config/vim/vimrc` に Vim9script で設定する。clipboard provider 機能がある場合、利用可能なコマンドと環境変数から WSL (`WSL_DISTRO_NAME` と `clip.exe` / `powershell.exe` / `iconv`)、macOS (`pbcopy` / `pbpaste`)、Wayland (`WAYLAND_DISPLAY` と `wl-copy` / `wl-paste`)、X11 (`DISPLAY` と `xclip`) の順に連携方法を選ぶ。WSL のコピーは UTF-16LE、貼り付けは UTF-8 を使う。貼り付け時は CRLF を LF に変換する。provider または Vim 組み込みの clipboard 機能が使える場合、`unnamedplus` により通常の yank / delete / change / put をシステム clipboard と連携する。外部 provider の `+` / `*` register は同じシステム clipboard を使う。
-- Codex のグローバル指示は `static/ln/.codex/`、共通のNix開発環境は `static/cp/.codex/flake.nix` で管理する。Codex用の `flake.lock`、認証情報、履歴、セッション、キャッシュは管理対象に含めない。
-- ユーザー共通の Codex Skill は `static/cp/.agents/skills/` で管理し、通常fileとして配置する。
-- Codex の外部ツールの実行許可ルールは `static/cp/.codex/rules/external-tools.rules` で管理し、`zellij` / `herdr` / `nix build` / `nix flake check` / `nix flake metadata` を確認なしで実行できるようにする。
-- Zellij のセッション、タブ、ペインを安全に操作する Skill は `static/cp/.agents/skills/zellij/` に置く。
-- Emacs package は terminal 用の `emacs-nox` を使う。
-- shell の `emacs` alias は起動時に判定し、`emacs-nox` の場合は alias しない。それ以外の Emacs では `emacs -nw` にする。
+## 設定ファイルの配置と削除
 
-## Home Manager
+- `make init` は `static/ln/` と `generated/` を `dotfiles-ln`、`static/cp/` を `dotfiles-cp` で `$HOME` に配置する。
+- `make clean` は `generated/`、`static/cp/`、`static/ln/` の順に管理対象を外す。
+- 配置対象は各 tree 内の directory、file、symlink とする。manifest や `$HOME/home-files` のような managed copy は作らない。
+- 既存 path が管理対象と異なる場合は、退避や上書きをせず conflict とする。conflict がある場合、そのコマンドは filesystem を変更せず失敗する。
+- `--dry-run` は filesystem を変更せず、実行予定の操作と conflict を表示する。
+- init / clean 系は、再実行しても既存の状態ファイルを空にしたり、管理対象 entry を失ったりしない。
 
-- Nixpkgs は `NIX_PATH` の `<nixpkgs>` から取得する。
-- Home Manager 自体は同じ Nixpkgs に含まれる `pkgs.home-manager` の source を使う。
-- Home Manager が管理する package には同じ `<nixpkgs>` から作った `pkgs` を渡す。
-- Home Manager は `pkgs.vim` を導入し、Zellij のスクロール履歴エディタとして利用できるようにする。
-- Linux では Vim / Doom Emacs の clipboard 連携用に `pkgs.wl-clipboard` と `pkgs.xclip` を導入する。
-- root の `flake.nix` は `homeConfigurations.default` を出力する。
-- root の `flake.nix` は `builtins.currentSystem` を使い、評価している host system 向けの packages / checks / devShells / apps を出力する。
-- この flake は個人 dotfiles 用で、Home Manager 設定も実行環境の `USER` と `HOME` を読む `--impure` 前提である。そのため、複数 system を明示列挙するより、実行 host の system に合わせる単純な構成を採用する。
-- cross build や pure flake としての利用は現在の目的に含めない。
-- Home Manager flake は `USER` と `HOME` から username と home directory を決める。
-- Home Manager flake は `--impure` 前提で使い、実環境の `USER` と `HOME` を読む。
-- `USER` または `HOME` が空の場合、Home Manager flake は評価エラーにする。
-- Home Manager flake は username と home directory の fake default を持たない。
+| コマンド | 動作 |
+| --- | --- |
+| `dotfiles-ln apply/unapply` | symlink tree を配置・削除する |
+| `dotfiles-cp apply` | 未配置 file を copy し、同一内容なら保持する。異なる既存 path は conflict とする |
+| `dotfiles-cp unapply` | 生成元と内容が同一の配置先 file だけを削除する。変更済み file は conflict とする |
+
+詳細は [dotfiles-ln](./nix/dotfiles-ln/README.md) と [dotfiles-cp](./nix/dotfiles-cp/README.md) を参照する。
+
+## Nix と Home Manager
+
+### 評価環境
+
+- root flake は input と `flake.lock` を持たず、`NIX_PATH` の `<nixpkgs>` を使う。
+- Home Manager は同じ Nixpkgs の `pkgs.home-manager` の source を使い、管理する package にも同じ `pkgs` を渡す。
+- `builtins.currentSystem` により、実行 host 向けの packages / checks / devShells / apps を出力する。cross build や pure flake としての利用は対象外とする。
+- `homeConfigurations.default` は、実環境の `USER` と `HOME` から username と home directory を決める。`--impure` を前提とし、どちらかが空なら評価エラーにする。仮の既定値や固定の home path は使わない。
 - Home Manager activation package を直接 build する場合は、`result` symlink を作らず store path を使う。
-- root flake は input を持たず、`flake.lock` を使用しない。
 
 ## dotfiles CLI
 
-- `dotfiles` は Go 製の Cargo 風 dispatcher。
-- `dotfiles <name>` は、同じ directory または PATH 上の `dotfiles-<name>` を実行する。
-- `dotfiles configure` は `dotfiles-configure-<command>` を呼ぶ dispatcher とする。
-- shell script subcommand は `static/ln/.local/bin/` に置く。
-- `dotfiles-flake` の Nix flake 操作はすべて `--impure` 付きで実行する。
-- `dotfiles-flake build` は root flake の `dotfiles-generated` package から `generated/` を再生成する。
-- `dotfiles-flake switch` は root flake の Home Manager activation package を build して activate する。
+`dotfiles` は Go 製の Cargo 風 dispatcher とする。`dotfiles <name>` は同じ directory または PATH 上の `dotfiles-<name>` を実行し、`dotfiles configure` は `dotfiles-configure-<command>` を呼び出す。
 
-## Dispatcher Environment
+shell subcommand は `static/ln/.local/bin/` に置く任意の拡張とする。個別コマンドの名前・内容・構造は repo 全体の仕様や checks に固定しない。
 
-- `dotfiles` dispatcher は repository root または local root を検出し、子 command に環境変数を渡す。
-- repository root は `flake.nix`、`home.nix`、`nix/` がある directory とする。
-- local root は `.local/bin` と `.local/share/dotfiles` がある directory とする。
-- repository root を検出した場合、子 command に `DOTFILES_HOME=<repository root>` を渡す。
-- local root を検出した場合、子 command に `DOTFILES_HOME=<local root>` を渡す。
-- executable から上位 directory を探索し、repository root より手前で local root が見つかった場合は local root を採用する。
-- 外部から渡された `DOTFILES_HOME` は repository root または local root として validation する。
-- validation に失敗した場合、dispatcher は子 command を実行せず usage error として終了する。
+### Root の検出と環境変数
 
-## Generated
+| Root | 判定に使う構成 |
+| --- | --- |
+| repository root | `flake.nix`、`home.nix`、`nix/` がある directory |
+| local root | `.local/bin` と `.local/share/dotfiles` がある directory |
 
-- `generated/` は `make build` で生成する。
-- `generated/.local/bin/dotfiles`、`generated/.local/bin/dotfiles-configure`、`generated/.local/bin/dotfiles-ln`、`generated/.local/bin/dotfiles-cp` を含める。
-- bash / zsh completion は `generated/.local/share/` に含める。
-- `generated/.local/share/dotfiles/.keep` は local root 検出用 marker として含める。
-- generated 生成時には `/nix/store` と固定 home path が成果物に残らないことを検査する。
+- executable から上位 directory を探索する。repository root より手前で local root が見つかった場合は local root を採用する。
+- 検出した root を `DOTFILES_HOME` として子コマンドに渡す。
+- 外部から渡された `DOTFILES_HOME` も、いずれかの root として検証する。検証に失敗した場合は子コマンドを実行せず、usage error として終了する。
 
-## Install
+## ビルドと検証
 
-- `make init` は `static/ln/` と `generated/` を `dotfiles-ln`、`static/cp/` を `dotfiles-cp` で `$HOME` へ展開する。
-- `make clean` は `generated/`、`static/cp/`、`static/ln/` の順に管理対象を外す。
-- `dotfiles-ln apply/unapply` はsymlink treeを反映・削除する。
-- `dotfiles-cp apply` は未配置fileをcopyし、同一内容ならkeep、異なる既存pathはconflictとする。
-- `dotfiles-cp unapply` はsourceと内容が同一のdestination fileだけを削除し、変更済みfileはconflictとする。
-- `dotfiles-ln` と `dotfiles-cp` の `--dry-run` はfilesystemを変更せず、実行予定の操作とconflictを表示する。
-- `$HOME/home-files` のような managed copy は作らない。
-- install対象は `static/ln/`、`static/cp/`、`generated/` 配下のdirectory、file、symlinkとする。
-- install/uninstall は manifest を使わない。
-- 既存ファイル、既存 symlink、既存の非 directory path は退避せず conflict とする。
-- conflictがある場合、`dotfiles-ln` と `dotfiles-cp` はfilesystemを変更せず失敗する。
+### 生成物
 
-## Development Shell
+`make build` は `generated/` を再生成する。生成物は直接編集しない。
 
-- `devShells.<current system>.default` は Go 開発用に `go` と `gopls` を提供する。
-- `.envrc` は `use flake --impure` で development shell を読み込む。
-- repository root の `go.work` は `nix/dotfiles/src`、`nix/dotfiles-ln/src`、`nix/dotfiles-cp/src` をworkspaceとして扱う。
+| 配置先 | 内容 |
+| --- | --- |
+| `generated/.local/bin/` | `dotfiles`、`dotfiles-configure`、`dotfiles-ln`、`dotfiles-cp` |
+| `generated/.local/share/` | bash / zsh の補完 |
+| `generated/.local/share/dotfiles/.keep` | local root 検出用 marker |
 
-## Makefile
+- 生成時に `/nix/store` と固定 home path が成果物に残らないことを検査する。
+- 新しい成果物を準備してから既存の `generated/` を置換する。置換に失敗した場合は既存成果物を復元する。
+- 作業ツリーにコピーした成果物には所有者の書き込み権限を付与し、Git による更新・削除を可能にする。Nix store 内の権限は変更しない。
 
-- root `Makefile` は repo の検証、ビルド、生成用。
-- `make build` と `make check` は `NIX_CACHE_HOME`（既定値は repository root の `.cache`）を `XDG_CACHE_HOME` とし、`--impure` を付けて Nix を実行する。
-- `make build` は `generated/` を再生成する。
-- 成果物を作業ツリーへコピーした後、所有者の書き込み権限を付与し、Git による更新・削除を可能にする。Nix store 内の成果物の権限は変更しない。
-- `make build` は新しい成果物を準備してから既存の `generated/` を置換し、置換に失敗した場合は既存成果物を復元する。
-- `make check` は `nix flake check --impure` を実行する。
-- `nix flake check --impure` は `checks.<current system>.dotfiles-tests` を実行し、Nix sandbox内で `dotfiles` / `dotfiles-ln` / `dotfiles-cp` のGo test、generated成果物のsmoke check、`make build` の失敗時復元を検査する。
-- `static/ln/.local/bin/` の shell subcommand は任意の拡張として扱い、repo全体のchecksから名前、内容、構造を参照しない。
+### 開発環境と checks
 
-## 運用ルール
+- `devShells.<current system>.default` は Go と gopls を提供する。`.envrc` は `use flake --impure` で読み込む。
+- root の `go.work` は `nix/dotfiles/src`、`nix/dotfiles-ln/src`、`nix/dotfiles-cp/src` を workspace として扱う。
+- `make build` と `make check` は `NIX_CACHE_HOME`（既定値は repository root の `.cache`）を `XDG_CACHE_HOME` として、Nix を `--impure` 付きで実行する。
+- `make check` は `nix flake check --impure` により `checks.<current system>.dotfiles-tests` を実行する。Nix sandbox 内で3つの Go package の test、生成物の smoke check、`make build` の失敗時復元を検査する。
+- tests は Nix 環境で build / 実行し、生成済み `generated/` 上での実行を前提にしない。
+- 変更後は影響範囲に応じて `make check` を実行する。生成元を変更した場合は先に `make build` で反映する。
 
-- `static/` は直接編集する。
-- `generated/` は直接編集しない。
-- 外部環境へ副作用を起こす処理を Home Manager activation や build check に入れない。
-- Home Manager の build / switch に重いネットワーク処理を混ぜない。
-- init / clean 系は、再実行しても既存の状態ファイルを空にしたり管理対象 entry を失ったりしない。
-- 変更後は影響範囲に応じて `make check`、`make build` を実行する。
-- tests は Nix 環境でのみ build / 実行する。生成済み `generated/` 上で実行する前提にはしない。
+## ツール間の連携
+
+以下の path は、特記がなければ `static/ln/` を基準とする。
+
+### シェルと環境変数
+
+- session 環境変数は `.profile.d/*.sh` に置き、`.bashrc` / `.zshrc` から読み込む。共通設定の `.profile.d/env.sh` は PATH entry を重複させない。
+- bash login shell は `.bash_profile` から `.bashrc` を読み込む。zsh login shell は `.zprofile` のあと `.zshrc` を読み込む。
+- bash / zsh の共通 alias は `.config/shell/aliases.sh` に集約する。
+- `generated/` から配置する補完を使うため、bash は `~/.local/share/bash-completion/completions` を読み込む。zsh は `compinit` 前に `~/.local/share/zsh/site-functions` を `fpath` に追加する。
+- `.config/direnv/direnvrc` は `use flake` / `use nix` の前後で元の `$SHELL` を保持し、他の開発環境変数は通常どおり取り込む。nix-direnv と併用する場合は、その読み込み後にこの設定を読み込む。
+
+### 外部エディタと Zellij
+
+- `.profile.d/env.sh` は `EDITOR=vim` と `VISUAL=vim` を設定し、これらを参照するツールの外部エディタを Vim に揃える。実行に必要な `pkgs.vim` は Home Manager で導入する。
+- Zellij は `.config/zellij/config.kdl` の `scrollback_editor "vim"` で Vim を明示指定する。スクロール履歴を Vim で開き、下記の clipboard 連携を通して内容をコピーできるようにする。
+
+### エディタとクリップボード
+
+Vim の `.config/vim/vimrc` と Doom Emacs の `.config/doom/` でシステム clipboard に接続する。Linux では必要な `pkgs.wl-clipboard` と `pkgs.xclip` を Home Manager で導入する。連携方法は、利用可能なコマンドと環境変数に応じて次の順で選ぶ。
+
+| 優先順 | 環境 | 外部コマンド |
+| --- | --- | --- |
+| 1 | WSL | `clip.exe` / `powershell.exe`（Vim は加えて `iconv`） |
+| 2 | macOS | `pbcopy` / `pbpaste` |
+| 3 | Wayland | `wl-copy` / `wl-paste` |
+| 4 | X11 | `xclip` |
+
+WSL のコピーは UTF-16LE、読み取りは UTF-8 を使い、貼り付け時に CRLF を LF に変換する。
+
+- Vim の外部連携は clipboard provider 機能を前提とする。WSL は `WSL_DISTRO_NAME`、Wayland は `WAYLAND_DISPLAY`、X11 は `DISPLAY` も判定に使う。
+- Vim は provider または組み込み clipboard 機能が使える場合、`unnamedplus` で通常の yank / delete / change / put をシステム clipboard に接続する。外部 provider の `+` / `*` register は同じ clipboard を使う。
+- Doom Emacs の端末 frame は selection backend を通して、通常の kill / yank、Evil の `y` / `p`、`+` / `*` register をシステム clipboard に接続する。GUI frame と外部コマンドが利用できない環境は標準 backend を使う。
+
+### Codex の管理対象
+
+この節の path は repository root を基準とする。
+
+| 対象 | 生成元・管理範囲 |
+| --- | --- |
+| グローバル指示 | `static/ln/.codex/` |
+| 共通の Nix 開発環境 | `static/cp/.codex/flake.nix` |
+| ユーザー共通の Skill | `static/cp/.agents/skills/`。通常 file として配置する |
+| 外部ツールの実行許可 | `static/cp/.codex/rules/external-tools.rules` |
+
+個別の Skill や許可コマンドは各設定ファイルで管理する。Codex 用の `flake.lock`、認証情報、履歴、セッション、キャッシュは管理対象に含めない。
