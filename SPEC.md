@@ -110,6 +110,9 @@ shell subcommand は `static/ln/.local/bin/` に置く任意の拡張とする�
 ### 外部エディタと Zellij
 
 - `.profile.d/env.sh` は `EDITOR=vim` と `VISUAL=vim` を設定し、これらを参照するツールの外部エディタを Vim に揃える。実行に必要な `pkgs.vim` は Home Manager で導入する。
+- Neovim と LazyVim の実行に使う `neovim`、`tree-sitter`、`gcc`、`curl`、`fzf`、`lazygit`、`shfmt`、`stylua` は Home Manager で導入する。LazyVim の設定は `static/ln/.config/nvim/` に置き、初回起動時に lazy.nvim がプラグインを取得する。
+- LazyVim の Snacks Explorer は dot ファイルと Git で無視されたファイルを初期状態で表示する。
+- LazyVim は `Ctrl-g` をキャンセル操作に割り当てる。通常の Neovim モードでは `Esc` として扱い、Snacks picker では閉じ、ターミナル入力モードでは通常モードへ戻る。
 - Zellij は `.config/zellij/config.kdl` の `scrollback_editor "vim"` で Vim を明示指定する。スクロール履歴を Vim で開き、下記の clipboard 連携を通して内容をコピーできるようにする。
 
 ### エディタとクリップボード

@@ -69,6 +69,12 @@ Vim と端末版 Doom Emacs は、WSL・macOS・Wayland・X11 に合わせてシ
 
 設定元は [Vim](./static/ln/.config/vim/vimrc) と [Doom Emacs](./static/ln/.config/doom/config.el) です。Vim は Vim9script と clipboard provider 機能を使います。通常のコピー・貼り付けに加え、削除・切り取りもクリップボードを更新します。SSH 先では接続先のクリップボードが対象です。
 
+Neovim は Home Manager で導入し、[LazyVim の公式 starter](https://www.lazyvim.org/installation) を元にした設定を [static/ln/.config/nvim](./static/ln/.config/nvim/init.lua) から配置します。`dotfiles flake switch` の後に `./generated/.local/bin/dotfiles-ln apply --src static/ln --dest "$HOME"` を実行し、`nvim` を起動してください。初回起動時に lazy.nvim と LazyVim のプラグインが GitHub から取得されます。プラグインの版は同ディレクトリの `lazy-lock.json` で固定します。導入後は Neovim で `:LazyHealth` を実行して状態を確認できます。既存の Neovim 設定やデータがある場合は、リンクを配置する前に退避してください。
+
+Snacks Explorer は `Space` → `e` で開き、dot ファイルと Git で無視されたファイルを初期状態で表示します。Explorer 内で `H` は dot ファイル、`I` は無視されたファイルの表示を切り替えます。
+
+LazyVim では `Ctrl-g` をキャンセルに使えます。編集中は `Esc` と同様にモードを抜け、Snacks の一覧では画面を閉じ、ターミナルでは入力モードを抜けます。
+
 Doom Emacs の GUI 版は標準の連携を使います。クリップボード設定の反映は Emacs の再起動だけでよく、`doom sync` は不要です。
 
 ### ターミナルとシェル

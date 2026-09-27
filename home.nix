@@ -30,6 +30,14 @@
       pkgs.codex
 
       # editor
+      pkgs.neovim
+      pkgs.tree-sitter
+      pkgs.gcc
+      pkgs.curl
+      pkgs.fzf
+      pkgs.lazygit
+      pkgs.shfmt
+      pkgs.stylua
       pkgs.vim
       pkgs.emacs-nox
     ] ++ pkgs.lib.optionals pkgs.stdenv.hostPlatform.isLinux [
