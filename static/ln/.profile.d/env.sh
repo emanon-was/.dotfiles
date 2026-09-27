@@ -8,14 +8,12 @@ dotfiles_prepend_path() {
 
 export XDG_LOCAL_HOME="$HOME/.local"
 export DOTFILES_HOME="$HOME/.dotfiles"
-export DOOM_EMACS_HOME="$HOME/.config/emacs"
 export CARGO_HOME="$HOME/.cargo"
 export GOPATH="$HOME/.go"
 export NPM_GLOBAL="$HOME/.npm-global"
-export EDITOR=vim
-export VISUAL=vim
+export EDITOR=nvim
+export VISUAL=nvim
 dotfiles_prepend_path "$HOME/.local/bin"
-dotfiles_prepend_path "$HOME/.config/emacs/bin"
 dotfiles_prepend_path "$HOME/.npm-global/bin"
 dotfiles_prepend_path "$HOME/.cargo/bin"
 dotfiles_prepend_path "$HOME/.go/bin"

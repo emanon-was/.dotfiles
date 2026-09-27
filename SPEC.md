@@ -102,35 +102,22 @@ shell subcommand は `static/ln/.local/bin/` に置く任意の拡張とする�
 - session 環境変数は `.profile.d/*.sh` に置き、`.bashrc` / `.zshrc` から読み込む。共通設定の `.profile.d/env.sh` は PATH entry を重複させない。
 - bash login shell は `.bash_profile` から `.bashrc` を読み込む。zsh login shell は `.zprofile` のあと `.zshrc` を読み込む。
 - bash / zsh の共通 alias は `.config/shell/aliases.sh` に集約する。
-- zsh は `.zshrc` の `bindkey -e` で Emacs キーバインドに固定し、`EDITOR` / `VISUAL` が Vim でも `Ctrl-r` で履歴検索できるようにする。
+- zsh は `.zshrc` の `bindkey -e` で Emacs キーバインドに固定し、`EDITOR` / `VISUAL` が Neovim でも `Ctrl-r` で履歴検索できるようにする。
 - bash は `.bashrc` の `set -o emacs` で Emacs キーバインドに固定する。
 - `generated/` から配置する補完を使うため、bash は `~/.local/share/bash-completion/completions` を読み込む。zsh は `compinit` 前に `~/.local/share/zsh/site-functions` を `fpath` に追加する。
 - `.config/direnv/direnvrc` は `use flake` / `use nix` の前後で元の `$SHELL` を保持し、他の開発環境変数は通常どおり取り込む。nix-direnv と併用する場合は、その読み込み後にこの設定を読み込む。
 
 ### 外部エディタと Zellij
 
-- `.profile.d/env.sh` は `EDITOR=vim` と `VISUAL=vim` を設定し、これらを参照するツールの外部エディタを Vim に揃える。実行に必要な `pkgs.vim` は Home Manager で導入する。
+- `.profile.d/env.sh` は `EDITOR=nvim` と `VISUAL=nvim` を設定し、これらを参照するツールの外部エディタを Neovim に揃える。
 - Neovim と LazyVim の実行に使う `neovim`、`tree-sitter`、`gcc`、`curl`、`fzf`、`lazygit`、`shfmt`、`stylua` は Home Manager で導入する。LazyVim の設定は `static/ln/.config/nvim/` に置き、初回起動時に lazy.nvim がプラグインを取得する。
 - LazyVim の Snacks Explorer は dot ファイルと Git で無視されたファイルを初期状態で表示する。
 - LazyVim は `Ctrl-g` をキャンセル操作に割り当てる。通常の Neovim モードでは `Esc` として扱い、Snacks picker では閉じ、ターミナル入力モードでは通常モードへ戻る。
-- Zellij は `.config/zellij/config.kdl` の `scrollback_editor "vim"` で Vim を明示指定する。スクロール履歴を Vim で開き、下記の clipboard 連携を通して内容をコピーできるようにする。
+- Zellij は `.config/zellij/config.kdl` の `scrollback_editor "nvim"` で Neovim を明示指定する。
 
 ### エディタとクリップボード
 
-Vim の `.config/vim/vimrc` と Doom Emacs の `.config/doom/` でシステム clipboard に接続する。Linux では必要な `pkgs.wl-clipboard` と `pkgs.xclip` を Home Manager で導入する。連携方法は、利用可能なコマンドと環境変数に応じて次の順で選ぶ。
-
-| 優先順 | 環境 | 外部コマンド |
-| --- | --- | --- |
-| 1 | WSL | `clip.exe` / `powershell.exe`（Vim は加えて `iconv`） |
-| 2 | macOS | `pbcopy` / `pbpaste` |
-| 3 | Wayland | `wl-copy` / `wl-paste` |
-| 4 | X11 | `xclip` |
-
-WSL のコピーは UTF-16LE、読み取りは UTF-8 を使い、貼り付け時に CRLF を LF に変換する。
-
-- Vim の外部連携は clipboard provider 機能を前提とする。WSL は `WSL_DISTRO_NAME`、Wayland は `WAYLAND_DISPLAY`、X11 は `DISPLAY` も判定に使う。
-- Vim は provider または組み込み clipboard 機能が使える場合、`unnamedplus` で通常の yank / delete / change / put をシステム clipboard に接続する。外部 provider の `+` / `*` register は同じ clipboard を使う。
-- Doom Emacs の端末 frame は selection backend を通して、通常の kill / yank、Evil の `y` / `p`、`+` / `*` register をシステム clipboard に接続する。GUI frame と外部コマンドが利用できない環境は標準 backend を使う。
+Neovim と LazyVim の設定は `.config/nvim/` に置く。Linux ではクリップボード連携用の `pkgs.wl-clipboard` と `pkgs.xclip` を Home Manager で導入する。
 
 ### Codex の管理対象
 

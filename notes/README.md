@@ -21,5 +21,5 @@ Home Manager 管理対象ではない個人メモ置き場です。
 
 ## 現在の内容
 
-- `emacs/emacs.el`: Doom Emacs の正式設定には入れない Emacs Lisp のメモ。
+- `emacs/emacs.el`: 管理対象外の Emacs Lisp のメモ。
 - `templates/`: project 用の参考ファイル。

@@ -47,7 +47,7 @@ Home Manager は実行ユーザーの `USER` と `HOME` を使います。Nix �
 | 導入するパッケージ | `home.nix` | `dotfiles flake switch` |
 | Go 製コマンドや補完の生成元 | `nix/`、`default.nix` | `make build` → `make check` → `make init` |
 
-`static/ln/` と `static/cp/` は、ホームディレクトリと同じ構成です。例えば `static/ln/.config/vim/vimrc` は `~/.config/vim/vimrc` に配置されます。アプリが設定を読み直すには、再起動や再読み込みが必要な場合があります。
+`static/ln/` と `static/cp/` は、ホームディレクトリと同じ構成です。例えば `static/ln/.config/nvim/init.lua` は `~/.config/nvim/init.lua` に配置されます。アプリが設定を読み直すには、再起動や再読み込みが必要な場合があります。
 
 `generated/` は生成物なので直接編集しません。また、同じ設定ファイルを Home Manager の `home.file` などでも配置すると競合します。
 
@@ -65,9 +65,7 @@ Home Manager は実行ユーザーの `USER` と `HOME` を使います。Nix �
 
 ### エディタとクリップボード
 
-Vim と端末版 Doom Emacs は、WSL・macOS・Wayland・X11 に合わせてシステムのクリップボードへ接続します。Linux 用の `wl-clipboard` と `xclip` は Home Manager で導入します。WSL では Windows の `clip.exe` / `powershell.exe`、Vim では加えて `iconv` が PATH 上に必要です。
-
-設定元は [Vim](./static/ln/.config/vim/vimrc) と [Doom Emacs](./static/ln/.config/doom/config.el) です。Vim は Vim9script と clipboard provider 機能を使います。通常のコピー・貼り付けに加え、削除・切り取りもクリップボードを更新します。SSH 先では接続先のクリップボードが対象です。
+Linux 用のクリップボードコマンド `wl-clipboard` と `xclip` は Home Manager で導入します。
 
 Neovim は Home Manager で導入し、[LazyVim の公式 starter](https://www.lazyvim.org/installation) を元にした設定を [static/ln/.config/nvim](./static/ln/.config/nvim/init.lua) から配置します。`dotfiles flake switch` の後に `./generated/.local/bin/dotfiles-ln apply --src static/ln --dest "$HOME"` を実行し、`nvim` を起動してください。初回起動時に lazy.nvim と LazyVim のプラグインが GitHub から取得されます。プラグインの版は同ディレクトリの `lazy-lock.json` で固定します。導入後は Neovim で `:LazyHealth` を実行して状態を確認できます。既存の Neovim 設定やデータがある場合は、リンクを配置する前に退避してください。
 
@@ -75,15 +73,13 @@ Snacks Explorer は `Space` → `e` で開き、dot ファイルと Git で無�
 
 LazyVim では `Ctrl-g` をキャンセルに使えます。編集中は `Esc` と同様にモードを抜け、Snacks の一覧では画面を閉じ、ターミナルでは入力モードを抜けます。
 
-Doom Emacs の GUI 版は標準の連携を使います。クリップボード設定の反映は Emacs の再起動だけでよく、`doom sync` は不要です。
-
 ### ターミナルとシェル
 
 - Herdr のサイドバーは、起動時に最小表示になります。
-- Zellij は復元用セッションを保存せず、スクロール履歴エディタに Vim を使います。
+- Zellij は復元用セッションを保存せず、スクロール履歴エディタに Neovim を使います。
 - 共通の環境変数は `static/ln/.profile.d/env.sh`、シェル別の設定は `.bashrc` / `.zshrc` に置きます。
 - bash / zsh は Emacs キーバインドを使用します。
-- 外部エディターは `EDITOR=vim` / `VISUAL=vim` に設定しています。Codex の `Ctrl+G` でも Vim が開きます。変更前から開いているシェルでは `source ~/.profile.d/env.sh` を実行し、Codex を起動し直してください。
+- 外部エディターは `EDITOR=nvim` / `VISUAL=nvim` に設定しています。Codex の `Ctrl+G` でも Neovim が開きます。変更前から開いているシェルでは `source ~/.profile.d/env.sh` を実行し、Codex を起動し直してください。
 - direnv の `use flake` / `use nix` は、読み込み前の `$SHELL` を保持します。nix-direnv を使う場合は、その読み込み後にこのリポジトリの `direnvrc` を読み込んでください。
 
 ### Codex

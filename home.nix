@@ -38,8 +38,6 @@
       pkgs.lazygit
       pkgs.shfmt
       pkgs.stylua
-      pkgs.vim
-      pkgs.emacs-nox
     ] ++ pkgs.lib.optionals pkgs.stdenv.hostPlatform.isLinux [
       pkgs.wl-clipboard
       pkgs.xclip

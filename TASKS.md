@@ -13,5 +13,5 @@
 - ユーザーの未コミット変更を勝手に戻さない。
 - `generated/` の生成済み成果物を直接編集しない。
 - `static/` / `generated/` の init / clean 系は、再実行しても既存の状態ファイルを空にしたり管理対象 entry を失ったりしないようにする。
-- `gsettings` や `doom install` のような副作用コマンドを自動処理に入れない。
+- `gsettings` のような副作用コマンドを自動処理に入れない。
 - Home Manager の build / switch に重いネットワーク処理を混ぜない。
