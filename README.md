@@ -82,7 +82,7 @@ Doom Emacs の GUI 版は標準の連携を使います。クリップボード�
 
 ### Codex
 
-グローバル指示は `static/ln/.codex/`、共通の Nix 開発環境は `static/cp/.codex/flake.nix`、Skill は `static/cp/.agents/skills/` で管理します。認証情報・履歴・セッション・キャッシュは管理対象に含めません。
+グローバル指示は `static/cp/.codex/AGENTS.md`、共通の Nix 開発環境は `static/cp/.codex/flake.nix`、Skill は `static/cp/.agents/skills/` で管理します。認証情報・履歴・セッション・キャッシュは管理対象に含めません。
 
 外部ツールの実行許可ルールは `static/cp/.codex/rules/external-tools.rules` にあります。変更は Codex を再起動すると反映されます。
 

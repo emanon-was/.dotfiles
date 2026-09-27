@@ -135,7 +135,7 @@ WSL のコピーは UTF-16LE、読み取りは UTF-8 を使い、貼り付け時
 
 | 対象 | 生成元・管理範囲 |
 | --- | --- |
-| グローバル指示 | `static/ln/.codex/` |
+| グローバル指示 | `static/cp/.codex/AGENTS.md` |
 | 共通の Nix 開発環境 | `static/cp/.codex/flake.nix` |
 | ユーザー共通の Skill | `static/cp/.agents/skills/`。通常 file として配置する |
 | 外部ツールの実行許可 | `static/cp/.codex/rules/external-tools.rules` |
