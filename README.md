@@ -79,7 +79,7 @@ LazyVim では `Ctrl-g` をキャンセルに使えます。編集中は `Esc` �
 - Zellij は復元用セッションを保存せず、スクロール履歴エディタに Neovim を使います。
 - 共通の環境変数は `static/ln/.profile.d/env.sh`、シェル別の設定は `.bashrc` / `.zshrc` に置きます。
 - bash / zsh は Emacs キーバインドを使用します。
-- 外部エディターは `EDITOR=nvim` / `VISUAL=nvim` に設定しています。Codex の `Ctrl+G` でも Neovim が開きます。変更前から開いているシェルでは `source ~/.profile.d/env.sh` を実行し、Codex を起動し直してください。
+- 外部エディターは `EDITOR=nvim` / `VISUAL=nvim` に、`sudoedit` 用エディターは `SUDO_EDITOR=nvim` に設定しています。Codex の `Ctrl+G` でも Neovim が開きます。変更前から開いているシェルでは `source ~/.profile.d/env.sh` を実行し、Codex を起動し直してください。
 - direnv の `use flake` / `use nix` は、読み込み前の `$SHELL` を保持します。nix-direnv を使う場合は、その読み込み後にこのリポジトリの `direnvrc` を読み込んでください。
 
 ### Codex

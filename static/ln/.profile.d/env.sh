@@ -13,6 +13,7 @@ export GOPATH="$HOME/.go"
 export NPM_GLOBAL="$HOME/.npm-global"
 export EDITOR=nvim
 export VISUAL=nvim
+export SUDO_EDITOR=nvim
 dotfiles_prepend_path "$HOME/.local/bin"
 dotfiles_prepend_path "$HOME/.npm-global/bin"
 dotfiles_prepend_path "$HOME/.cargo/bin"

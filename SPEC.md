@@ -109,7 +109,7 @@ shell subcommand は `static/ln/.local/bin/` に置く任意の拡張とする�
 
 ### 外部エディタと Zellij
 
-- `.profile.d/env.sh` は `EDITOR=nvim` と `VISUAL=nvim` を設定し、これらを参照するツールの外部エディタを Neovim に揃える。
+- `.profile.d/env.sh` は `EDITOR=nvim`、`VISUAL=nvim`、`SUDO_EDITOR=nvim` を設定し、これらを参照するツールの外部エディタを Neovim に揃える。
 - Neovim と LazyVim の実行に使う `neovim`、`tree-sitter`、`gcc`、`curl`、`fzf`、`lazygit`、`shfmt`、`stylua` は Home Manager で導入する。LazyVim の設定は `static/ln/.config/nvim/` に置き、初回起動時に lazy.nvim がプラグインを取得する。
 - LazyVim の Snacks Explorer は dot ファイルと Git で無視されたファイルを初期状態で表示する。
 - LazyVim は `Ctrl-g` をキャンセル操作に割り当てる。通常の Neovim モードでは `Esc` として扱い、Snacks picker では閉じ、ターミナル入力モードでは通常モードへ戻る。
