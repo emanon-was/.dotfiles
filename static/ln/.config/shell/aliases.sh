@@ -1,6 +1,7 @@
 # interactive bash/zsh で共有する alias。
 
 # 日常操作向けの短縮 alias。
+alias -- codex='codex --no-daemon'
 alias -- df='df -h'
 alias -- du='du -h'
 alias -- egrep='grep -E --color=auto'
