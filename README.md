@@ -128,7 +128,9 @@ nix build --impure .#homeConfigurations.default.activationPackage --no-link
   - `use flake` / `use nix` は、読み込み前の `$SHELL` を保持します。
   - nix-direnv を使う場合は、その読み込み後にこのリポジトリの `direnvrc` を読み込んでください。
 - ターミナル：
-  - Herdr のサイドバーは、起動時に最小表示になります。
+  - Herdr のサイドバーは、起動時に細いバーへ畳まれます。
+  - Herdr のタブは画面上に置き、右端に現在の tab ID・pane ID とズーム状態を表示します。ペインは常に枠を表示し、手動の名前がない場合は検出したエージェント名を表示します。エージェントの状態は色付きの点で表示します。
+  - Herdr は `Ctrl+z` → `Shift+q` でサーバーと全 pane のプロセスを終了します。`Ctrl+z` → `q` はサーバーを残してデタッチします。
   - Zellij は復元用セッションを保存せず、スクロール履歴エディタに Neovim を使います。
 
 ### Windows 用フォント
@@ -148,7 +150,9 @@ Windows 側のターミナルで Nerd Fonts（NF）のアイコンを表示す�
 
 - 管理する設定：
   - グローバル指示：`static/cp/.codex/AGENTS.md` で管理します。
-  - 共通の Nix 開発環境：`static/cp/.codex/flake.nix` で管理します。
+  - 起動時に herdr 内かを確認し、該当する Skill を読んで現在の workspace / tab / pane を確認します。
+  - 共通の Nix 開発環境の雛形：`static/cp/.codex/flake.nix` は、ツールを宣言しない空の dev shell をコピー元として管理します。実際の作業ツールは `$CODEX_HOME/flake.nix`（未設定なら `~/.codex/flake.nix`）に追加します。
+  - プロジェクト自体に必要なツールはプロジェクトの flake、AI の作業用ツールは Codex 共通の flake に宣言します。両方で必要なツールは双方に宣言できます。
   - Skill：`static/cp/.agents/skills/` で管理します。
   - 外部ツールの実行許可ルール：`static/cp/.codex/rules/external-tools.rules` で管理します。
   - 実行許可ルールの変更は、Codex を再起動すると反映されます。
@@ -182,6 +186,7 @@ home-manager uninstall
 ## 開発と構成
 
 開発環境には Go と gopls が含まれています。
+direnv は `.envrc` の `use flake . --impure` で、このリポジトリの開発環境を読み込みます。
 
 ```sh
 nix develop --impure

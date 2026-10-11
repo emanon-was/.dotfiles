@@ -3,7 +3,22 @@ onboarding = false
 [keys]
 prefix = "ctrl+z"
 
+[[keys.command]]
+key = "prefix+shift+q"
+type = "shell"
+command = '"$HERDR_BIN_PATH" server stop'
+description = "stop Herdr server"
+
 [ui]
 agent_panel_sort = "spaces"
 sidebar_start_collapsed = true
 sidebar_collapsed_mode = "compact"
+tab_bar_position = "top"
+tab_bar_right = [
+  { type = "zoom" },
+  { type = "command", command = 'printf "| tab=%s pane=%s |" "$HERDR_ACTIVE_TAB_ID" "$HERDR_ACTIVE_PANE_ID"', interval_seconds = 1, timeout_seconds = 1 },
+]
+tab_bar_right_separator = " "
+pane_borders = "always"
+show_agent_labels_on_pane_borders = true
+status_indicators = "dots"

@@ -116,7 +116,7 @@
 
 - 開発環境：
   - `devShells.<current system>.default` は Go と gopls を提供する。
-  - `.envrc` は `use flake --impure` で読み込む。
+  - `.envrc` は `use flake . --impure` で repository root の flake を読み込む。
   - root の `go.work` は `nix/dotfiles/src`、`nix/dotfiles-ln/src`、`nix/dotfiles-cp/src` を workspace として扱う。
 - `make build` と `make check` は `NIX_CACHE_HOME`（既定値は repository root の `.cache`）を `XDG_CACHE_HOME` として、Nix を `--impure` 付きで実行する。
 - 検証内容：
@@ -165,6 +165,11 @@
 - direnv：
   - `.config/direnv/direnvrc` は `use flake` / `use nix` の前後で元の `$SHELL` を保持し、他の開発環境変数は通常どおり取り込む。
   - nix-direnv と併用する場合は、その読み込み後にこの設定を読み込む。
+- Herdr：
+  - `.config/herdr/config.toml` は `sidebar_start_collapsed = true` と `sidebar_collapsed_mode = "compact"` で、起動時にサイドバーを細いバーへ畳む。
+  - `tab_bar_position = "top"` でタブを画面上に配置する。`tab_bar_right` はズーム状態と `HERDR_ACTIVE_TAB_ID` / `HERDR_ACTIVE_PANE_ID` を表示し、ID は1秒間隔で更新する。
+  - `pane_borders = "always"` で単一ペインにも枠を表示し、`show_agent_labels_on_pane_borders = true` で手動名がないペインにエージェント名を表示する。`status_indicators = "dots"` でエージェントの状態を色付きの点で区別する。
+  - `prefix+shift+q` のカスタム shell コマンドで `"$HERDR_BIN_PATH" server stop` を実行し、サーバーと全 pane のプロセスを終了する。通常の `prefix+q` はデタッチとして保持する。
 - Zellij：
   - `.config/zellij/config.kdl` の `scrollback_editor "nvim"` で Neovim を明示指定する。
 
@@ -175,14 +180,21 @@
 | 対象 | 生成元・管理範囲 |
 | --- | --- |
 | グローバル指示 | `static/cp/.codex/AGENTS.md` |
-| 共通の Nix 開発環境 | `static/cp/.codex/flake.nix` |
+| 共通の Nix 開発環境の雛形 | `static/cp/.codex/flake.nix` |
 | ユーザー共通の Skill | `static/cp/.agents/skills/`。通常 file として配置する |
 | 外部ツールの実行許可 | `static/cp/.codex/rules/external-tools.rules` |
 
 - 管理範囲：
   - 個別の Skill や許可コマンドは、各設定ファイルで管理する。
   - Codex 用の `flake.lock`、認証情報、履歴、セッション、キャッシュは管理対象に含めない。
+- 起動時の端末環境：
+  - グローバル指示で herdr 内の実行コンテキストを確認し、該当スキルを読んで workspace / tab / pane の所属を検証する。
+  - herdr の組み込みスキルは `herdr --skill` で読み、herdr 内の判定には `HERDR_ENV=1` を使う。
+  - herdr 内、herdr 外、判定不能を区別し、結果とスキル不足を報告する。
 - 作業環境：
+  - `static/cp/.codex/flake.nix` はコピー元の雛形とし、ツールを宣言しない空の dev shell を保持する。実際のツール宣言は `$CODEX_HOME/flake.nix`（未設定なら `~/.codex/flake.nix`）に追加する。
   - 作業ツールは Codex の共通開発環境で管理する。
+  - ツールの宣言先は用途で決める。プロジェクト自体のビルド、実行、テスト、整形、開発に必要なツールはプロジェクトの flake に、AI の作業用ツールは Codex 共通の flake に宣言する。両方で必要なツールは双方に宣言してよい。
+  - プロジェクトの `.envrc` はプロジェクトの flake を読み込み、AI の作業用ツールのために共通 flake へ切り替えない。
   - 作業環境自動作成ルールは、`/etc/nixos` 以下を例外とする。
   - システム設定への作業用 flake・direnv 設定の追加を避ける。

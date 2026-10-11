@@ -51,6 +51,7 @@
         packages = with pkgs; [
           bashInteractive
           coreutils
+          direnv
           findutils
           git
           go
