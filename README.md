@@ -131,6 +131,19 @@ nix build --impure .#homeConfigurations.default.activationPackage --no-link
   - Herdr のサイドバーは、起動時に最小表示になります。
   - Zellij は復元用セッションを保存せず、スクロール履歴エディタに Neovim を使います。
 
+### Windows 用フォント
+
+Windows 側のターミナルで Nerd Fonts（NF）のアイコンを表示するには、次のいずれかをインストールしてください。
+
+| フォント | ダウンロード |
+| --- | --- |
+| Noto Nerd Font | [Noto.zip（最新版）](https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Noto.zip) |
+| HackGen NF | [最新版の配布ページ](https://github.com/yuru7/HackGen/releases/latest) の Assets から `HackGen_NF_v*.zip` を選択 |
+
+1. ダウンロードした ZIP を展開します。
+2. 使うフォントファイル（`.ttf` / `.otf`）を選び、右クリックから「インストール」を選びます。
+3. ターミナルのフォント設定で、インストールした Nerd Font / NF のフォントを選びます。
+
 ### Codex
 
 - 管理する設定：
