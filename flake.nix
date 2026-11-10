@@ -1,16 +1,20 @@
 {
   description = "Dotfiles packages and generated artifacts";
 
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+  inputs.nixos-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+  inputs.nixpkgs-master = {
+    url = "github:NixOS/nixpkgs/master";
+    flake = false;
+  };
   inputs.home-manager = {
     url = "github:nix-community/home-manager";
-    inputs.nixpkgs.follows = "nixpkgs";
+    inputs.nixpkgs.follows = "nixos-unstable";
   };
 
-  outputs = { self, nixpkgs, home-manager }:
+  outputs = { self, nixos-unstable, nixpkgs-master, home-manager }:
     let
       system = builtins.currentSystem;
-      pkgs = import nixpkgs {
+      pkgs = import nixos-unstable {
         inherit system;
         config.allowUnfree = true;
       };
@@ -41,6 +45,8 @@
         inherit pkgs;
         extraSpecialArgs = {
           inherit username homeDirectory;
+          nixos-unstable = pkgs;
+          nixpkgs-master = import nixpkgs-master { inherit system; };
         };
         modules = [
           ./home.nix

@@ -106,7 +106,7 @@ flake_switch() {
   have nix || fail "nix is not available"
   require_home_manager_root
   prepare_nix_cache
-  activation_package="$(nix build --impure --no-link --print-out-paths "$(activation_package_ref)")"
+  activation_package="$(nix build --impure --no-link --print-out-paths "$(activation_package_ref)")" || return "$?"
   "$activation_package/activate"
 }
 

@@ -12,9 +12,10 @@
 - 必要なコマンドは Git、Make、flakes を使える Nix です。
 - `home-manager` コマンドを事前に導入する必要はありません。
 - Nix の依存関係：
-  - Nixpkgs はルートの `flake.nix` に宣言した `nixos-unstable` を使います。
+  - 通常のパッケージは、ルートの `flake.nix` に宣言した `nixos-unstable` input から導入します。`home.packages` では `with nixos-unstable;` により接頭辞を省略します。
   - Nixpkgs と Home Manager は flake input として取得し、`flake.lock` でリビジョンを固定します。
   - Home Manager は同じ Nixpkgs を共有します。
+  - Codex は、ビルド依存の修正を含む Nixpkgs `master` を `nixpkgs-master` input から読み込み、`nixpkgs-master.codex` として導入します。取得する版は同じ `flake.lock` で固定します。
   - システムやユーザーの channel に依存しません。
 - 実行ユーザー：
   - Home Manager は実行ユーザーの `USER` と `HOME` を使います。

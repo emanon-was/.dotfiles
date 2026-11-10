@@ -6,7 +6,7 @@
 
 ## 未完了タスク
 
-- なし。
+- `nixos-unstable` に Codex のビルド依存修正が入ったら、`nixpkgs-master` input を削除して `nixos-unstable.codex` に戻す。変更後に Home Manager activation package のビルドを確認する。
 
 ## 注意点
 

@@ -54,10 +54,10 @@
 ## Nix と Home Manager
 
 - 入力とバージョン管理：
-  - root flake は `github:NixOS/nixpkgs/nixos-unstable` を input に宣言する。
+  - root flake は `github:NixOS/nixpkgs/nixos-unstable` を `nixos-unstable` input に宣言する。
   - Home Manager は `github:nix-community/home-manager` を input に宣言する。
   - `flake.lock` を commit して、Nixpkgs と Home Manager のリビジョンを固定する。
-  - Home Manager の Nixpkgs input は dotfiles の `nixpkgs` input に follows させ、管理する package にも同じ `pkgs` を渡す。
+  - Home Manager の Nixpkgs input は dotfiles の `nixos-unstable` input に follows させ、`home.packages` は `with nixos-unstable;` で通常のパッケージの接頭辞を省略する。
   - Nixpkgs の取得元は、システムやユーザーの channel、`NIX_PATH` に依存しない。
   - lock の更新は明示的な操作で行い、生成物の再ビルドや Home Manager の適用とは分ける。
 - 評価環境：
@@ -71,6 +71,9 @@
   - 副作用のある外部環境の操作は、明示的なコマンドで実行する。
   - 外部環境の操作を Home Manager activation や build check に組み込まない。
   - Home Manager の build / switch に重いネットワーク処理を混ぜない。
+- Codex のパッケージ：
+  - `nixpkgs-master` input で Nixpkgs `master` のソースを取得し、実行 host 向けのパッケージ集合として読み込む。
+  - Home Manager は `nixpkgs-master.codex` を導入し、Codex の依存ライブラリもこのパッケージ集合を使う。両 input のリビジョンは `flake.lock` で固定する。
 
 ## dotfiles CLI
 
@@ -135,7 +138,7 @@
 
 - 導入するパッケージ：
   - Neovim と LazyVim の実行に使う `neovim`、`tree-sitter`、`gcc`、`curl`、`fzf`、`lazygit`、`shfmt`、`stylua` は Home Manager で導入する。
-  - Linux ではクリップボード連携用の `pkgs.wl-clipboard` と `pkgs.xclip` も Home Manager で導入する。
+  - Linux ではクリップボード連携用の `wl-clipboard` と `xclip` も Home Manager で導入する。
 - 設定とプラグイン：
   - Neovim と LazyVim の設定は `.config/nvim/`（repository root からは `static/ln/.config/nvim/`）に置く。
   - 初回起動時に lazy.nvim がプラグインを取得する。

@@ -1,4 +1,4 @@
-{ username, homeDirectory, pkgs, ... }:
+{ username, homeDirectory, nixos-unstable, nixpkgs-master, ... }:
 
 {
   # この seed は最小限に保つ。package は Home Manager、file はこの repo の profile 生成で管理する。
@@ -6,41 +6,41 @@
     inherit username homeDirectory;
     stateVersion = "26.05";
 
-    packages = [
+    packages = with nixos-unstable; [
       # shell integration
-      pkgs.direnv
+      direnv
 
       # version control
-      pkgs.git
+      git
 
       # search and file inspection
-      pkgs.ripgrep # grep
-      pkgs.fd # find
+      ripgrep # grep
+      fd # find
 
       # build tools
-      pkgs.gnumake
+      gnumake
 
       # terminal multiplexers
-      pkgs.screen
-      pkgs.tmux
-      pkgs.zellij
-      pkgs.herdr
+      screen
+      tmux
+      zellij
+      herdr
 
       # AI coding tools
-      pkgs.codex
+      nixpkgs-master.codex
 
       # editor
-      pkgs.neovim
-      pkgs.tree-sitter
-      pkgs.gcc
-      pkgs.curl
-      pkgs.fzf
-      pkgs.lazygit
-      pkgs.shfmt
-      pkgs.stylua
-    ] ++ pkgs.lib.optionals pkgs.stdenv.hostPlatform.isLinux [
-      pkgs.wl-clipboard
-      pkgs.xclip
+      neovim
+      tree-sitter
+      gcc
+      curl
+      fzf
+      lazygit
+      shfmt
+      stylua
+    ] ++ lib.optionals stdenv.hostPlatform.isLinux [
+      wl-clipboard
+      xclip
     ];
   };
 
